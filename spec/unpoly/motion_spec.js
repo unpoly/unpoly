@@ -477,7 +477,7 @@ describe('up.motion', function() {
         })
 
         it("finishes animations only once", function(done) {
-          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
+          const finishSpy = spyOn(up.internal.MotionController.prototype, 'finish').and.callThrough()
           const $element = $fixture('.element').text('content')
 
           const animation = function(element, options) {
@@ -1065,7 +1065,7 @@ describe('up.motion', function() {
         })
 
         it('finishes animations only once per element', async function() {
-          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
+          const finishSpy = spyOn(up.internal.MotionController.prototype, 'finish').and.callThrough()
 
           const oldFixture = fixture('.old', { text: 'old content' })
           const newFixture = up.element.createFromSelector('.new', { text: 'new content' }) // need detached element
@@ -1123,7 +1123,7 @@ describe('up.motion', function() {
 
 
         it("finishes animations only once", async function() {
-          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
+          const finishSpy = spyOn(up.internal.MotionController.prototype, 'finish').and.callThrough()
 
           const oldFixture = fixture('.old', { text: 'old content' })
           const newFixture = up.element.createFromSelector('.new', { text: 'new content' })  // need detached element

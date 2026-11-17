@@ -1,0 +1,102 @@
+import * as u from '../../util.js'
+import * as e from '../../element.js'
+import type { InputDevice } from '../../event.js'
+import { doFocus, firstHashTarget, restoreFocus, type FocusCapsule } from '../../viewport.js'
+import type * as t from '../types.js'
+import { FragmentProcessor } from './fragment_processor.js'
+
+// Options for an up.FragmentFocus.
+interface FragmentFocusOptions extends t.FragmentProcessorOptions {
+  hash?: string
+  focusVisible?: boolean | 'auto'
+  focusCapsule?: FocusCapsule
+  inputDevice?: InputDevice
+}
+
+const PREVENT_SCROLL_OPTIONS = { preventScroll: true }
+
+export class FragmentFocus extends FragmentProcessor<FragmentFocusOptions> {
+  processPrimitive(opt: unknown): boolean | undefined {
+    switch (opt) {
+      case 'keep':
+        // Try to keep the focus from before the fragment update.
+        return this._restoreLostFocus()
+      case 'restore':
+        // Restore the focus we saved at a previous visit the current location.
+        return this._restorePreviousFocusForLocation()
+      case 'target':
+      case true:
+        return this._focusElement(this.options.fragment)
+      case 'layer':
+        // The render pass always passes a { layer }.
+        return this._focusElement(this.options.layer!.getFocusElement())
+      case 'main':
+        return this._focusSelector(':main')
+      case 'hash':
+        return this._focusHash()
+      case 'autofocus':
+        return this._autofocus()
+      default:
+        if (u.isString(opt)) {
+          return this._focusSelector(opt)
+        }
+    }
+  }
+
+  processElement(element: HTMLElement): boolean | undefined {
+    return this._focusElement(element)
+  }
+
+  resolveCondition(condition: string): boolean | null | undefined {
+    if (condition === 'lost') {
+      return this._wasFocusLost()
+    } else {
+      return super.resolveCondition(condition)
+    }
+  }
+
+  _focusSelector(selector: string): boolean | undefined {
+    let match = this.findSelector(selector)
+    return this._focusElement(match)
+  }
+
+  _restoreLostFocus(): boolean | undefined {
+    return this.options.focusCapsule?.restore(this.options.layer!, PREVENT_SCROLL_OPTIONS)
+  }
+
+  _restorePreviousFocusForLocation(): boolean {
+    return restoreFocus({ layer: this.options.layer })
+  }
+
+  _autofocus(): boolean | undefined {
+    let { fragment } = this.options
+    let autofocusElement = fragment && e.subtreeFirst(fragment, '[autofocus]')
+    if (autofocusElement) {
+      return this._focusElement(autofocusElement)
+    }
+  }
+
+  _focusElement(element?: HTMLElement | null): boolean | undefined {
+    if (element) {
+      doFocus(element, {
+        force: true, // force focus on otherwise non-focusable elements
+        ...PREVENT_SCROLL_OPTIONS,
+        inputDevice: this.options.inputDevice,
+        focusVisible: this.options.focusVisible,
+      })
+      return true
+    }
+  }
+
+  _focusHash(): boolean | undefined {
+    let hashTarget = firstHashTarget(this.options.hash, { layer: this.options.layer })
+    if (hashTarget) {
+      return this._focusElement(hashTarget)
+    }
+  }
+
+  _wasFocusLost(): boolean | undefined {
+    return this.options.focusCapsule?.wasLost()
+  }
+
+}

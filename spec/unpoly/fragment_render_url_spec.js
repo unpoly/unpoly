@@ -1476,7 +1476,8 @@ extendDescribe('up.fragment', function() {
             const event1Plan = { type: 'foo', prop: 'bar ' }
             const event2Plan = { type: 'baz', prop: 'bam ' }
 
-            spyOn(up, 'emit').and.callThrough()
+            const emittedEvents = []
+            up.on('foo baz', (event) => emittedEvents.push(event))
 
             await wait()
 
@@ -1487,8 +1488,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
-            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
+            expect(emittedEvents.map(({ type, prop }) => ({ type, prop }))).toEqual([event1Plan, event2Plan])
           })
 
           it('accepts unquoted property names in the header value', async function() {
@@ -1496,7 +1496,8 @@ extendDescribe('up.fragment', function() {
 
             up.render({ target: '.element', url: '/path' })
 
-            spyOn(up, 'emit').and.callThrough()
+            const emittedEvents = []
+            up.on('foo baz', (event) => emittedEvents.push(event))
 
             await wait()
 
@@ -1507,7 +1508,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining({ type: "foo", prop: "bar" }))
+            expect(emittedEvents.map(({ type, prop }) => ({ type, prop }))).toEqual([{ type: "foo", prop: "bar" }])
           })
 
           it('emits these events for a failure response', async function() {
@@ -1517,7 +1518,8 @@ extendDescribe('up.fragment', function() {
 
             const eventPlan = { type: 'foo', prop: 'bar ' }
 
-            spyOn(up, 'emit').and.callThrough()
+            const emittedEvents = []
+            up.on('foo baz', (event) => emittedEvents.push(event))
 
             await wait()
 
@@ -1529,7 +1531,7 @@ extendDescribe('up.fragment', function() {
 
             await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(eventPlan))
+            expect(emittedEvents.map(({ type, prop }) => ({ type, prop }))).toEqual([eventPlan])
           })
         })
 
@@ -2160,7 +2162,7 @@ extendDescribe('up.fragment', function() {
         describe('for a cross-origin URL', function() {
 
           it('loads the content in a new page', async function() {
-            const loadPage = spyOn(up.network, 'loadPage')
+            const loadPage = up.network.loadPage.mock()
 
             fixture('.one')
             up.render({ target: '.one', url: 'http://other-domain.com/path/to' })
@@ -2172,7 +2174,7 @@ extendDescribe('up.fragment', function() {
           })
 
           it("returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", function(done) {
-            const loadPage = spyOn(up.network, 'loadPage')
+            const loadPage = up.network.loadPage.mock()
 
             fixture('.one')
             const promise = up.render({ target: '.one', url: 'http://other-domain.com/path/to' })
@@ -2193,7 +2195,7 @@ extendDescribe('up.fragment', function() {
           describe('when options.history is truthy', function() {
 
             it('loads the content in a new page', async function() {
-              const loadPage = spyOn(up.network, 'loadPage')
+              const loadPage = up.network.loadPage.mock()
 
               fixture('.one')
               up.render({ target: '.one', url: '/path', history: true })
@@ -2205,7 +2207,7 @@ extendDescribe('up.fragment', function() {
             })
 
             it("returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", async function() {
-              const loadPage = spyOn(up.network, 'loadPage')
+              const loadPage = up.network.loadPage.mock()
 
               fixture('.one')
               const promise = up.render({ target: '.one', url: '/path', history: true })
@@ -2217,7 +2219,7 @@ extendDescribe('up.fragment', function() {
 
           describe('when options.history is falsy', function() {
             it("does not load the content in a new page", async function() {
-              const loadPage = spyOn(up.network, 'loadPage')
+              const loadPage = up.network.loadPage.mock()
 
               fixture('.one')
               up.render({ target: '.one', url: '/path' })

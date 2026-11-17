@@ -51,9 +51,9 @@ beforeEach(function() {
           }
 
           if (result.pass) {
-            result.message = u.sprintf("Expected object %o to not have the given value recursively, but found matches %o", object, matches)
+            result.message = up.internal.sprintf("Expected object %o to not have the given value recursively, but found matches %o", object, matches)
           } else {
-            result.message = u.sprintf("Expected object %o to have the given value recursively, but found no matches", object)
+            result.message = up.internal.sprintf("Expected object %o to have the given value recursively, but found no matches", object)
           }
 
           return result

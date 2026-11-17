@@ -246,81 +246,81 @@ describe('up.history', function() {
       })
     })
 
-    describe('up.history.findMetaTags()', function() {
+    describe('up.internal.findMetaTags()', function() {
 
       it('does not find an [up-meta] element in the <body>', function() {
         const [element] = htmlFixtureList('<div up-meta>text</div>')
-        expect(up.history.findMetaTags()).not.toContain(element)
+        expect(up.internal.findMetaTags()).not.toContain(element)
       })
 
       it('finds a meta[name=description]', function() {
         const head = document.createElement('head')
         const meta = e.affix(head, 'meta[name="description"][content="content"]')
-        expect(up.history.findMetaTags(head)).toEqual([meta])
+        expect(up.internal.findMetaTags(head)).toEqual([meta])
       })
 
       it('finds a link[rel=alternate]', function() {
         const head = document.createElement('head')
         const link = e.affix(head, 'link[rel="alternate"][type="application/rss+xml"][title="RSS Feed"][href="/feed"]')
-        expect(up.history.findMetaTags(head)).toEqual([link])
+        expect(up.internal.findMetaTags(head)).toEqual([link])
       })
 
       it('finds a link[rel=canonical]', function() {
         const head = document.createElement('head')
         const link = e.affix(head, 'link[rel="canonical"][href="/home"]')
-        expect(up.history.findMetaTags(head)).toEqual([link])
+        expect(up.internal.findMetaTags(head)).toEqual([link])
       })
 
       it('finds a link[rel=icon]', function() {
         const head = document.createElement('head')
         const link = e.affix(head, 'link[rel="icon"][href="/favicon.png"]')
-        expect(up.history.findMetaTags(head)).toEqual([link])
+        expect(up.internal.findMetaTags(head)).toEqual([link])
       })
 
       it('does not find a link[rel=stylesheet]', function() {
         const head = document.createElement('head')
         const link = e.affix(head, 'link[rel="stylesheet"][href="/styles.css"]')
-        expect(up.history.findMetaTags(head)).toEqual([])
+        expect(up.internal.findMetaTags(head)).toEqual([])
       })
 
       it('finds an arbitrary element with [up-meta]', function() {
         const head = document.createElement('head')
         const base = e.affix(head, 'base[href="/pages"]')
-        expect(up.history.findMetaTags(head)).toEqual([])
+        expect(up.internal.findMetaTags(head)).toEqual([])
 
         base.setAttribute('up-meta', '')
-        expect(up.history.findMetaTags(head)).toEqual([base])
+        expect(up.internal.findMetaTags(head)).toEqual([base])
       })
 
       it('does not find a meta[http-equiv]', function() {
         const head = document.createElement('head')
         const meta = e.affix(head, 'meta[http-equiv="content-type"][content="text/html; charset=UTF-8"]')
-        expect(up.history.findMetaTags(head)).toEqual([])
+        expect(up.internal.findMetaTags(head)).toEqual([])
       })
 
       it('allows to opt out with [up-meta=false]', function() {
         const head = document.createElement('head')
         const meta = e.affix(head, 'meta[name="description"][content="content"][up-meta="false"]')
-        expect(up.history.findMetaTags(head)).toEqual([])
+        expect(up.internal.findMetaTags(head)).toEqual([])
       })
 
       it('allows to opt out by configuring up.history.config.noMetaTagSelectors', function() {
         const head = document.createElement('head')
         up.history.config.noMetaTagSelectors.push('meta[name="excluded"]')
         const meta = e.affix(head, 'meta[name="excluded"][content="content"]')
-        expect(up.history.findMetaTags(head)).toEqual([])
+        expect(up.internal.findMetaTags(head)).toEqual([])
       })
 
       it('does not match a meta[name=csp-nonce] so we do not invalidate existing nonced callbacks', function() {
         const head = document.createElement('head')
         const meta = e.affix(head, 'meta[name="csp-nonce"][conce="nonce-123"]')
-        expect(up.history.findMetaTags(head)).toEqual([])
+        expect(up.internal.findMetaTags(head)).toEqual([])
       })
 
       it('does not find a script[src]', function() {
         const head = document.createElement('head')
         const meta = e.affix(head, 'script[src="/foo.js"][nonce="specs-nonce"]')
-        expect(up.history.findMetaTags(head)).toEqual([])
+        expect(up.internal.findMetaTags(head)).toEqual([])
       })
 
       it('finds a script[type="application/ld+json"]', function() {
@@ -339,7 +339,7 @@ describe('up.history', function() {
             "prepTime": "PT20M"
           }
         ` })
-        expect(up.history.findMetaTags(head)).toEqual([script])
+        expect(up.internal.findMetaTags(head)).toEqual([script])
       })
     })
 
@@ -408,12 +408,12 @@ describe('up.history', function() {
           up.history.config.enabled = true
 
           expect(up.history.config.updateMetaTags).toBe(true)
-          expect(up.history.isEnabled('metaTags')).toBe(true)
+          expect(up.internal.isHistoryEnabled('metaTags')).toBe(true)
         })
 
         it('keeps working after a framework reset', async function() {
           up.migrate.warn.mock()
-          up.framework.reset()
+          up.internal.emitReset()
           await wait()
 
           expect(up.history.config.updateMetaTags).toBe(true)

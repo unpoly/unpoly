@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+// Runs the browser specs from the terminal. Lint and type errors don't stop it: when the dev
+// watcher knows of some, it says so in one line after the results.
+//
+//   bin/specs [options]        against the dev build. Starts the dev environment in the
+//                              background if none is running.
+//   bin/specs --ci [options]   against the artifacts of `bin/build --config=ci`, with its own
+//                              server. Doesn't wait for a watcher. What CI runs.
+//
+// Exits with 0 when the specs pass, 1 on spec failures, 2 when the specs stop making progress
+// (the watchdog), and with 3-6 when they couldn't run (see runDev()). Everything it prints is
+// also written to tmp/test.log, so a truncated terminal never costs you the failure block.
+import { runDev, runCI } from '../tooling/runner/terminal/run.mjs'
+import { teeToLogFile, LOG_FILE } from '../tooling/runner/terminal/tee.mjs'
+
+const argv = process.argv.slice(2)
+const ci = argv.includes('--ci')
+const log = teeToLogFile()
+const code = await (ci ? runCI : runDev)(argv.filter((arg) => arg !== '--ci'), process.env)
+// Point at the log only when specs actually ran and something failed. A preflight refusal has
+// already printed its whole message.
+if (code === 1 || code === 2) console.error(`Full output: ${LOG_FILE}`)
+await log.close()
+process.exit(code)

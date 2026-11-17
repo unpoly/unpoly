@@ -224,6 +224,9 @@ api:
     - type: namespace
       namespace: up.log
 
+    - type: namespace
+      namespace: up.error
+
     - type: page-group
       title: Formats
       index: formats # a generated page listing the formats, at /formats

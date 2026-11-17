@@ -1,0 +1,230 @@
+import * as u from '../../util.js'
+import { assertConfirmed } from '../../browser.js'
+import { Aborted, guard } from '../../error.js'
+import { emit } from '../../event.js'
+import { abortFragment } from '../../fragment.js'
+import { printToStandard } from '../../log.js'
+import { abortRequests, type UpRequest } from '../../network.js'
+import type * as t from '../types.js'
+import { renderFromContent } from './render_from_content.js'
+import { renderFromResponse } from './render_from_response.js'
+import { renderFromURL, type URLRenderOptions } from './render_from_url.js'
+import { assertContentGiven, preprocessRenderOptions } from './render_options.js'
+import { RenderResult } from './render_result.js'
+
+export class RenderJob {
+  declare renderOptions: t.RenderOptions
+  declare _rendered: Promise<RenderResult>
+  // The promise methods are delegated to the render promise, see the static block below.
+  declare then: Promise<RenderResult>['then']
+  declare catch: Promise<RenderResult>['catch']
+  declare finally: Promise<RenderResult>['finally']
+
+  constructor(renderOptions: t.RenderOptions) {
+    this.renderOptions = renderOptions
+  }
+
+  execute(): this {
+    this._rendered = this._executePromise()
+    return this
+  }
+
+  async _executePromise(): Promise<RenderResult> {
+    try {
+      this._emitGuardEvent()
+
+      // Do this after emitting { guardEvent }, in case listeners want to augment render options
+      // that are shortcuts (e.g. { layer: 'new modal' }) or that affect other options.
+      this.renderOptions = preprocessRenderOptions(this.renderOptions)
+
+      // Throw if { confirm } is given and the user rejects the dialog.
+      // Do this after emitting { guardEvent }, in case listeners want to augment render options.
+      assertConfirmed(this.renderOptions)
+
+      // Ensure we have either { url, content, fragment, document } option.
+      // Do this after emitting { guardEvent }, in case listeners want to augment render options.
+      assertContentGiven(this.renderOptions)
+
+      // TODO: Should the change always return a successful result for easier handling here, and we then throw on !result.ok?
+
+      let result = await this._render()
+      this._handleResult(result)
+      // When preloading, the job fulfills with an up.Request or nothing (see _render()).
+      return result as RenderResult
+    } catch (resultOrError) {
+      this._handleResult(resultOrError) || this._handleError(resultOrError)
+      throw resultOrError
+    }
+  }
+
+  _handleResult(result: unknown): true | undefined {
+    // There may be multiple reasons why `result` is not an up.RenderResult:
+    //
+    // (1) There was an error during the request (return value is up.Offline, up.Aborted, etc.)
+    // (2) No fragment could be matched (return value is up.CannotMatch)
+    // (3) We're preloading (early return value is up.Request)
+    if (result instanceof RenderResult) {
+      let { onRendered, onFinished } = result.renderOptions
+
+      // We call result.renderOptions.onRendered() instead of this.renderOptions.onRendered()
+      // as this will call the correct options.onRendered() or onFailRendered()
+      // depending on options.failOptions.
+      if (!result.none) guard(() => onRendered?.(result))
+
+      // Run an { onFinished } callback if revalidation succeeds.
+      // There is no callback for a failed revalidation.
+      //
+      // After an error response, this.finished rejects with the failed up.RenderResult.
+      // We run its { onFinished } (the user's { onFailFinished }) then.
+      //
+      // We need to pay attention to not creating unnecessary promises that will fail with unhandled rejections:
+      //
+      // (1) Only access result.finished through this.finished to avoid creating new promises
+      // (2) The then() will create a new chain, and we don't want to fail that
+
+      let guardedOnFinished = function(result: RenderResult) {
+        guard(() => onFinished?.(result))
+      }
+
+      // Ignoring other rejections prevents Chrome from logging an `unhandledrejection` event
+      // to the error console, hiding details about a failed revalidation. We could fix this by
+      // handling errors with `up.error.throwCritical` instead.
+      //
+      // However, handling errors with `up.error.throwCritical` will cause Safari (not Chrome)
+      // to emit an `unhandledrejection` event whenever there is a critical error, even if there are
+      // other error handlers registered via `job.finished.catch()`.
+      //
+      // I think Safari is in the right here, as every individual `then()` chain should require
+      // an error handler or log an `unhandledrejection` event when an error is thrown. However I cannot
+      // find a solution that has the same behavior in both Safari and Chrome.
+      //
+      // Although Chrome will fail to log error traces that way, we still log the error name and message
+      // in _handleError().
+      this.finished.then(guardedOnFinished, (reason) => !result.ok && reason instanceof RenderResult && guardedOnFinished(reason))
+
+      return true
+    }
+  }
+
+  _handleError(error: Error): void {
+    let prefix = error instanceof Aborted ? 'Rendering was aborted' : 'Error while rendering'
+    printToStandard('up.render()', `${prefix}: ${error.name}: ${error.message}`)
+    guard(() => this.renderOptions.onError?.(error))
+  }
+
+  get finished(): Promise<RenderResult> {
+    return this._awaitFinished()
+  }
+
+  // Method is memoized below
+  async _awaitFinished(): Promise<RenderResult> {
+    try {
+      let result = await this._rendered
+      return await result.finished
+    } catch (error) {
+      if (error instanceof RenderResult) {
+        throw await error.finished
+      } else {
+        // Fatal error, not a failure result.
+        throw error
+      }
+    }
+  }
+
+  // Returns an up.RenderResult, or a promise for one. When preloading, the promise fulfills
+  // with an up.Request (renderFromURL()) or with nothing (renderFromContent()).
+  _render(): RenderResult | Promise<RenderResult | UpRequest | void> {
+    // (1) With a given { url } we want to handle { abort } when the new request is known.
+    //     This way we can exclude the new request from aborting.
+    //     The { handleAbort } callback is called in renderFromURL()
+    // (2) When rendering local content, we want to handle { abort } when we render.
+    //     This way we don't abort when the pass was aborted by { guardEvent }, { confirm }
+    //     or any other error on the way.
+    //     The { handleAbort } callback is called in onPlanApplicable() (render_from_content.ts)
+    // (3) renderFromURL() is eventually going to call renderFromContent().
+    //     We memoize the callback so we only run it once.
+    // (4) renderFromURL() passes the preflight props of the change, plus the new { request }.
+    //     renderFromContent() passes the preflight props of the plan it renders, which may be a fallback.
+    let handleAbort = u.memoize((preflightProps: t.AbortOptionProps) => this._handleAbortOption(preflightProps))
+    let renderOptions = { ...this.renderOptions, handleAbort }
+
+    if (renderOptions.url) {
+      // TypeScript doesn't narrow the object through renderOptions.url.
+      return renderFromURL(renderOptions as URLRenderOptions)
+    } else if (renderOptions.response) {
+      return renderFromResponse(renderOptions)
+    } else {
+      return renderFromContent(renderOptions)
+    }
+  }
+
+  _emitGuardEvent(): void {
+    let guardEvent = u.pluckKey(this.renderOptions, 'guardEvent')
+    if (guardEvent) {
+      // Allow guard event handlers to manipulate render options for the default behavior.
+      //
+      // Note that we have removed { guardEvent } from options to not recursively define
+      // guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
+      // listeners that prevent the default and re-render.
+      guardEvent.renderOptions = this.renderOptions
+      if (emit(guardEvent, { target: this.renderOptions.origin }).defaultPrevented) {
+        throw new Aborted(`Rendering was prevented by ${guardEvent.type} listener`)
+      }
+    }
+  }
+
+  _handleAbortOption({ bindFragments, bindLayer, origin, layer, request }: t.AbortOptionProps): void {
+    // When preloading, up.link.preload() forces { abort: false }.
+    let { abort } = this.renderOptions
+
+    // The only case where we don't call up.fragment.abort() is with { abort: false }.
+    // Even with no requests in flight we will call up.fragment.abort(),
+    // so non-network async jobs can wait for up:fragment:aborted as an aborting signal.
+    if (!abort) return
+
+    let abortOptions: t.AbortFragmentOptions = {
+      except: request, // don't abort the request we just made
+      logOnce: ['up.render()', 'Change with { abort } option will abort other requests'],
+      newLayer: (layer === 'new'),
+      origin,
+      jid: this.renderOptions.jid,
+    }
+
+    if (abort === 'target') {
+      // Abort requests in the subtree of the targeted fragment
+      abortFragment(bindFragments, { ...abortOptions })
+    } else if (abort === 'layer') {
+      // Abort requests targeting any fragment in the targeted layer
+      abortFragment({ ...abortOptions, layer: bindLayer })
+    } else if (abort === 'all' || abort === true) {
+      // Abort requests targeting any fragment in any layer
+      abortFragment({ ...abortOptions, layer: 'any' })
+    } else if (u.isFunction(abort)) {
+      // Abort the requests in any layer for which the function returns true, like up.network.abort(fn),
+      // but keep requests made with { abortable: false }, like the other { abort } values do.
+      // The function picks requests, not fragments, so there is no up:fragment:aborted event.
+      // { except } keeps our own request, and a cached request that it waits for.
+      let test = (otherRequest: UpRequest) => otherRequest.abortable && abort(otherRequest)
+      let reason = 'Aborting requests picked by { abort } function'
+      abortRequests(test, { except: request, reason, logOnce: abortOptions.logOnce })
+    } else {
+      // (1) Abort requests in the subtree of a given selector (string)
+      // (2) Abort requests targeting a given element
+      abortFragment(abort, { ...abortOptions, layer: bindLayer })
+    }
+  }
+
+  static {
+    // A render job is also a promise ("thenable") for its render pass.
+    u.delegatePromise(this.prototype, function() { return this._rendered })
+
+    u.memoizeMethod(this.prototype, {
+      _awaitFinished: true,
+    })
+  }
+
+}
+
+export const api = {
+  RenderJob,
+}

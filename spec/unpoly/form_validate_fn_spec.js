@@ -448,6 +448,19 @@ extendDescribe('up.form', function() {
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
         })
 
+        it('derives a target from a jQuery collection with an { origin } option', async function() {
+          const form = fixture('form[action=/form]')
+          const element = e.affix(form, '.element')
+          const field = e.affix(form, 'input[name=email]')
+
+          up.validate(jQuery(element), { origin: field })
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+        })
+
         it('names all contained field in X-Up-Validate header', async function() {
           const form = fixture('form[action=/path]')
           const container = e.affix(form, '.container')

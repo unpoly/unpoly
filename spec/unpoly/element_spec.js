@@ -134,27 +134,27 @@ describe('up.element', function() {
   }
 
 
-  describe('up.element.list()', function() {
+  describe('up.internal.getList()', function() {
 
     it('returns the given array of elements', function() {
       const array = [document.body]
-      const result = up.element.list(array)
+      const result = up.internal.getList(array)
       expect(result).toEqual(array)
     })
 
     it('returns an empty list for undefined', function() {
-      const result = up.element.list(undefined)
+      const result = up.internal.getList(undefined)
       expect(result).toEqual([])
   })
 
     it('returns an empty list for null', function() {
-      const result = up.element.list(null)
+      const result = up.internal.getList(null)
       expect(result).toEqual([])
   })
 
     it('converts a NodeList to an array', function() {
       const nodeList = document.querySelectorAll('body')
-      const result = up.element.list(nodeList)
+      const result = up.internal.getList(nodeList)
       expect(u.isArray(result)).toBe(true)
       expect(result.length).toBe(1)
       expect(result[0]).toBe(document.body)
@@ -166,7 +166,7 @@ describe('up.element', function() {
       const div2 = $fixture('div.div2')[0]
       const div3 = $fixture('div.div3')[0]
 
-      const result = up.element.list(div0, [div1, div2], div3)
+      const result = up.internal.getList(div0, [div1, div2], div3)
       expect(u.isArray(result)).toBe(true)
       expect(result).toEqual([div0, div1, div2, div3])
   })
@@ -177,7 +177,7 @@ describe('up.element', function() {
       const div2 = $fixture('div.div2')[0]
       const div3 = $fixture('div.div3')[0]
 
-      const result = up.element.list(null, div0, [div1, div2], undefined, div3)
+      const result = up.internal.getList(null, div0, [div1, div2], undefined, div3)
       expect(u.isArray(result)).toBe(true)
       expect(result).toEqual([div0, div1, div2, div3])
   })
@@ -244,13 +244,13 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.contains()', function() {
+  describe('up.internal.containsElement()', function() {
 
     it('can handle conflicts with forms where an input is named `contains` GH#507', function() {
       const $form = $fixture('form')
       const $child = $form.affix('input[name="contains"]')
 
-      expect(up.element.contains($form[0], $child)).toBe(true)
+      expect(up.internal.containsElement($form[0], $child)).toBe(true)
     })
 
   })
@@ -294,7 +294,7 @@ describe('up.element', function() {
     })
   }
 
-  describe('up.element.ancestor()', function() {
+  describe('up.internal.ancestor()', function() {
 
     it('returns the closest ancestor of the given root that matches the given selector', function() {
       const $grandGrandMother = $fixture('.match')
@@ -302,14 +302,14 @@ describe('up.element', function() {
       const $mother = $grandMother.affix('.no-match')
       const $element = $mother.affix('.element')
 
-      const result = up.element.ancestor($element[0], '.match')
+      const result = up.internal.ancestor($element[0], '.match')
       expect(result).toBe($grandMother[0])
     })
 
     it('does not return the given root, even if it matches', function() {
       const $element = $fixture('.match')
 
-      const result = up.element.ancestor($element[0], '.match')
+      const result = up.internal.ancestor($element[0], '.match')
       expect(result).toBeMissing()
     })
 
@@ -317,7 +317,7 @@ describe('up.element', function() {
       const $element = $fixture('.element')
       const $child = $element.affix('.match')
 
-      const result = up.element.ancestor($element[0], '.match')
+      const result = up.internal.ancestor($element[0], '.match')
       expect(result).toBeMissing()
     })
 
@@ -325,12 +325,12 @@ describe('up.element', function() {
       const $mother = $fixture('.no-match')
       const $element = $mother.affix('.no-match')
 
-      const result = up.element.ancestor($element[0], '.match')
+      const result = up.internal.ancestor($element[0], '.match')
       expect(result).toBeMissing()
     })
 
     it('returns missing for the <html> element, which has no parent element', function() {
-      const result = up.element.ancestor(document.documentElement, '*')
+      const result = up.internal.ancestor(document.documentElement, '*')
       expect(result).toBeMissing()
     })
   })
@@ -734,7 +734,7 @@ describe('up.element', function() {
   })
 
 
-  describe('up.element.createBrokenDocumentFromHTML', function() {
+  describe('up.internal.createBrokenDocumentFromHTML', function() {
 
     it('parses a string that contains a serialized HTML document', function() {
       const string = `
@@ -749,7 +749,7 @@ describe('up.element', function() {
         </html>
       `
 
-      const element = up.element.createBrokenDocumentFromHTML(string)
+      const element = up.internal.createBrokenDocumentFromHTML(string)
 
       expect(element.querySelector('head title').textContent).toEqual('document title')
       expect(element.querySelector('body').getAttribute('data-env')).toEqual('production')
@@ -767,7 +767,7 @@ describe('up.element', function() {
         </html>
       `
 
-      const $element = up.element.createBrokenDocumentFromHTML(string)
+      const $element = up.internal.createBrokenDocumentFromHTML(string)
       expect($element.querySelector('body')).toBeGiven()
       expect($element.querySelector('body div').textContent).toEqual('line')
     })
@@ -802,7 +802,7 @@ describe('up.element', function() {
         </html>
       `
 
-      const element = up.element.createBrokenDocumentFromHTML(html)
+      const element = up.internal.createBrokenDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
     })
@@ -815,7 +815,7 @@ describe('up.element', function() {
           </body>
         </html>
       `
-      const element = up.element.createBrokenDocumentFromHTML(html)
+      const element = up.internal.createBrokenDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
     })
@@ -824,7 +824,7 @@ describe('up.element', function() {
       const html = `
         <h1>Full story</h1>\
       `
-      const element = up.element.createBrokenDocumentFromHTML(html)
+      const element = up.internal.createBrokenDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
     })
@@ -838,7 +838,7 @@ describe('up.element', function() {
             </tr>
           </tbody>
         `
-        const element = up.element.createBrokenDocumentFromHTML(html)
+        const element = up.internal.createBrokenDocumentFromHTML(html)
         expect(element.querySelector("tbody")).toBeElement()
         expect(element.querySelector("tbody tr")).toBeElement()
         expect(element.querySelector("tbody tr td")).toBeElement()
@@ -851,7 +851,7 @@ describe('up.element', function() {
             <td>cell</td>
           </tr>
         `
-        const element = up.element.createBrokenDocumentFromHTML(html)
+        const element = up.internal.createBrokenDocumentFromHTML(html)
         expect(element.querySelector("tr")).toBeElement()
         expect(element.querySelector("tr td")).toBeElement()
         expect(element.querySelector("tr td").textContent).toBe('cell')
@@ -863,7 +863,7 @@ describe('up.element', function() {
             <td>cell</td>
           </tr>
         `
-        const element = up.element.createBrokenDocumentFromHTML(html)
+        const element = up.internal.createBrokenDocumentFromHTML(html)
         expect(element.querySelector("tr")).toBeElement()
         expect(element.querySelector("tr")).toHaveAttribute('id', 'row123')
         expect(element.querySelector("tr td")).toBeElement()
@@ -877,7 +877,7 @@ describe('up.element', function() {
             <td>cell</td>
           </tr>
         `
-        const element = up.element.createBrokenDocumentFromHTML(html)
+        const element = up.internal.createBrokenDocumentFromHTML(html)
         expect(element.querySelector("tr")).toBeElement()
         expect(element.querySelector("tr td")).toBeElement()
         expect(element.querySelector("tr td").textContent).toBe('cell')
@@ -887,7 +887,7 @@ describe('up.element', function() {
         const html = `
           <td>cell</td>
         `
-        const element = up.element.createBrokenDocumentFromHTML(html)
+        const element = up.internal.createBrokenDocumentFromHTML(html)
         expect(element.querySelector("td")).toBeElement()
         expect(element.querySelector("td").textContent).toBe('cell')
       })
@@ -973,7 +973,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.fixedToAbsolute', function() {
+  describe('up.internal.fixedToAbsolute', function() {
 
     it("changes the given element's position from fixed to absolute, without changing its rendered position", function() {
       const $container = $fixture('.container').css({
@@ -990,12 +990,12 @@ describe('up.element', function() {
         backgroundColor: 'red'
       })
 
-      const oldRect = up.Rect.fromElement($element[0])
+      const oldRect = up.internal.Rect.fromElement($element[0])
 
-      up.element.fixedToAbsolute($element[0])
+      up.internal.fixedToAbsolute($element[0])
 
       expect($element.css('position')).toEqual('absolute')
-      const newRect = up.Rect.fromElement($element[0])
+      const newRect = up.internal.Rect.fromElement($element[0])
       expect(newRect).toEqual(oldRect)
     })
 
@@ -1015,12 +1015,12 @@ describe('up.element', function() {
         margin: '15px'
       })
 
-      const oldRect = up.Rect.fromElement($element[0])
+      const oldRect = up.internal.Rect.fromElement($element[0])
 
-      up.element.fixedToAbsolute($element[0])
+      up.internal.fixedToAbsolute($element[0])
 
       expect($element.css('position')).toEqual('absolute')
-      const newRect = up.Rect.fromElement($element[0])
+      const newRect = up.internal.Rect.fromElement($element[0])
       expect(newRect).toEqual(oldRect)
     })
 
@@ -1040,12 +1040,12 @@ describe('up.element', function() {
         backgroundColor: 'red'
       })
 
-      const oldRect = up.Rect.fromElement($element[0])
+      const oldRect = up.internal.Rect.fromElement($element[0])
 
-      up.element.fixedToAbsolute($element[0])
+      up.internal.fixedToAbsolute($element[0])
 
       expect($element.css('position')).toEqual('absolute')
-      const newRect = up.Rect.fromElement($element[0])
+      const newRect = up.internal.Rect.fromElement($element[0])
       expect(newRect).toEqual(oldRect)
     })
 
@@ -1068,12 +1068,12 @@ describe('up.element', function() {
         backgroundColor: 'red'
       })
 
-      const oldRect = up.Rect.fromElement($element[0])
+      const oldRect = up.internal.Rect.fromElement($element[0])
 
-      up.element.fixedToAbsolute($element[0])
+      up.internal.fixedToAbsolute($element[0])
 
       expect($element.css('position')).toEqual('absolute')
-      const newRect = up.Rect.fromElement($element[0])
+      const newRect = up.internal.Rect.fromElement($element[0])
       expect(newRect).toEqual(oldRect)
     })
   })
@@ -1125,74 +1125,74 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.booleanOrStringAttr', function() {
+  describe('up.internal.booleanOrStringAttr', function() {
 
     it('returns true if the attribute value is empty', function() {
       const element = up.element.createFromHTML('<div foo></div>')
-      expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(true)
+      expect(up.internal.booleanOrStringAttr(element, 'foo')).toBe(true)
     })
 
     it('returns true if the attribute value is the string "true"', function() {
       const element = up.element.createFromHTML('<div foo="true"></div>')
-      expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(true)
+      expect(up.internal.booleanOrStringAttr(element, 'foo')).toBe(true)
     })
 
     it('returns true if the attribute value is the name of the attribute', function() {
       const element = up.element.createFromHTML('<div foo="foo"></div>')
-      expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(true)
+      expect(up.internal.booleanOrStringAttr(element, 'foo')).toBe(true)
     })
 
     it('returns false if the attribute value is the string "false"', function() {
       const element = up.element.createFromHTML('<div foo="false"></div>')
-      expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(false)
+      expect(up.internal.booleanOrStringAttr(element, 'foo')).toBe(false)
     })
 
     it('returns undefined if the element has no such attribute', function() {
       const element = up.element.createFromHTML('<div></div>')
-      expect(up.element.booleanOrStringAttr(element, 'foo')).toBeUndefined()
+      expect(up.internal.booleanOrStringAttr(element, 'foo')).toBeUndefined()
     })
 
     it("returns the attribute's raw string value if that value cannot be cast to a boolean", function() {
       const element = up.element.createFromHTML('<div foo="some text"></div>')
-      expect(up.element.booleanOrStringAttr(element, 'foo')).toEqual('some text')
+      expect(up.internal.booleanOrStringAttr(element, 'foo')).toEqual('some text')
     })
   })
 
-  describe('up.element.booleanOrNumberAttr', function() {
+  describe('up.internal.booleanOrNumberAttr', function() {
 
     it('returns true if the attribute value is empty', function() {
       const element = up.element.createFromHTML('<div foo></div>')
-      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(true)
+      expect(up.internal.booleanOrNumberAttr(element, 'foo')).toBe(true)
     })
 
     it('returns true if the attribute value is the string "true"', function() {
       const element = up.element.createFromHTML('<div foo="true"></div>')
-      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(true)
+      expect(up.internal.booleanOrNumberAttr(element, 'foo')).toBe(true)
     })
 
     it('returns true if the attribute value is the name of the attribute', function() {
       const element = up.element.createFromHTML('<div foo="foo"></div>')
-      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(true)
+      expect(up.internal.booleanOrNumberAttr(element, 'foo')).toBe(true)
     })
 
     it('returns false if the attribute value is the string "false"', function() {
       const element = up.element.createFromHTML('<div foo="false"></div>')
-      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(false)
+      expect(up.internal.booleanOrNumberAttr(element, 'foo')).toBe(false)
     })
 
     it('returns undefined if the element has no such attribute', function() {
       const element = up.element.createFromHTML('<div></div>')
-      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBeUndefined()
+      expect(up.internal.booleanOrNumberAttr(element, 'foo')).toBeUndefined()
     })
 
     it('casts the attribute value to a number if it cannot be cast to a boolean', function() {
       const element = up.element.createFromHTML('<div foo="-12.34"></div>')
-      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(-12.34)
+      expect(up.internal.booleanOrNumberAttr(element, 'foo')).toBe(-12.34)
     })
 
     it('returns undefined if the attribute value cannot be cast as either boolean or number', function() {
       const element = up.element.createFromHTML('<div foo="bar"></div>')
-      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBeUndefined()
+      expect(up.internal.booleanOrNumberAttr(element, 'foo')).toBeUndefined()
     })
   })
 
@@ -1263,31 +1263,31 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.closestAttr', function() {
+  describe('up.internal.closestAttr', function() {
 
     it('returns the the value of the given attribute on the given element', function() {
       const element = fixture('div[foo=value]')
-      expect(up.element.closestAttr(element, 'foo')).toEqual('value')
+      expect(up.internal.closestAttr(element, 'foo')).toEqual('value')
     })
 
     it('returns the the value of the given attribute of an ancestor of the given element', function() {
       const grandParent = fixture('div[foo=value]')
       const parent = up.element.affix(grandParent, 'div')
       const element = up.element.affix(parent, 'div')
-      expect(up.element.closestAttr(element, 'foo')).toEqual('value')
+      expect(up.internal.closestAttr(element, 'foo')).toEqual('value')
     })
 
     it('returns a missing value if neither the given element nor an ancestor have the given attribute', function() {
       const parent = fixture('div')
       const element = up.element.affix(parent, 'div')
-      expect(up.element.closestAttr(element, 'foo')).toBeMissing()
+      expect(up.internal.closestAttr(element, 'foo')).toBeMissing()
     })
 
     it('uses the third optional argument to parse the attribute', function() {
       const grandParent = fixture('div[foo]')
       const parent = up.element.affix(grandParent, 'div')
       const element = up.element.affix(parent, 'div')
-      expect(up.element.closestAttr(element, 'foo', up.element.booleanAttr)).toBe(true)
+      expect(up.internal.closestAttr(element, 'foo', up.element.booleanAttr)).toBe(true)
     })
   })
 
@@ -1332,26 +1332,26 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.setMissingAttr()', function() {
+  describe('up.internal.setMissingAttr()', function() {
 
     it('sets a missing attribute', function() {
       let element = document.createElement('div')
-      up.element.setMissingAttr(element, 'foo', 'value')
+      up.internal.setMissingAttr(element, 'foo', 'value')
 
       expect(element).toHaveAttribute('foo', 'value')
     })
 
     it('keeps an existing attribute', function() {
       let element = up.element.createFromSelector('div[foo=original]')
-      up.element.setMissingAttr(element, 'foo', 'changed')
+      up.internal.setMissingAttr(element, 'foo', 'changed')
 
       expect(element).toHaveAttribute('foo', 'original')
     })
 
     it('leaves the attribute missing when passed null or undefined', function() {
       let element = document.createElement('div')
-      up.element.setMissingAttr(element, 'foo', null)
-      up.element.setMissingAttr(element, 'bar', undefined)
+      up.internal.setMissingAttr(element, 'foo', null)
+      up.internal.setMissingAttr(element, 'bar', undefined)
 
       expect(element).not.toHaveAttribute('foo')
       expect(element).not.toHaveAttribute('bar')
@@ -1359,20 +1359,70 @@ describe('up.element', function() {
 
     it('sets false as "false"', function() {
       let element = document.createElement('div')
-      up.element.setMissingAttr(element, 'foo', false)
+      up.internal.setMissingAttr(element, 'foo', false)
 
       expect(element).toHaveAttribute('foo', 'false')
     })
 
   })
 
-  describe('up.element.setAttrsTemp()', function() {
+  describe('up.element.setMissingAttrs()', function() {
+
+    it('sets missing attributes from the given object', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttrs(element, { 'foo-name': 'foo-value', 'bar-name': 'bar-value' })
+
+      expect(element).toHaveAttribute('foo-name', 'foo-value')
+      expect(element).toHaveAttribute('bar-name', 'bar-value')
+    })
+
+    it('keeps existing attributes', function() {
+      let element = up.element.createFromSelector('div[foo=original]')
+      up.element.setMissingAttrs(element, { 'foo': 'changed', 'bar': 'new' })
+
+      expect(element).toHaveAttribute('foo', 'original')
+      expect(element).toHaveAttribute('bar', 'new')
+    })
+
+    it('keeps an existing attribute with an empty value', function() {
+      let element = up.element.createFromSelector('div[foo=""]')
+      up.element.setMissingAttrs(element, { 'foo': 'changed' })
+
+      expect(element).toHaveAttribute('foo', '')
+    })
+
+    it('sets an empty attribute with an empty string as a property value', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttrs(element, { 'foo': '' })
+
+      expect(element).toHaveAttribute('foo', '')
+    })
+
+    it('skips null and undefined property values', function() {
+      let element = up.element.createFromSelector('div[baz=original]')
+      up.element.setMissingAttrs(element, { 'foo': null, 'bar': undefined, 'baz': null })
+
+      expect(element).not.toHaveAttribute('foo')
+      expect(element).not.toHaveAttribute('bar')
+      expect(element).toHaveAttribute('baz', 'original')
+    })
+
+    it('sets false as "false"', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttrs(element, { 'foo': false })
+
+      expect(element).toHaveAttribute('foo', 'false')
+    })
+
+  })
+
+  describe('up.internal.setAttrsTemp()', function() {
 
     it('returns a function that restores the original attribute values', function() {
       let element = up.element.createFromSelector('div[foo=original]')
       expect(element).toHaveAttribute('foo', 'original')
 
-      let undo = up.element.setAttrsTemp(element, { 'foo': 'changed' })
+      let undo = up.internal.setAttrsTemp(element, { 'foo': 'changed' })
       expect(element).toHaveAttribute('foo', 'changed')
 
       undo()
@@ -1383,7 +1433,7 @@ describe('up.element', function() {
       let element = up.element.createFromSelector('div')
       expect(element).not.toHaveAttribute('foo')
 
-      let undo = up.element.setAttrsTemp(element, { 'foo': 'changed' })
+      let undo = up.internal.setAttrsTemp(element, { 'foo': 'changed' })
       expect(element).toHaveAttribute('foo', 'changed')
 
       undo()
@@ -1392,13 +1442,13 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.addClassTemp()', function() {
+  describe('up.internal.addClassTemp()', function() {
 
     it('adds the given class to the given element', function() {
       let element = up.element.createFromSelector('.foo')
       expect(element.className).toBe('foo')
 
-      up.element.addClassTemp(element, 'bar')
+      up.internal.addClassTemp(element, 'bar')
       expect(element.className).toBe('foo bar')
     })
 
@@ -1408,7 +1458,7 @@ describe('up.element', function() {
         let element = up.element.createFromSelector('.foo')
         expect(element.className).toBe('foo')
 
-        let undo = up.element.addClassTemp(element, 'bar')
+        let undo = up.internal.addClassTemp(element, 'bar')
         expect(element.className).toBe('foo bar')
 
         undo()
@@ -1419,7 +1469,7 @@ describe('up.element', function() {
         let element = up.element.createFromSelector('.foo')
         expect(element.className).toBe('foo')
 
-        let undo = up.element.addClassTemp(element, 'foo')
+        let undo = up.internal.addClassTemp(element, 'foo')
         expect(element.className).toBe('foo')
 
         undo()
@@ -1430,13 +1480,13 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.removeClassTemp()', function() {
+  describe('up.internal.removeClassTemp()', function() {
 
     it('adds the given class to the given element', function() {
       let element = up.element.createFromSelector('.foo.bar')
       expect(element.className).toBe('foo bar')
 
-      up.element.removeClassTemp(element, 'bar')
+      up.internal.removeClassTemp(element, 'bar')
       expect(element.className).toBe('foo')
     })
 
@@ -1446,7 +1496,7 @@ describe('up.element', function() {
         let element = up.element.createFromSelector('.foo.bar')
         expect(element.className).toBe('foo bar')
 
-        let undo = up.element.removeClassTemp(element, 'bar')
+        let undo = up.internal.removeClassTemp(element, 'bar')
         expect(element.className).toBe('foo')
 
         undo()
@@ -1457,7 +1507,7 @@ describe('up.element', function() {
         let element = up.element.createFromSelector('.foo')
         expect(element.className).toBe('foo')
 
-        let undo = up.element.removeClassTemp(element, 'bar')
+        let undo = up.internal.removeClassTemp(element, 'bar')
         expect(element.className).toBe('foo')
 
         undo()
@@ -1468,11 +1518,11 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.setStyleTemp()', function() {
+  describe('up.internal.setStyleTemp()', function() {
 
     it("sets the given inline styles and returns a function that will restore the previous inline styles", function() {
       const div = fixture('div[style="color: red"]')
-      const restore = up.element.setStyleTemp(div, { color: 'blue' })
+      const restore = up.internal.setStyleTemp(div, { color: 'blue' })
       expect(div.getAttribute('style')).toContain('color: blue')
       expect(div.getAttribute('style')).not.toContain('color: red')
       restore()
@@ -1482,7 +1532,7 @@ describe('up.element', function() {
 
     it("does not restore inherited styles", function() {
       const div = fixture('div[class="red-background"]')
-      const restore = up.element.setStyleTemp(div, { 'background-color': 'blue' })
+      const restore = up.internal.setStyleTemp(div, { 'background-color': 'blue' })
       expect(div.getAttribute('style')).toContain('background-color: blue')
       restore()
       expect(div.getAttribute('style')).not.toContain('background-color')
@@ -1490,7 +1540,7 @@ describe('up.element', function() {
 
     it("sets and restores the given custom properties as inline styles", function() {
       const div = fixture('div')
-      const restore = up.element.setStyleTemp(div, { '--custom-prop': 'custom-value' })
+      const restore = up.internal.setStyleTemp(div, { '--custom-prop': 'custom-value' })
 
       expect(div.getAttribute('style')).toContain('--custom-prop: custom-value')
       expect(div.style.getPropertyValue('--custom-prop')).toBe('custom-value')
@@ -1543,26 +1593,26 @@ describe('up.element', function() {
     }
   })
 
-  describe('up.element.inlineStyle', function() {
+  describe('up.internal.inlineStyle', function() {
 
     describe('with a string as second argument', function() {
 
       it('returns a CSS value string from an inline [style] attribute', function() {
         const div = $fixture('div').attr('style', 'background-color: #ff0000')[0]
-        const style = up.element.inlineStyle(div, 'background-color')
+        const style = up.internal.inlineStyle(div, 'background-color')
         // Browsers convert colors to rgb() values, even IE11
         expect(style).toBe('rgb(255, 0, 0)')
       })
 
       it('returns a blank value if the element does not have the given property in the [style] attribute', function() {
         const div = $fixture('div').attr('style', 'background-color: red')[0]
-        const style = up.element.inlineStyle(div, 'color')
+        const style = up.internal.inlineStyle(div, 'color')
         expect(style).toBeBlank()
       })
 
       it('returns a blank value the given property is a computed property, but not in the [style] attribute', function() {
         const div = $fixture('div[class="red-background"]')[0]
-        const inlineStyle = up.element.inlineStyle(div, 'background-color')
+        const inlineStyle = up.internal.inlineStyle(div, 'background-color')
         const computedStyle = up.element.style(div, 'background-color')
         expect(computedStyle).toEqual('rgb(255, 0, 0)')
         expect(inlineStyle).toBeBlank()
@@ -1571,7 +1621,7 @@ describe('up.element', function() {
       it('returns a custom property from a [style] attribute', function() {
         const div = fixture('div')
         div.setAttribute('style', 'background-color: #ff0000; --custom-property: custom-value;')
-        const style = up.element.inlineStyle(div, '--custom-property')
+        const style = up.internal.inlineStyle(div, '--custom-property')
         expect(style).toBe('custom-value')
       })
     })
@@ -1580,7 +1630,7 @@ describe('up.element', function() {
 
       it('returns an object with the given inline [style] properties', function() {
         const div = $fixture('div').attr('style', 'background-color: #ff0000; color: #0000ff')[0]
-        const style = up.element.inlineStyle(div, ['background-color', 'color'])
+        const style = up.internal.inlineStyle(div, ['background-color', 'color'])
         expect(style).toEqual({
           'background-color': 'rgb(255, 0, 0)',
           color: 'rgb(0, 0, 255)'
@@ -1589,14 +1639,14 @@ describe('up.element', function() {
 
       it('returns blank keys if the element does not have the given property in the [style] attribute', function() {
         const div = $fixture('div').attr('style', 'background-color: #ff0000')[0]
-        const style = up.element.inlineStyle(div, ['background-color', 'color'])
+        const style = up.internal.inlineStyle(div, ['background-color', 'color'])
         expect(style).toHaveOwnProperty('color')
         expect(style.color).toBeBlank()
       })
 
       it('returns a blank value the given property is a computed property, but not in the [style] attribute', function() {
         const div = fixture('div[class="red-background"]')
-        const inlineStyleHash = up.element.inlineStyle(div, ['background-color'])
+        const inlineStyleHash = up.internal.inlineStyle(div, ['background-color'])
         const computedBackground = up.element.style(div, 'background-color')
         expect(computedBackground).toEqual('rgb(255, 0, 0)')
         expect(inlineStyleHash).toHaveOwnProperty('background-color')
@@ -1606,7 +1656,7 @@ describe('up.element', function() {
       it('supports custom properties', function() {
         const div = fixture('div')
         div.setAttribute('style', 'background-color: #ff0000; --custom-property: custom-value; color: #00ff00;')
-        const style = up.element.inlineStyle(div, ['--custom-property', 'color'])
+        const style = up.internal.inlineStyle(div, ['--custom-property', 'color'])
         expect(style).toEqual({
           '--custom-property': 'custom-value',
           'color': 'rgb(0, 255, 0)',
@@ -1782,29 +1832,29 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.classSelector', function() {
+  describe('up.internal.classSelector', function() {
     it('escapes all colons', function() {
       const element = fixture('div')
       element.classList.add('print:sm:hidden')
-      expect(up.element.classSelector('print:sm:hidden')).toBe('.print\\:sm\\:hidden')
+      expect(up.internal.classSelector('print:sm:hidden')).toBe('.print\\:sm\\:hidden')
     })
 
     it('escapes all square-brackets', function() {
       const element = fixture('div')
       element.classList.add('text-[2rem]')
-      expect(up.element.classSelector('text-[2rem]')).toBe('.text-\\[2rem\\]')
+      expect(up.internal.classSelector('text-[2rem]')).toBe('.text-\\[2rem\\]')
     })
 
     it('escapes all periods', function() {
       const element = fixture('div')
       element.classList.add('text-[.8125rem]')
-      expect(up.element.classSelector('text-[.8125rem]')).toBe('.text-\\[\\.8125rem\\]')
+      expect(up.internal.classSelector('text-[.8125rem]')).toBe('.text-\\[\\.8125rem\\]')
     })
 
     it('escapes all exclamation marks', function() {
       const element = fixture('div')
       element.classList.add('!font-bold')
-      expect(up.element.classSelector('!font-bold')).toBe('.\\!font-bold')
+      expect(up.internal.classSelector('!font-bold')).toBe('.\\!font-bold')
     })
   })
 
@@ -1889,10 +1939,10 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.parseSelector()', function() {
+  describe('up.internal.parseSelector()', function() {
 
     it('parses a selector with tag name, IDs, classes and attributes', function() {
-      const parsed = up.element.parseSelector('tag-name#id.klass[attr=value]')
+      const parsed = up.internal.parseSelector('tag-name#id.klass[attr=value]')
 
       expect(parsed.includePath).toEqual([{
         tagName: 'tag-name',
@@ -1903,7 +1953,7 @@ describe('up.element', function() {
     })
 
     it('ignores control characters in quoted attribute value', function() {
-      const parsed = up.element.parseSelector('.klass[foo="#noid"][bar=".noclass"]')
+      const parsed = up.internal.parseSelector('.klass[foo="#noid"][bar=".noclass"]')
 
       expect(parsed.includePath).toEqual([{
         tagName: null,
@@ -1914,32 +1964,32 @@ describe('up.element', function() {
     })
 
     it('unescapes quotes in double-quoted attribute values', function() {
-      const parsed = up.element.parseSelector('[attr="foo\\"bar"]')
+      const parsed = up.internal.parseSelector('[attr="foo\\"bar"]')
 
       expect(parsed.includePath[0].attributes).toEqual({ attr: 'foo"bar' })
     })
 
     it('unescapes quotes in single-quoted attribute values', function() {
-      const parsed = up.element.parseSelector(`[attr='foo\\'bar']`)
+      const parsed = up.internal.parseSelector(`[attr='foo\\'bar']`)
 
       expect(parsed.includePath[0].attributes).toEqual({ attr: "foo'bar" })
     })
 
     it('parses all ways to express an empty string value', function() {
-      expect(up.element.parseSelector(`[attr]`).includePath[0].attributes).toEqual({ attr: '' })
-      expect(up.element.parseSelector(`[attr=]`).includePath[0].attributes).toEqual({ attr: '' })
-      expect(up.element.parseSelector(`[attr=""]`).includePath[0].attributes).toEqual({ attr: '' })
-      expect(up.element.parseSelector(`[attr='']`).includePath[0].attributes).toEqual({ attr: '' })
+      expect(up.internal.parseSelector(`[attr]`).includePath[0].attributes).toEqual({ attr: '' })
+      expect(up.internal.parseSelector(`[attr=]`).includePath[0].attributes).toEqual({ attr: '' })
+      expect(up.internal.parseSelector(`[attr=""]`).includePath[0].attributes).toEqual({ attr: '' })
+      expect(up.internal.parseSelector(`[attr='']`).includePath[0].attributes).toEqual({ attr: '' })
     })
 
     it('parses an attribute value that contain literal quote characters inside the quote delimiters', function() {
-      const parsed = up.element.parseSelector(`[up-etag='"abc"']`) // double quotes are part of the ETag
+      const parsed = up.internal.parseSelector(`[up-etag='"abc"']`) // double quotes are part of the ETag
 
       expect(parsed.includePath[0].attributes).toEqual({ 'up-etag': '"abc"' })
     })
 
     it('parses a descendant selector', function() {
-      const parsed = up.element.parseSelector('.content[data-foo=bar] > form[action="/"]')
+      const parsed = up.internal.parseSelector('.content[data-foo=bar] > form[action="/"]')
 
       expect(parsed.includePath).toEqual([
         {
@@ -1958,7 +2008,7 @@ describe('up.element', function() {
     })
 
     it('parses a :not() suffix', function() {
-      const parsed = up.element.parseSelector('.foo:not(.bar)')
+      const parsed = up.internal.parseSelector('.foo:not(.bar)')
 
       expect(parsed.includePath).toEqual([{
         tagName: null,
@@ -1971,7 +2021,7 @@ describe('up.element', function() {
     })
 
     it('parses a :not() suffix containing an :is() expression', function() {
-      const parsed = up.element.parseSelector('.foo:not(.bar:is(.baz, .qux))')
+      const parsed = up.internal.parseSelector('.foo:not(.bar:is(.baz, .qux))')
 
       expect(parsed.includePath).toEqual([{
         tagName: null,
@@ -1984,33 +2034,33 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.extractSingular()', function() {
+  describe('up.internal.extractSingular()', function() {
 
     it('returns an Element for an array of only that Element', function() {
       let array = [document.head]
-      expect(up.element.extractSingular(array)).toBe(document.head)
+      expect(up.internal.extractSingular(array)).toBe(document.head)
     })
 
     it('throws an error for an array of multiple Elements', function() {
       let array = [document.head, document.body]
-      let doExtract = () => up.element.extractSingular(array)
+      let doExtract = () => up.internal.extractSingular(array)
       expect(doExtract).toThrowError(/Expected a single element/)
     })
 
     it('throws an error for an empty array', function() {
       let array = []
-      let doExtract = () => up.element.extractSingular(array)
+      let doExtract = () => up.internal.extractSingular(array)
       expect(doExtract).toThrowError(/Expected a single element/)
     })
 
     it('returns a Document for an array of only that Document', function() {
       let array = [document]
-      expect(up.element.extractSingular(array)).toBe(document)
+      expect(up.internal.extractSingular(array)).toBe(document)
     })
 
   })
 
-  describe('up.element.unwrap()', function() {
+  describe('up.internal.unwrap()', function() {
 
     it("attaches the element's children to its parent, then removes the element", function() {
       let [container, wrapper, child1, child2] = htmlFixtureList(`
@@ -2022,7 +2072,7 @@ describe('up.element', function() {
         </div>
       `)
 
-      up.element.unwrap(wrapper)
+      up.internal.unwrap(wrapper)
 
       expect(container.children).toEqual([child1, child2])
       expect(wrapper).toBeDetached()
@@ -2038,7 +2088,7 @@ describe('up.element', function() {
       let container = document.createElement('div')
       container.append(wrapper)
 
-      up.element.unwrap(wrapper)
+      up.internal.unwrap(wrapper)
 
       expect(container.innerHTML.trim()).toBe('foo <b>bar</b> baz')
       expect(wrapper).toBeDetached()
@@ -2056,7 +2106,7 @@ describe('up.element', function() {
       child.focus()
       expect(child).toBeFocused()
 
-      up.element.unwrap(wrapper)
+      up.internal.unwrap(wrapper)
 
       expect(child.parentNode).toBe(container)
       expect(child).toBeFocused()
@@ -2064,12 +2114,12 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.leadingElement()', function() {
+  describe('up.internal.leadingElement()', function() {
 
     it('returns the first child node when it is an element', function() {
       const nodes = up.element.createFromHTML(`<div><span id="match"></span></div>`).childNodes
 
-      expect(up.element.leadingElement(nodes)).toMatchSelector('#match')
+      expect(up.internal.leadingElement(nodes)).toMatchSelector('#match')
     })
 
     it('returns the first element that is only preceded by a whitespace text node', function() {
@@ -2079,7 +2129,7 @@ describe('up.element', function() {
         </div>
       `).childNodes
 
-      expect(up.element.leadingElement(nodes)).toMatchSelector('#match')
+      expect(up.internal.leadingElement(nodes)).toMatchSelector('#match')
     })
 
     it('returns undefined if the first element is preceded by non-whitespace text node', function() {
@@ -2090,7 +2140,7 @@ describe('up.element', function() {
         </div>
       `).childNodes
 
-      expect(up.element.leadingElement(nodes)).toBeUndefined()
+      expect(up.internal.leadingElement(nodes)).toBeUndefined()
     })
 
     it('returns undefined if the node list only contains text nodes', function() {
@@ -2100,16 +2150,16 @@ describe('up.element', function() {
         </div>
       `).childNodes
 
-      expect(up.element.leadingElement(nodes)).toBeUndefined()
+      expect(up.internal.leadingElement(nodes)).toBeUndefined()
     })
 
     it('returns undefined if the node list is empty', function() {
-      expect(up.element.leadingElement([])).toBeUndefined()
+      expect(up.internal.leadingElement([])).toBeUndefined()
     })
 
   })
 
-  describe('up.element.removeAttrsFromHTML()', function() {
+  describe('up.internal.removeAttrsFromHTML()', function() {
     it('removes the given attributes from the given HTML', function() {
       const html = `
         <div id="container" class="foo" data-foo="bar">
@@ -2117,7 +2167,7 @@ describe('up.element', function() {
         </div>
       `.trim()
 
-      const result = up.element.removeAttrsFromHTML(html, ['id', 'data-foo'])
+      const result = up.internal.removeAttrsFromHTML(html, ['id', 'data-foo'])
 
       expect(result).toBe(`
         <div class="foo">
@@ -2128,7 +2178,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.trackDefinitions()', function() {
+  describe('up.internal.trackDefinitions()', function() {
 
     it('emits up:element:defined with the { localName } when a custom element in the given root gets defined', async function() {
       const { tagName, define } = lateFormAssociatedElement()
@@ -2136,7 +2186,7 @@ describe('up.element', function() {
       const listener = jasmine.createSpy('up:element:defined listener')
       up.on('up:element:defined', (event) => listener(event.localName))
 
-      up.element.trackDefinitions(root)
+      up.internal.trackDefinitions(root)
       await wait()
 
       expect(listener).not.toHaveBeenCalledWith(tagName)
@@ -2159,8 +2209,8 @@ describe('up.element', function() {
       const listener = jasmine.createSpy('up:element:defined listener')
       up.on('up:element:defined', (event) => listener(event.localName))
 
-      up.element.trackDefinitions(root)
-      up.element.trackDefinitions(root)
+      up.internal.trackDefinitions(root)
+      up.internal.trackDefinitions(root)
       define()
       await wait()
 

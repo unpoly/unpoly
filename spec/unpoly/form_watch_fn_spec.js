@@ -204,8 +204,8 @@ extendDescribe('up.form', function() {
         })
 
         it('does not unnecessarily track fields for performance reasons', async function() {
-          const trackFieldsSpy = up.form.trackFields.mock().and.callThrough()
-          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
+          const trackFieldsSpy = up.internal.trackFields.mock().and.callThrough()
+          const syncSpy = spyOn(up.internal.SelectorTracker.prototype, 'sync').and.callThrough()
 
           const [form, root, field1, outside, field2] = htmlFixtureList(`
             <form id="form">

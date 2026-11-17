@@ -28,25 +28,25 @@ describe('up.util', () => {
 
     require('./util_lists_spec')
 
-    describe('up.util.args()', function() {
+    describe('up.internal.parseArgs()', function() {
 
       describe('val slots', function() {
 
         it('parses args', function() {
           let args = [0, 1, 2]
-          let results = up.util.args(args, 'val', 'val', 'val')
+          let results = up.internal.parseArgs(args, 'val', 'val', 'val')
           expect(results).toEqual([0, 1, 2])
         })
 
         it('parses args from the right if there are more args than specs', function() {
           let args = [0, 1, 2, 3]
-          let results = up.util.args(args, 'val', 'val')
+          let results = up.internal.parseArgs(args, 'val', 'val')
           expect(results).toEqual([2, 3])
         })
 
         it('returns undefined for positions that have a spec, but no arg', function() {
           let args = [0, 1]
-          let results = up.util.args(args, 'val', 'val', 'val')
+          let results = up.internal.parseArgs(args, 'val', 'val', 'val')
           expect(results).toEqual([undefined, 0, 1])
         })
 
@@ -56,19 +56,19 @@ describe('up.util', () => {
 
         it('parses a trailing options object', function() {
           let args = [0, 1, { foo: 'bar' } ]
-          let results = up.util.args(args, 'val', 'val', 'options')
+          let results = up.internal.parseArgs(args, 'val', 'val', 'options')
           expect(results).toEqual([0, 1, { foo: 'bar' }])
         })
 
         it('parses an empty object is no options object is trailing', function() {
           let args = [0, 1]
-          let results = up.util.args(args, 'val', 'val', 'options')
+          let results = up.internal.parseArgs(args, 'val', 'val', 'options')
           expect(results).toEqual([0, 1, { }])
         })
 
         it('parses options in the middle of a spec list', function() {
-          expect(up.util.args([0, 1], 'val', 'options', 'val')).toEqual([0, {}, 1])
-          expect(up.util.args([0, { foo: 'bar' }, 1], 'val', 'options', 'val')).toEqual([0, { foo: 'bar' }, 1])
+          expect(up.internal.parseArgs([0, 1], 'val', 'options', 'val')).toEqual([0, {}, 1])
+          expect(up.internal.parseArgs([0, { foo: 'bar' }, 1], 'val', 'options', 'val')).toEqual([0, { foo: 'bar' }, 1])
         })
 
       })
@@ -78,13 +78,13 @@ describe('up.util', () => {
         it('parses a trailing function', function() {
           let fn = function() { console.log("fn!") }
           let args = [0, 1, fn]
-          let results = up.util.args(args, 'val', 'val', 'callback')
+          let results = up.internal.parseArgs(args, 'val', 'val', 'callback')
           expect(results).toEqual([0, 1, fn])
         })
 
         it('parses undefined if no function is trailing', function() {
           let args = [0, 1]
-          let results = up.util.args(args, 'val', 'val', 'callback')
+          let results = up.internal.parseArgs(args, 'val', 'val', 'callback')
           expect(results).toEqual([0, 1, undefined])
         })
 
@@ -92,10 +92,10 @@ describe('up.util', () => {
 
     })
 
-    describe('up.util.cleaner()', function() {
+    describe('up.internal.cleaner()', function() {
 
       it('returns a function that collects clean-up action, which are executed when { clean } is called', function() {
-        let cleaner = up.util.cleaner()
+        let cleaner = up.internal.cleaner()
         let action1 = jasmine.createSpy('action 1')
         let action2 = jasmine.createSpy('action 2')
         cleaner(action1)
@@ -111,7 +111,7 @@ describe('up.util', () => {
       })
 
       it('binds the returned { clean } function', function() {
-        let cleaner = up.util.cleaner()
+        let cleaner = up.internal.cleaner()
         let action = jasmine.createSpy('action')
         cleaner(action)
 
@@ -123,7 +123,7 @@ describe('up.util', () => {
 
       it("runs clean-up actions in the reverse order that they've been scheduled in", function() {
         let actions = []
-        let cleaner = up.util.cleaner()
+        let cleaner = up.internal.cleaner()
         cleaner(() => actions.push('one'))
         cleaner(() => actions.push('two'))
 
@@ -133,7 +133,7 @@ describe('up.util', () => {
       })
 
       it('accepts multiple clean-up actions as multiple arguments', function() {
-        let cleaner = up.util.cleaner()
+        let cleaner = up.internal.cleaner()
         let action1 = jasmine.createSpy('action 1')
         let action2 = jasmine.createSpy('action 2')
         cleaner(action1, action2)
@@ -148,7 +148,7 @@ describe('up.util', () => {
       })
 
       it('accepts multiple clean-up actions as a single Array argument', function() {
-        let cleaner = up.util.cleaner()
+        let cleaner = up.internal.cleaner()
         let action1 = jasmine.createSpy('action 1')
         let action2 = jasmine.createSpy('action 2')
         cleaner([action1, action2])
@@ -163,7 +163,7 @@ describe('up.util', () => {
       })
 
       it('ignores non-Function arguments', function() {
-        let cleaner = up.util.cleaner()
+        let cleaner = up.internal.cleaner()
         let action1 = jasmine.createSpy('action 1')
         let action2 = jasmine.createSpy('action 2')
         cleaner([action1, null, action2])
@@ -179,7 +179,7 @@ describe('up.util', () => {
       })
 
       it('does not let clean-up actions schedule more clean-up actions', function() {
-        let cleaner = up.util.cleaner()
+        let cleaner = up.internal.cleaner()
 
         let recursiveAction = jasmine.createSpy('recursive action')
         let action = jasmine.createSpy('clean-up action').and.callFake(() => {
@@ -199,7 +199,7 @@ describe('up.util', () => {
       })
 
       it('allows to re-use a cleaner function after cleaning, restarting with an empty list of clean-up actions', function() {
-        let cleaner = up.util.cleaner()
+        let cleaner = up.internal.cleaner()
         let action1 = jasmine.createSpy('action 1')
         let action2 = jasmine.createSpy('action 2')
 
@@ -220,7 +220,7 @@ describe('up.util', () => {
 
         it("runs clean-up actions in the same order that they've been scheduled in", function() {
           let actions = []
-          let cleaner = up.util.cleaner('fifo')
+          let cleaner = up.internal.cleaner('fifo')
           cleaner(() => actions.push('one'))
           cleaner(() => actions.push('two'))
 
@@ -230,7 +230,7 @@ describe('up.util', () => {
         })
 
         it('does not let clean-up actions schedule more clean-up actions', function() {
-          let cleaner = up.util.cleaner('fifo')
+          let cleaner = up.internal.cleaner('fifo')
 
           let recursiveAction = jasmine.createSpy('recursive action')
           let action = jasmine.createSpy('clean-up action').and.callFake(() => {
@@ -612,84 +612,33 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.isElementLike', function() {
+    describe('up.internal.isElementLike', function() {
 
       it('returns true for an element', function() {
         const value = document.body
-        expect(up.util.isElementLike(value)).toBe(true)
+        expect(up.internal.isElementLike(value)).toBe(true)
       })
 
       it('returns true for a jQuery collection', function() {
         const value = $('body')
-        expect(up.util.isElementLike(value)).toBe(true)
+        expect(up.internal.isElementLike(value)).toBe(true)
       })
 
       it('returns false for undefined', function() {
         const value = undefined
-        expect(up.util.isElementLike(value)).toBe(false)
+        expect(up.internal.isElementLike(value)).toBe(false)
       })
 
       it('returns true for the document', function() {
         const value = document
-        expect(up.util.isElementLike(value)).toBe(true)
+        expect(up.internal.isElementLike(value)).toBe(true)
       })
 
       it('returns true for the window', function() {
         const value = window
-        expect(up.util.isElementLike(value)).toBe(true)
+        expect(up.internal.isElementLike(value)).toBe(true)
       })
     })
-
-
-//    describe 'up.util.parsePath', ->
-//
-//      it 'parses a plain name', ->
-//        path = up.util.parsePath("foo")
-//        expect(path).toEqual ['foo']
-//
-//      it 'considers underscores to be part of a name', ->
-//        path = up.util.parsePath("foo_bar")
-//        expect(path).toEqual ['foo_bar']
-//
-//      it 'considers dashes to be part of a name', ->
-//        path = up.util.parsePath("foo-bar")
-//        expect(path).toEqual ['foo-bar']
-//
-//      it 'parses dot-separated names into multiple path segments', ->
-//        path = up.util.parsePath('foo.bar.baz')
-//        expect(path).toEqual ['foo', 'bar', 'baz']
-//
-//      it 'parses nested params notation with square brackets', ->
-//        path = up.util.parsePath('user[account][email]')
-//        expect(path).toEqual ['user', 'account', 'email']
-//
-//      it 'parses double quotes in square brackets', ->
-//        path = up.util.parsePath('user["account"]["email"]')
-//        expect(path).toEqual ['user', 'account', 'email']
-//
-//      it 'parses single quotes in square brackets', ->
-//        path = up.util.parsePath("user['account']['email']")
-//        expect(path).toEqual ['user', 'account', 'email']
-//
-//      it 'allows square brackets inside quotes', ->
-//        path = up.util.parsePath("element['a[up-href]']")
-//        expect(path).toEqual ['element', 'a[up-href]']
-//
-//      it 'allows single quotes inside double quotes', ->
-//        path = up.util.parsePath("element[\"a[up-href='foo']\"]")
-//        expect(path).toEqual ['element', "a[up-href='foo']"]
-//
-//      it 'allows double quotes inside single quotes', ->
-//        path = up.util.parsePath("element['a[up-href=\"foo\"]']")
-//        expect(path).toEqual ['element', 'a[up-href="foo"]']
-//
-//      it 'allows dots in square brackets when it is quoted', ->
-//        path = up.util.parsePath('elements[".foo"]')
-//        expect(path).toEqual ['elements', '.foo']
-//
-//      it 'allows different notation for each segment', ->
-//        path = up.util.parsePath('foo.bar[baz]["bam"][\'qux\']')
-//        expect(path).toEqual ['foo', 'bar', 'baz', 'bam', 'qux']
 
     describe('up.util.parseURL', function() {
 
@@ -740,49 +689,14 @@ describe('up.util', () => {
 
     require('./util_objects_spec')
 
-//    describe 'up.util.previewable', ->
-//
-//      it 'wraps a function into a proxy function with an additional .promise attribute', ->
-//        fun = -> 'return value'
-//        proxy = up.util.previewable(fun)
-//        expect(u.isFunction(proxy)).toBe(true)
-//        expect(u.isPromise(proxy.promise)).toBe(true)
-//        expect(proxy()).toEqual('return value')
-//
-//      it "resolves the proxy's .promise when the inner function returns", (done) ->
-//        fun = -> 'return value'
-//        proxy = up.util.previewable(fun)
-//        callback = jasmine.createSpy('promise callback')
-//        proxy.promise.then(callback)
-//        u.task ->
-//          expect(callback).not.toHaveBeenCalled()
-//          proxy()
-//          u.task ->
-//            expect(callback).toHaveBeenCalledWith('return value')
-//            done()
-//
-//      it "delays resolution of the proxy's .promise if the inner function returns a promise", (done) ->
-//        funDeferred = u.newDeferred()
-//        fun = -> funDeferred
-//        proxy = up.util.previewable(fun)
-//        callback = jasmine.createSpy('promise callback')
-//        proxy.promise.then(callback)
-//        proxy()
-//        u.task ->
-//          expect(callback).not.toHaveBeenCalled()
-//          funDeferred.resolve('return value')
-//          u.task ->
-//            expect(callback).toHaveBeenCalledWith('return value')
-//            done()
-
-    describe('up.util.sequence', function() {
+    describe('up.internal.sequence', function() {
 
       it('combines an array of function into a single function', function() {
         const values = []
         const one = () => values.push('one')
         const two = () => values.push('two')
         const three = () => values.push('three')
-        const sequence = up.util.sequence([one, two, three])
+        const sequence = up.internal.sequence([one, two, three])
         expect(values).toEqual([])
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
@@ -793,7 +707,7 @@ describe('up.util', () => {
         const one = () => values.push('one')
         const two = () => values.push('two')
         const three = () => values.push('three')
-        const sequence = up.util.sequence(one, two, three)
+        const sequence = up.internal.sequence(one, two, three)
         expect(values).toEqual([])
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
@@ -804,7 +718,7 @@ describe('up.util', () => {
         const one = () => values.push('one')
         const two = () => values.push('two')
         const three = () => values.push('three')
-        const sequence = up.util.sequence(one, false, two, undefined, null, three)
+        const sequence = up.internal.sequence(one, false, two, undefined, null, three)
         expect(values).toEqual([])
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
@@ -813,7 +727,7 @@ describe('up.util', () => {
       it('passes its arguments to each function', function() {
         const one = jasmine.createSpy('one')
         const two = jasmine.createSpy('two')
-        const sequence = up.util.sequence(one, two)
+        const sequence = up.internal.sequence(one, two)
         sequence('foo', 'bar')
         expect(one).toHaveBeenCalledWith('foo', 'bar')
         expect(two).toHaveBeenCalledWith('foo', 'bar')
@@ -822,7 +736,7 @@ describe('up.util', () => {
       it('returns an array of all return values', function() {
         const one = () => 1
         const two = () => 2
-        const sequence = up.util.sequence(one, two)
+        const sequence = up.internal.sequence(one, two)
         expect(sequence()).toEqual([1, 2])
       })
 
@@ -1065,10 +979,10 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.unresolvablePromise', function() {
+    describe('up.internal.unresolvablePromise', function() {
 
       it('return a pending promise', function(done) {
-        const promise = up.util.unresolvablePromise()
+        const promise = up.internal.unresolvablePromise()
         promiseState(promise).then(function(result) {
           expect(result.state).toEqual('pending')
           done()
@@ -1077,35 +991,35 @@ describe('up.util', () => {
       })
 
       it('returns a different object every time (to prevent memory leaks)', function() {
-        const one = up.util.unresolvablePromise()
-        const two = up.util.unresolvablePromise()
+        const one = up.internal.unresolvablePromise()
+        const two = up.internal.unresolvablePromise()
         expect(one).not.toBe(two)
       })
     })
 
-    describe('up.util.isCrossOrigin', function() {
+    describe('up.internal.isCrossOrigin', function() {
 
       it('returns false for an absolute path', () => {
-        expect(up.util.isCrossOrigin('/foo')).toBe(false)
+        expect(up.internal.isCrossOrigin('/foo')).toBe(false)
       })
 
       it('returns false for an relative path', () => {
-        expect(up.util.isCrossOrigin('foo')).toBe(false)
+        expect(up.internal.isCrossOrigin('foo')).toBe(false)
       })
 
       it('returns false for a fully qualified URL with the same protocol and hostname as the current location', function() {
         const fullURL = `${location.protocol}//${location.host}/foo`
-        expect(up.util.isCrossOrigin(fullURL)).toBe(false)
+        expect(up.internal.isCrossOrigin(fullURL)).toBe(false)
       })
 
       it('returns true for a fully qualified URL with a different protocol than the current location', function() {
         const fullURL = `otherprotocol://${location.host}/foo`
-        expect(up.util.isCrossOrigin(fullURL)).toBe(true)
+        expect(up.internal.isCrossOrigin(fullURL)).toBe(true)
       })
 
       it('returns false for a fully qualified URL with a different hostname than the current location', function() {
         const fullURL = `${location.protocol}//other-host.tld/foo`
-        expect(up.util.isCrossOrigin(fullURL)).toBe(true)
+        expect(up.internal.isCrossOrigin(fullURL)).toBe(true)
       })
     })
 
@@ -1149,17 +1063,17 @@ describe('up.util', () => {
 //        obj = up.util.deepMerge(obj, other)
 //        expect(obj).toEqual { a: ['3', '4'] }
 
-    describe('up.util.memoize()', function() {
+    describe('up.internal.memoize()', function() {
 
       it('returns a function that calls the memoized function', function() {
         const fun = () => 'foo'
-        const memoized = u.memoize(fun)
+        const memoized = up.internal.memoize(fun)
         expect(memoized()).toEqual('foo')
       })
 
       it('returns the cached return value of the first call when called again', function() {
         const spy = jasmine.createSpy().and.returnValue(5)
-        const memoized = u.memoize(spy)
+        const memoized = up.internal.memoize(spy)
         expect(memoized(2, 3)).toEqual(5)
         expect(memoized(2, 3)).toEqual(5)
         expect(spy.calls.count()).toEqual(1)
@@ -1167,7 +1081,7 @@ describe('up.util', () => {
 
       it('caches undefined', function() {
         const spy = jasmine.createSpy().and.returnValue(undefined)
-        const memoized = u.memoize(spy)
+        const memoized = up.internal.memoize(spy)
         expect(memoized()).toBeUndefined()
         expect(memoized()).toBeUndefined()
         expect(spy.calls.count()).toEqual(1)
@@ -1175,7 +1089,7 @@ describe('up.util', () => {
 
       it('caches false', function() {
         const spy = jasmine.createSpy().and.returnValue(false)
-        const memoized = u.memoize(spy)
+        const memoized = up.internal.memoize(spy)
         expect(memoized()).toBe(false)
         expect(memoized()).toBe(false)
         expect(spy.calls.count()).toEqual(1)
@@ -1184,7 +1098,7 @@ describe('up.util', () => {
       it('throws a cached error from the first caller', function() {
         let error = new Error('foo')
         const spy = jasmine.createSpy().and.throwError(error)
-        const memoized = u.memoize(spy)
+        const memoized = up.internal.memoize(spy)
         expect(memoized).toThrow(error)
         expect(memoized).toThrow(error)
         expect(spy.calls.count()).toEqual(1)
@@ -1193,7 +1107,7 @@ describe('up.util', () => {
       it('allows callers to control `this`', function() {
         const thisSpy = jasmine.createSpy('this spy')
         const fun = function() { thisSpy(this) }
-        const memoized = u.memoize(fun)
+        const memoized = up.internal.memoize(fun)
         const givenThis = {}
 
         memoized.apply(givenThis)
@@ -1205,7 +1119,7 @@ describe('up.util', () => {
 
       it('allows callers to control arguments', function() {
         const fun = (a, b) => a + b
-        const memoized = u.memoize(fun)
+        const memoized = up.internal.memoize(fun)
         expect(memoized(2, 3)).toEqual(5)
       })
 
@@ -1382,47 +1296,33 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.isRegExp', function() {
+    describe('up.internal.isRegExp', function() {
 
       it('returns true for a RegExp', function() {
         const value = /foo/
-        expect(up.util.isRegExp(value)).toBe(true)
+        expect(up.internal.isRegExp(value)).toBe(true)
       })
 
       it('returns false for a string', function() {
         const value = 'foo'
-        expect(up.util.isRegExp(value)).toBe(false)
+        expect(up.internal.isRegExp(value)).toBe(false)
       })
 
       it('returns false for a undefined', function() {
         const value = undefined
-        expect(up.util.isRegExp(value)).toBe(false)
+        expect(up.internal.isRegExp(value)).toBe(false)
       })
     })
 
     require('./util_strings_spec')
 
-//    describe 'up.util.unprefixCamelCase', ->
-//
-//      it 'returns the given key without the given prefixed', ->
-//        result = up.util.unprefixCamelCase('prefixFoo', 'prefix')
-//        expect(result).toEqual('foo')
-//
-//      it 'returns undefined if the given key is not prefixed with the given prefix', ->
-//        result = up.util.unprefixCamelCase('foo', 'prefix')
-//        expect(result).toBeUndefined()
-//
-//      it 'returns undefined if the given prefix is the full given key', ->
-//        result = up.util.unprefixCamelCase('prefix', 'prefix')
-//        expect(result).toBeUndefined()
-
-    describe('up.util.memoizeMethod()', function() {
+    describe('up.internal.memoizeMethod()', function() {
 
       it("caches a function property's return value", function() {
         const spy = jasmine.createSpy('method').and.returnValue('return value')
 
         const obj = { foo: spy }
-        up.util.memoizeMethod(obj, { foo: true })
+        up.internal.memoizeMethod(obj, { foo: true })
 
         expect(obj.foo()).toBe('return value')
         expect(obj.foo()).toBe('return value')
@@ -1465,7 +1365,7 @@ describe('up.util', () => {
           }
         }
 
-        up.util.memoizeMethod(Person.prototype, { getFullName: true })
+        up.internal.memoizeMethod(Person.prototype, { getFullName: true })
 
         const alice = new Person('Alice', 'Anderson')
         const bob = new Person('Bob', 'Bertison')
@@ -1478,7 +1378,7 @@ describe('up.util', () => {
         const spy = jasmine.createSpy('spy')
 
         const obj = { foo(arg) { spy(this, arg) } }
-        up.util.memoizeMethod(obj, { foo: true })
+        up.internal.memoizeMethod(obj, { foo: true })
 
         obj.foo('given arg')
 
@@ -1490,7 +1390,7 @@ describe('up.util', () => {
         const spy = jasmine.createSpy('method').and.throwError(new Error('error message'))
 
         const obj = { foo: spy }
-        up.util.memoizeMethod(obj, { foo: true })
+        up.internal.memoizeMethod(obj, { foo: true })
 
         expect(() => obj.foo()).toThrowError(/error message/)
         expect(() => obj.foo()).toThrowError(/error message/)
@@ -1526,7 +1426,7 @@ describe('up.util', () => {
           foo: fooSpy,
           bar: barSpy
         }
-        up.util.memoizeMethod(obj, { foo: true, bar: true })
+        up.internal.memoizeMethod(obj, { foo: true, bar: true })
 
         expect(obj.foo()).toBe('foo return value')
         expect(obj.foo()).toBe('foo return value')
@@ -1537,49 +1437,6 @@ describe('up.util', () => {
         expect(barSpy.calls.count()).toBe(1)
       })
     })
-
-    // describe('up.util.assignTemp()', function() {
-    //
-    //   it('assigns the given properties to the given object', function() {
-    //     let obj = { a: 1, b: 2, c: 3, d: 4 }
-    //     up.util.assignTemp(obj, { b: 20, c: 30 })
-    //     expect(obj).toEqual({ a: 1, b: 20, c: 30, d: 4 })
-    //   })
-    //
-    //   describe('returned undo function', function() {
-    //     it("restores the object's original properties", function() {
-    //       let obj = { a: 1, b: 2, c: 3, d: 4 }
-    //       let undo = up.util.assignTemp(obj, { b: 20, c: 30 })
-    //       expect(obj).toEqual({ a: 1, b: 20, c: 30, d: 4 })
-    //
-    //       undo()
-    //
-    //       expect(obj).toEqual({ a: 1, b: 2, c: 3, d: 4 })
-    //     })
-    //
-    //     it("only restores properties that were re-assigned", function() {
-    //       let obj = { a: 1, b: 2, c: 3 }
-    //       let undo = up.util.assignTemp(obj, { b: 20 })
-    //       expect(obj).toEqual({ a: 1, b: 20, c: 3 })
-    //
-    //       obj.c = 30
-    //
-    //       undo()
-    //
-    //       expect(obj).toEqual({ a: 1, b: 2, c: 30 })
-    //     })
-    //
-    //     it('deletes properties that were not set before', function() {
-    //       let obj = {}
-    //       let undo = up.util.assignTemp(obj, { a: 1 })
-    //       expect(obj).toHaveKey('a')
-    //
-    //       undo()
-    //       expect(obj).not.toHaveKey('a')
-    //     })
-    //   })
-    //
-    // })
 
     describe('up.util.evalOption()', function() {
 
@@ -1596,12 +1453,12 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.evalAutoOption()', function() {
+    describe('up.internal.evalAutoOption()', function() {
 
       describe('if the first argument is a primitive value', function() {
         it('returns the first argument', function() {
           const autoDefault = 'auto default'
-          expect(up.util.evalAutoOption('foo', autoDefault)).toBe('foo')
+          expect(up.internal.evalAutoOption('foo', autoDefault)).toBe('foo')
         })
       })
 
@@ -1609,12 +1466,12 @@ describe('up.util', () => {
 
         it('returns the second argument if it is a primitive value', function() {
           const autoDefault = 'auto default'
-          expect(up.util.evalAutoOption('auto', autoDefault)).toBe('auto default')
+          expect(up.internal.evalAutoOption('auto', autoDefault)).toBe('auto default')
         })
 
         it('calls the second argument if it is a function, passing the 3rd...nth argument as function arguments', function() {
           const sum = (a, b) => a + b
-          expect(up.util.evalAutoOption('auto', sum, 2, 5)).toBe(7)
+          expect(up.internal.evalAutoOption('auto', sum, 2, 5)).toBe(7)
         })
       })
 
@@ -1623,13 +1480,13 @@ describe('up.util', () => {
         it('calls the first argument', function() {
           const sum = (a, b) => a + b
           const autoDefault = 'auto default'
-          expect(up.util.evalAutoOption(sum, autoDefault, 3, 5)).toBe(8)
+          expect(up.internal.evalAutoOption(sum, autoDefault, 3, 5)).toBe(8)
         })
 
         it('still applies the auto default if the function returns "auto"', function() {
           const fn = () => 'auto'
           const autoSum = (a, b) => a + b
-          expect(up.util.evalAutoOption(fn, autoSum, 3, 5)).toBe(8)
+          expect(up.internal.evalAutoOption(fn, autoSum, 3, 5)).toBe(8)
         })
       })
     })

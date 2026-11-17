@@ -6,7 +6,7 @@ beforeEach(function() {
     toBeExpired(util, customEqualityTesters) {
       return {
         compare(optionsOrRequest) {
-          const request = u.wrapValue(up.Request, optionsOrRequest)
+          const request = up.internal.wrapValue(up.Request, optionsOrRequest)
           const cached = up.cache.get(request)
 
           if (!(cached instanceof up.Request)) {

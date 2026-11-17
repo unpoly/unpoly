@@ -4,7 +4,7 @@ function match(actual, eventType, eventProps = {}) {
   return actual &&
     actual.preventDefault &&
     (actual.type === eventType) &&
-    up.util.objectContains(actual, eventProps)
+    up.internal.objectContains(actual, eventProps)
 }
 
 // As a regular matcher
@@ -30,9 +30,9 @@ jasmine.anyEvent = (eventType, eventProps = {}) => ({
 
   jasmineToString() {
     if (u.isPresent(eventProps)) {
-      return u.sprintf("An event %s with properties %o", eventType, eventProps)
+      return up.internal.sprintf("An event %s with properties %o", eventType, eventProps)
     } else {
-      return u.sprintf("An event %s", eventType)
+      return up.internal.sprintf("An event %s", eventType)
     }
   }
 })

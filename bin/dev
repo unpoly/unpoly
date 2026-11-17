@@ -5,8 +5,8 @@
 //   bin/dev status    report whether one is running
 // All the logic lives in tooling/dev_env.mjs, which is also the only thing that decides
 // whether an environment exists — we just switch on the state it reports.
-import { devEnvState, runDevEnvForeground, stopDevEnv, lastBuildErrors } from '../tooling/dev_env.mjs'
-import { buildFailure } from '../tooling/runner/terminal/formatter.mjs'
+import { devEnvState, runDevEnvForeground, stopDevEnv, lastBuildErrors, lastLintErrors, lastTypeErrors } from '../tooling/dev_env.mjs'
+import { buildFailure, checkErrors } from '../tooling/runner/terminal/formatter.mjs'
 import pc from 'picocolors'
 
 const command = process.argv[2] || 'start'
@@ -59,8 +59,8 @@ if (command === 'start') {
     process.exit(3)
   }
   if (state === 'unidentified') {
-    // Exit 3, not 0: bin/test refuses to run in this state, so `bin/dev status &&
-    // bin/test` must not green-light it.
+    // Exit 3, not 0: bin/specs refuses to run in this state, so `bin/dev status &&
+    // bin/specs` must not green-light it.
     console.log(pc.yellow(`tmp/dev.pid names PID ${pid}, which is alive but cannot be identified.`))
     process.exit(3)
   }
@@ -71,7 +71,12 @@ if (command === 'start') {
     process.stdout.write(buildFailure(errors))
     process.exit(1)
   }
-  console.log(pc.green(`Dev environment is ${where}.`))
+  // Lint and type errors don't make the environment unusable: bin/specs runs the specs anyway.
+  const lint = lastLintErrors()
+  const types = lastTypeErrors()
+  console.log(pc.green(`Dev environment is ${where}${lint || types ? ', but the watcher found errors:' : '.'}`))
+  if (lint) process.stdout.write(checkErrors('Lint errors', lint))
+  if (types) process.stdout.write(checkErrors('Type errors', types))
   process.exit(0)
 } else {
   console.error('Usage: bin/dev [start|stop|status]')

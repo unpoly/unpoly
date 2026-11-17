@@ -1,6 +1,6 @@
 jasmine.Ajax.addCustomParamParser({
   test(xhr) {
-    return up.util.isFormData(xhr.params)
+    return up.internal.isFormData(xhr.params)
   },
 
   parse(params) {

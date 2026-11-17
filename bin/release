@@ -69,18 +69,25 @@ function confirm(message) {
   })
 }
 
+// Removes every build output, so we only publish what the production build writes, never a file
+// that a dev or CI build left in dist/ (their bundles keep comments and source paths).
 function clean() {
-  const distPath = 'dist'
-  if (fs.existsSync(distPath)) {
-    console.log("Cleaning orphaned files...")
-    console.log()
-    globSync('dist/unpoly*{.css,.js}').forEach(filePath => {
-      if (!paths().includes(filePath)) {
-        console.log("Cleaning orphaned file: %o", filePath)
-        fs.unlinkSync(filePath)
-      }
-    })
-    console.log()
+  console.log("Removing previous build outputs...")
+  console.log()
+  globSync('dist/unpoly*{.css,.js,.d.ts,.map,.gz}').forEach(filePath => {
+    fs.unlinkSync(filePath)
+  })
+}
+
+// A running dev environment writes to dist/ too. bin/build stops it, but only after clean(), so a
+// dev rebuild in between could leave its bundles for us to publish. Stop it first.
+async function stopDevEnv() {
+  const { stopDevEnv } = await import('../tooling/dev_env.mjs')
+  const { result, pid } = await stopDevEnv()
+  if (result === 'stopped') {
+    console.log(colors.yellow('Stopped the dev environment, since it writes to dist/ too. Restart it with bin/dev.'))
+  } else if (result === 'wedged') {
+    throw new Error(`The dev environment (PID ${pid}) would not stop. Stop it by hand, then release again.`)
   }
 }
 
@@ -149,24 +156,24 @@ async function publishToNpm() {
   console.log()
 }
 
+// Exactly the files we publish: what the production build writes (but the .gz files, which it
+// only writes to measure), and the package files. No patterns, so a stray file can't slip in, and
+// a missing one fails the copy.
 function paths() {
-  const globs = [
-    'package.json',
-    'dist/unpoly{.js,.js.map,.min.js,.min.js.map}',
-    'dist/unpoly.es6{.js,.js.map,.min.js,.min.js.map}',
-    'dist/unpoly{.css,.css.map,.min.css,.min.css.map}',
-    'dist/unpoly-migrate{.js,.js.map,.min.js,.min.js.map}',
-    'dist/unpoly-bootstrap{3,4,5}{.js,.js.map,.min.js,.min.js.map}',
-    'dist/unpoly-bootstrap{3,4,5}{.css,.css.map,.min.css,.min.css.map}',
-    'dist/README.md',
-    'dist/CHANGELOG.md',
-    'dist/LICENSE'
-  ]
-  return globs.flatMap((file) => globSync(file))
+  const bundles = ['unpoly', 'unpoly.es6', 'unpoly-migrate', 'unpoly-bootstrap3', 'unpoly-bootstrap4', 'unpoly-bootstrap5']
+  const stylesheets = ['unpoly', 'unpoly-bootstrap3', 'unpoly-bootstrap4', 'unpoly-bootstrap5']
+  const files = ['package.json']
+  for (const min of ['', '.min']) {
+    for (const name of bundles) files.push(`dist/${name}${min}.js`, `dist/${name}${min}.js.map`, `dist/${name}${min}.d.ts`)
+    for (const name of stylesheets) files.push(`dist/${name}${min}.css`, `dist/${name}${min}.css.map`)
+  }
+  files.push('dist/README.md', 'dist/CHANGELOG.md', 'dist/LICENSE')
+  return files
 }
 
 async function processRelease() {
   checkChangelog()
+  await stopDevEnv()
   await clean()
   await build()
   await confirmRelease()

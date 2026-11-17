@@ -682,7 +682,7 @@ extendDescribe('up.link', function() {
         })
 
         it('does not show a confirmation dialog if the option is not a present string', async function() {
-          spyOn(up, 'render').and.returnValue(Promise.resolve())
+          const renderSpy = up.render.mock().and.returnValue(Promise.resolve())
           spyOn(window, 'confirm')
           const link = fixture('a[href="/danger"][up-target=".middle"]')
           up.follow(link, { confirm: '' })
@@ -690,7 +690,7 @@ extendDescribe('up.link', function() {
           await wait()
 
           expect(window.confirm).not.toHaveBeenCalled()
-          expect(up.render).toHaveBeenCalled()
+          expect(renderSpy).toHaveBeenCalled()
         })
       })
 

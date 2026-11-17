@@ -57,7 +57,7 @@ extendDescribe('up.form', function() {
         const form = fixture('form#form-id[action="https://external-domain.com/path"][up-submit][method=post]')
         e.affix(form, 'input[name="field-name"][value="field-value"]')
 
-        const loadPage = spyOn(up.network, 'loadPage')
+        const loadPage = up.network.loadPage.mock()
 
         up.submit(form)
 

@@ -3,7 +3,7 @@
 // docs/contributing/trying-out-changes.md for how to drive one.
 //
 // Its own process on its own port, not a route on the spec server — that one is booted by
-// `bin/ci`, and dynamically importing whatever uncommitted files happen to be in pages/ has
+// `bin/specs --ci`, and dynamically importing whatever uncommitted files happen to be in pages/ has
 // no business anywhere near a CI run.
 
 import express from 'express'
@@ -105,7 +105,7 @@ export function startServer(port = serverPort, { waitForBuild = waitForFreshBuil
   })
 }
 
-// Blocks the request while webpack is working, so a page never shows you the previous
+// Blocks the request while the watcher is building, so a page never shows you the previous
 // build. Reuses the runner's build protocol rather than watching dist/ a second way.
 const gateOnBuild = (waitForBuild) => async (req, res, next) => {
   try {

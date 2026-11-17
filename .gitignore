@@ -7,6 +7,7 @@
 /dist/manifest.json
 /dist/*.js
 /dist/*.js.map
+/dist/*.d.ts
 /dist/*.css
 /dist/*.css.map
 /dist/*.tgz

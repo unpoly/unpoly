@@ -95,7 +95,7 @@ extendDescribe('up.fragment', function() {
         up.fragment.config.targetDerivers.unshift('middle-element')
 
         // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-        up.element.isSingleton.mock().and.callFake((element) => element.matches('middle-element'))
+        up.internal.isSingleton.mock().and.callFake((element) => element.matches('middle-element'))
 
         const $container = $fixture('.container')
         $container.affix('before-element').text('old-before')
@@ -224,7 +224,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           const videoBeforeRender = document.querySelector('#video')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -242,7 +242,7 @@ extendDescribe('up.fragment', function() {
           const container = htmlFixture(html)
           document.querySelector('#video')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -261,7 +261,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           const audioBeforeRender = document.querySelector('#audio')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -288,7 +288,7 @@ extendDescribe('up.fragment', function() {
             // This may have two reasons:
             //
             // 1. Rendering from a URL is async, rendering a local string is sync
-            // 2. Rendering from a URL uses DOMParser and fixParserDamage(), rendering from a local string
+            // 2. Rendering from a URL uses DOMParser and revivedClone(), rendering from a local string
             //    creates elements within the current browsing context.
             const promise = up.render({ target: '#player', url: '/video2' })
 
@@ -337,7 +337,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           const scriptBeforeRender = document.querySelector('#script')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involved.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involved.
           up.render('#container', { document: html })
 
           await wait()
@@ -359,7 +359,7 @@ extendDescribe('up.fragment', function() {
 
           expect(window.keepSpy.calls.count()).toBe(1)
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -367,7 +367,7 @@ extendDescribe('up.fragment', function() {
           expect(document.querySelector('#script')).toBe(scriptBeforeRender)
           expect(window.keepSpy.calls.count()).toBe(1)
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html, keep: false })
 
           await wait()
@@ -391,7 +391,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           expect(window.specSpy.calls.count()).toBe(1)
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -436,7 +436,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           const noscriptBeforeRender = document.querySelector('#noscript')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -1068,7 +1068,7 @@ extendDescribe('up.fragment', function() {
       })
 
       it('prints a warning when the [up-keep] element is not targetable, but does not crash the render pass', async function() {
-        spyOn(up, 'warn').and.callThrough()
+        const warnSpy = up.internal.printToWarn.mock().and.callThrough()
 
         let html = (prefix) => `
           <div id="target">
@@ -1086,7 +1086,7 @@ extendDescribe('up.fragment', function() {
         expect('#target [up-keep]').toHaveText('new keepable')
         expect('#target #content').toHaveText('new content')
 
-        expect(up.warn).toHaveBeenCalledWith('[up-keep]', jasmine.stringMatching(/Cannot keep untargetable/i), jasmine.anything())
+        expect(warnSpy).toHaveBeenCalledWith('[up-keep]', jasmine.stringMatching(/Cannot keep untargetable/i), jasmine.anything())
       })
 
       function keepableFixture(html, renderOptions = {}) {
@@ -1343,7 +1343,7 @@ extendDescribe('up.fragment', function() {
         it('ignores a <script nonce> for the comparison', async function() {
           up.script.config.scriptElementPolicy = 'pass'
 
-          spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          up.internal.cspNonce.mock().and.returnValue('page-secret')
 
           let keepable = keepableFixture(`<div id="keepable" up-keep="same-html"><script nonce="page-secret"></script></div>`)
 
@@ -1362,7 +1362,7 @@ extendDescribe('up.fragment', function() {
         it('ignores a callback nonce for the comparison', async function() {
           up.script.config.scriptElementPolicy = 'pass'
 
-          spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          up.internal.cspNonce.mock().and.returnValue('page-secret')
 
           let keepable = keepableFixture(`<input id="keepable" name="foo" up-keep="same-html" up-watch="nonce-page-secret foo()"></input>`)
 
@@ -1381,7 +1381,7 @@ extendDescribe('up.fragment', function() {
         it('ignores multiple callback nonces within the same tag', async function() {
           up.script.config.scriptElementPolicy = 'pass'
 
-          spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          up.internal.cspNonce.mock().and.returnValue('page-secret')
 
           let keepable = keepableFixture(`<a id="keepable" href="/path" up-keep="same-html" up-on-rendered="nonce-page-secret foo()" data-x="x" up-on-finished="nonce-page-secret bar()" data-y="y">text</a>`)
 

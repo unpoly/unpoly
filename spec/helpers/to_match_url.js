@@ -13,12 +13,12 @@ beforeEach(() => {
           if (pass) {
             return {
               pass,
-              message: u.sprintf("Expected %o to not match URL %o", actual, expected)
+              message: up.internal.sprintf("Expected %o to not match URL %o", actual, expected)
             }
           } else {
             return {
               pass,
-              message: u.sprintf("Expected %o to match URL %o", actual, expected)
+              message: up.internal.sprintf("Expected %o to match URL %o", actual, expected)
             }
           }
         }

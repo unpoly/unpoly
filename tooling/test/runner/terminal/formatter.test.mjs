@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { failureBlock, runSummary, groupSummary, mark, buildFailure } from '../../../runner/terminal/formatter.mjs'
+import { failureBlock, runSummary, groupSummary, mark, buildFailure, checkErrors, checksHint } from '../../../runner/terminal/formatter.mjs'
 
 const FAILURE = {
   index: 1,
@@ -72,4 +72,32 @@ test('buildFailure tolerates empty error text', () => {
   let out = buildFailure('')
   assert.match(out, /Build failed/)
   assert.match(out, /no error output captured/)
+})
+
+test('checkErrors says the specs run anyway, and indents the errors', () => {
+  let out = checkErrors('Type errors', 'src/unpoly/link.ts\n  635:14   error  Type \'string\' is not assignable to type \'number\'.  TS2322')
+  assert.match(out, /Type errors \(bin\/specs runs the specs anyway\)/)
+  assert.match(out, /^ {2}src\/unpoly\/link\.ts$/m)
+  assert.match(out, /^ {4}635:14 /m)
+})
+
+test('checksHint counts the lint and type errors in one line', () => {
+  let out = checksHint({
+    lint: { ok: false, errors: 'src/a.ts\n  1:1      error  X  eslint(no-var)' },
+    types: { ok: false, errors: 'src/a.ts\n  1:1      error  X  TS2322\n  2:1      error  Y  TS2322' },
+  })
+  assert.equal(out, 'Watcher: 2 type errors, 1 lint error in src/, run bin/lint and bin/typecheck\n')
+})
+
+test('checksHint names only the script for the kind of error there is', () => {
+  let lint = { ok: false, errors: 'src/a.ts\n  1:1      error  X  eslint(no-var)' }
+  let types = { ok: false, errors: 'src/a.ts\n  1:1      error  X  TS2322' }
+  assert.equal(checksHint({ lint }), 'Watcher: 1 lint error in src/, run bin/lint\n')
+  assert.equal(checksHint({ lint: { ok: true, errors: '' }, types }), 'Watcher: 1 type error in src/, run bin/typecheck\n')
+})
+
+test('checksHint is empty without errors, while checking, and without a status', () => {
+  assert.equal(checksHint({ lint: { ok: true, errors: '' }, types: { state: 'done', ok: true, errors: '' } }), '')
+  assert.equal(checksHint({ lint: { ok: true, errors: '' }, types: { state: 'checking', ok: null, errors: '' } }), '')
+  assert.equal(checksHint(null), '')
 })

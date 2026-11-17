@@ -1,3 +1,6 @@
+const u = up.util
+const e = up.element
+
 extendDescribe('up.fragment', function() {
 
   extendDescribe('JavaScript', function() {
@@ -19,7 +22,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             up.render('.element', { url: '/path2', abort: true })
@@ -27,7 +30,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeAbortError()
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
 
           it('does not abort an earlier request that was made with { abortable: false }', async function() {
@@ -41,7 +44,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             up.render('.element', { url: '/path2', abort: true })
@@ -49,7 +52,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeUndefined()
-            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.internal.queue.allRequests.length).toEqual(2)
           })
 
           it('aborts the request of an existing change if the new change is made from local content', async function() {
@@ -64,7 +67,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             up.render('.element2', { content: 'local content', abort: true })
@@ -72,7 +75,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeAbortError()
-            expect(up.network.queue.allRequests.length).toEqual(0)
+            expect(up.internal.queue.allRequests.length).toEqual(0)
           })
 
           it('aborts an existing request when a preload request gets promoted to the foreground', async function() {
@@ -88,18 +91,18 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             up.link.preload(change2Link)
             await wait()
             expect(change1Error).toBeUndefined()
-            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.internal.queue.allRequests.length).toEqual(2)
 
             up.link.follow(change2Link)
             await wait()
             expect(change1Error).toBeAbortError()
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
 
           it('does not cancel its own pending preload request (bugfix)', async function() {
@@ -117,7 +120,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.follow(changeLink)
@@ -126,7 +129,7 @@ extendDescribe('up.fragment', function() {
 
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
 
           it("aborts an existing change's request that was queued with { abort: false }", async function() {
@@ -140,7 +143,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             up.render('.element', { url: '/path2', abort: true })
@@ -148,7 +151,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeAbortError()
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
         })
 
@@ -157,7 +160,7 @@ extendDescribe('up.fragment', function() {
             fixture('.element')
             const previousRequest = up.request('/baz')
 
-            const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = up.fragment.abort.mock()
 
             up.render('.element', { url: '/path1', abort: 'all' })
 
@@ -175,7 +178,7 @@ extendDescribe('up.fragment', function() {
 
             const previousRequest = up.request('/baz')
 
-            const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = up.fragment.abort.mock()
 
             up.render('.element', { url: '/path1', abort: 'layer', layer: 1 })
 
@@ -193,7 +196,7 @@ extendDescribe('up.fragment', function() {
 
             const previousRequest = up.request('/baz')
 
-            const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = up.fragment.abort.mock()
 
             up.render('.element', { url: '/path1', abort: '.element', layer: 1 })
 
@@ -209,7 +212,7 @@ extendDescribe('up.fragment', function() {
 
             const previousRequest = up.request('/baz')
 
-            const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = up.fragment.abort.mock()
 
             up.render('.element', { url: '/path1', abort: element })
 
@@ -219,13 +222,168 @@ extendDescribe('up.fragment', function() {
           })
         })
 
+        describe('with { abort } option set to a function', function() {
+
+          it('calls the function with each pending up.Request and aborts the requests for which it returns true', async function() {
+            fixture('.element1')
+            fixture('.element2')
+            fixture('.element3')
+
+            let change1Error = undefined
+            let change2Error = undefined
+
+            up.render('.element1', { url: '/path1' }).catch((e) => change1Error = e)
+            up.render('.element2', { url: '/path2' }).catch((e) => change2Error = e)
+            await wait()
+
+            expect(up.internal.queue.allRequests.length).toEqual(2)
+
+            const abortFn = jasmine.createSpy('abort function').and.callFake((request) => request.url === '/path1')
+            up.render('.element3', { url: '/path3', abort: abortFn })
+            await wait()
+
+            expect(abortFn).toHaveBeenCalledWith(jasmine.any(up.Request))
+            let seenURLs = abortFn.calls.allArgs().map(([request]) => request.url)
+            expect(seenURLs).toContain('/path2')
+            expect(seenURLs).not.toContain('/path3')
+            expect(change1Error).toBeAbortError()
+            expect(change1Error.message).toContain('Aborting requests picked by { abort } function')
+            expect(change2Error).toBeUndefined()
+            expect(u.map(up.internal.queue.allRequests, 'url')).toEqual(['/path2', '/path3'])
+          })
+
+          it('keeps a request for which the function returns false', async function() {
+            fixture('.element1')
+            fixture('.element2')
+
+            let change1Error = undefined
+            up.render('.element1', { url: '/path1' }).catch((e) => change1Error = e)
+            await wait()
+
+            up.render('.element2', { url: '/path2', abort: () => false })
+            await wait()
+
+            expect(change1Error).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(2)
+          })
+
+          it('does not abort a request that was made with { abortable: false }', async function() {
+            fixture('.element1')
+            fixture('.element2')
+
+            let change1Error = undefined
+            up.render('.element1', { url: '/path1', abortable: false }).catch((e) => change1Error = e)
+            await wait()
+
+            up.render('.element2', { url: '/path2', abort: () => true })
+            await wait()
+
+            expect(change1Error).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(2)
+          })
+
+          it('emits up:request:aborted, but no up:fragment:aborted', async function() {
+            fixture('.element1')
+            fixture('.element2')
+
+            up.render('.element1', { url: '/path1' }).catch(u.noop)
+            await wait()
+
+            const requestAbortedListener = jasmine.createSpy('up:request:aborted listener')
+            up.on('up:request:aborted', requestAbortedListener)
+            const fragmentAbortedListener = jasmine.createSpy('up:fragment:aborted listener')
+            up.on('up:fragment:aborted', fragmentAbortedListener)
+
+            up.render('.element2', { url: '/path2', abort: (request) => request.url === '/path1' })
+            await wait()
+
+            expect(requestAbortedListener).toHaveBeenCalledWith(jasmine.objectContaining({ request: jasmine.objectContaining({ url: '/path1' }) }), jasmine.anything(), jasmine.anything())
+            expect(fragmentAbortedListener).not.toHaveBeenCalled()
+          })
+
+          it("never aborts the render pass's own request", async function() {
+            fixture('.element')
+
+            let changeError = undefined
+            up.render('.element', { url: '/path', abort: () => true }).catch((e) => changeError = e)
+            await wait()
+
+            expect(changeError).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+          })
+
+          it("never aborts a preload request that the render pass reuses", async function() {
+            fixture('.element')
+            const link = fixture('a[href="/path"][up-target=".element"]')
+
+            let preloadError = undefined
+            up.link.preload(link).catch((e) => preloadError = e)
+            await wait()
+
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+
+            let followError = undefined
+            up.follow(link, { abort: () => true }).catch((e) => followError = e)
+            await wait()
+
+            expect(preloadError).toBeUndefined()
+            expect(followError).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+          })
+
+          it('never aborts a cached request that the render pass reuses', async function() {
+            fixture('.element')
+
+            let cachedRequestError = undefined
+            up.request('/path', { cache: true }).catch((e) => cachedRequestError = e)
+            await wait()
+
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+
+            let changeError = undefined
+            up.render('.element', { url: '/path', cache: true, abort: () => true }).catch((e) => changeError = e)
+            await wait()
+
+            expect(cachedRequestError).toBeUndefined()
+            expect(changeError).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+          })
+
+          it('aborts a validation request in an overlay when a form submission into the root layer picks it', async function() {
+            fixture('.root-target', { text: 'old root content' })
+            const layers = makeLayers(2)
+            const form = layers[1].affix('form#form[action="/submit"][method="post"][up-target=".root-target"][up-layer="root"]')
+            const field = e.affix(form, 'input[name=email]')
+
+            up.on('up:form:submit', (event) => {
+              event.renderOptions.abort = (request) => event.form.contains(request.origin)
+            })
+
+            let validateError = undefined
+            up.validate(field).catch((e) => validateError = e)
+            await wait()
+
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+            expect(validateError).toBeUndefined()
+
+            let submitError = undefined
+            up.submit(form).catch((e) => submitError = e)
+            await wait()
+
+            expect(validateError).toBeAbortError()
+            expect(submitError).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests[0].url).toMatchURL('/submit')
+          })
+        })
+
         describe('with { abort: "target" }', function() {
 
           it('aborts existing requests targeting the same element', async function() {
             fixture('.element')
             const change1Promise = up.render('.element', { url: '/path1' })
 
-            expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.internal.queue.allRequests.length).toBe(1)
 
             up.render('.element', { url: '/path2', abort: 'target' })
 
@@ -236,7 +394,7 @@ extendDescribe('up.fragment', function() {
             fixture('.element')
             const change1Promise = up.render('.element', { url: '/path1' })
 
-            expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.internal.queue.allRequests.length).toBe(1)
 
             up.render('.element', { url: '/path1', abort: 'target' })
 
@@ -249,11 +407,11 @@ extendDescribe('up.fragment', function() {
             const change1Promise = up.render('.element', { url: '/path2', abort: 'target' })
             await wait()
 
-            expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.internal.queue.allRequests.length).toBe(1)
             const change2Promise = up.render('.element', { url: '/path1', abort: false })
             await wait()
 
-            expect(up.network.queue.allRequests.length).toBe(2)
+            expect(up.internal.queue.allRequests.length).toBe(2)
 
             jasmine.respondWith({ request: 0, responseText: '<div class="element">v2</div>' })
 
@@ -269,11 +427,11 @@ extendDescribe('up.fragment', function() {
             const change1Promise = up.render({ target: '.element', failTarget: '.fail-element', url: '/path2', abort: 'target' })
             await wait()
 
-            expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.internal.queue.allRequests.length).toBe(1)
             const change2Promise = up.render('.fail-element', { url: '/path1', abort: false })
             await wait()
 
-            expect(up.network.queue.allRequests.length).toBe(2)
+            expect(up.internal.queue.allRequests.length).toBe(2)
 
             jasmine.respondWith({ request: 0, responseText: '<div class="fail-element">v2</div>', status: 500 })
 
@@ -290,7 +448,7 @@ extendDescribe('up.fragment', function() {
             fixture('.sibling')
             const change2Promise = up.render('.sibling', { url: '/path2' })
 
-            expect(up.network.queue.allRequests.length).toBe(2)
+            expect(up.internal.queue.allRequests.length).toBe(2)
 
             up.render('.element', { content: 'new content', abort: 'target' })
 
@@ -401,7 +559,7 @@ extendDescribe('up.fragment', function() {
             fixture('.parent .child')
             const change1Promise = up.render('.child', { url: '/path1' })
 
-            expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.internal.queue.allRequests.length).toBe(1)
 
             up.render('.parent', { url: '/path2', abort: 'target' })
 
@@ -412,7 +570,7 @@ extendDescribe('up.fragment', function() {
             fixture('.parent .child')
             const parentChangePromise = up.render('.parent', { url: '/path1' })
 
-            expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.internal.queue.allRequests.length).toBe(1)
 
             up.render('.child', { url: '/path2', abort: 'target' })
 
@@ -426,14 +584,14 @@ extendDescribe('up.fragment', function() {
             const preloadPromise = up.link.preload(link)
             await wait()
 
-            expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.internal.queue.allRequests.length).toBe(1)
 
             const followPromise = up.link.follow(link)
             await wait()
 
             expect((await promiseState(preloadPromise)).state).toBe('pending')
             expect((await promiseState(followPromise)).state).toBe('pending')
-            expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.internal.queue.allRequests.length).toBe(1)
           })
 
           it('aborts an earlier pass that reuses a preload request, but keeps loading the preload request', async function() {
@@ -507,7 +665,7 @@ extendDescribe('up.fragment', function() {
               const change1Promise = up.render('.element', { url: '/path1' })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(1)
+              expect(up.internal.queue.allRequests.length).toBe(1)
 
               let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
               up.on('up:fragment:aborted', abortedListener)
@@ -528,7 +686,7 @@ extendDescribe('up.fragment', function() {
               const change1Promise = up.render('.element', { url: '/path1' })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(1)
+              expect(up.internal.queue.allRequests.length).toBe(1)
 
               let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
               up.on('up:fragment:aborted', abortedListener)
@@ -564,7 +722,7 @@ extendDescribe('up.fragment', function() {
               const change1Promise = up.render('.element', { url: '/path1' })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(1)
+              expect(up.internal.queue.allRequests.length).toBe(1)
 
               let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
               up.on('up:fragment:aborted', abortedListener)
@@ -633,7 +791,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             up.render('.element', { url: '/path2', abort: false })
@@ -641,7 +799,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeUndefined()
-            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.internal.queue.allRequests.length).toEqual(2)
           })
 
           it('does not abort requests targeting the same subtree once our response is received and swapped in', async function() {
@@ -653,13 +811,13 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
 
             up.render('.element', { url: '/path2', abort: false })
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.internal.queue.allRequests.length).toEqual(2)
             expect(change1Error).toBeUndefined()
 
             jasmine.respondWithSelector('.element', { text: 'text from /path2' })
@@ -668,7 +826,7 @@ extendDescribe('up.fragment', function() {
 
             expect('.element').toHaveText('text from /path2')
             expect(change1Error).toBeUndefined()
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
 
           describe('up:fragment:aborted event', function() {
@@ -678,7 +836,7 @@ extendDescribe('up.fragment', function() {
               up.render('.element', { url: '/path1' })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toEqual(1)
+              expect(up.internal.queue.allRequests.length).toEqual(1)
 
               let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
               up.on('up:fragment:aborted', abortedListener)
@@ -687,7 +845,7 @@ extendDescribe('up.fragment', function() {
               up.render('.element', { url: '/path2', abort: false })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toEqual(2)
+              expect(up.internal.queue.allRequests.length).toEqual(2)
               expect(abortedListener).not.toHaveBeenCalled()
             })
 

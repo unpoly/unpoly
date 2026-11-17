@@ -34,14 +34,14 @@ function compare(container, expectedText, visibleOnly = false) {
   if (u.isString(expectedText)) {
     expectedText = normalizeText(expectedText)
     result.pass &&= (actualText === expectedText)
-  } else if (u.isRegExp(expectedText)) {
+  } else if (up.internal.isRegExp(expectedText)) {
     result.pass &&= (expectedText.test(actualText))
   }
 
   if (result.pass) {
-    result.message = u.sprintf('Expected element %o to not have text "%s"', element, actualText)
+    result.message = up.internal.sprintf('Expected element %o to not have text "%s"', element, actualText)
   } else {
-    result.message = u.sprintf('Expected element %o to have text "%s", but its text was "%s"', element, expectedText, actualText)
+    result.message = up.internal.sprintf('Expected element %o to have text "%s", but its text was "%s"', element, expectedText, actualText)
   }
 
   return result

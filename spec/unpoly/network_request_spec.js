@@ -225,6 +225,17 @@ extendDescribe('up.network', function() {
           expect(request.originMode).toEqual('drawer')
         })
 
+        it('leaves the layer undefined when a { layer } name matches no layer', async function() {
+          expect(up.layer.isRoot()).toBe(true)
+
+          const request = up.request({ url: '/foo', layer: 'overlay' })
+          await wait()
+
+          expect(request.layer).toBeUndefined()
+          expect(request.mode).toBeUndefined()
+          expect('X-Up-Mode' in jasmine.lastRequest().requestHeaders).toBe(false)
+        })
+
         it('assumes no layer if neither { layer, failLayer, origin } are given', function() {
           makeLayers([
             { mode: 'root', context: { rootKey: 'rootValue' } },
@@ -345,6 +356,15 @@ extendDescribe('up.network', function() {
           it('does not use a timeout when up.network.config.timeout is set to undefined', async function() {
             up.network.config.timeout = undefined
             const request = up.request('/url')
+            await wait()
+
+            expect(request.timeout).toBeMissing()
+            expect(jasmine.lastRequest().timeout).toBeFalsy()
+          })
+
+          it('does not use a timeout when passed { timeout: null }', async function() {
+            up.network.config.timeout = 456789
+            const request = up.request('/url', { timeout: null })
             await wait()
 
             expect(request.timeout).toBeMissing()
@@ -1435,6 +1455,15 @@ extendDescribe('up.network', function() {
               expect(request.data()['_method']).toBeUndefined()
             })
           })
+        })
+
+        it('does not wrap the method when passed { wrapMethod: null }', async function() {
+          up.request({ url: '/foo', method: 'PUT', wrapMethod: null })
+          await wait()
+
+          const request = jasmine.lastRequest()
+          expect(request.method).toEqual('PUT')
+          expect(request.data()['_method']).toBeUndefined()
         })
 
         it('does not wrap the method when up.network.config.wrapMethod is false', async function() {

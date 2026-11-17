@@ -4,11 +4,12 @@
 every change are what let you alter code you don't fully understand and find out immediately whether you broke it.
 Treat a green suite as permission to be bold, and a red one as the cheapest possible bug report.
 
-"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each namespace file `foo.js` has a
+"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each namespace file `foo.ts` has a
 spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 
 <!-- toc -->
 - [Running tests](#running-tests)
+  - [Before committing](#before-committing)
   - [Reading a failure](#reading-a-failure)
   - [Debugging a failure](#debugging-a-failure)
   - [Options and filters](#options-and-filters)
@@ -34,6 +35,8 @@ spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
   - [Asserting on promises](#asserting-on-promises)
   - [When async/await isn't enough](#when-asyncawait-isnt-enough)
 - [Matchers](#matchers)
+- [Reaching internal functions](#reaching-internal-functions)
+- [Spying on Unpoly functions](#spying-on-unpoly-functions)
 - [Specs with special conditions](#specs-with-special-conditions)
 - [Trying something by hand](#trying-something-by-hand)
 <!-- /toc -->
@@ -44,12 +47,36 @@ spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 Unpoly's specs run in a real browser, driven from your terminal:
 
 ```
-bin/test --spec="up.form HTML [up-switch]"   # only specs whose full name contains this
-bin/test --all                               # the whole suite (~9 minutes)
+bin/specs --spec="up.form HTML [up-switch]"  # only specs whose full name contains this
+bin/specs --all                              # the whole suite (~9 minutes)
 ```
 
-`bin/test` needs a running [dev environment](dev-environment.md) and starts one in
+`bin/specs` needs a running [dev environment](dev-environment.md) and starts one in
 the background if none is running.
+
+### Before committing
+
+| You changed | Before committing, run |
+|---|---|
+| anything | `bin/lint`, `bin/typecheck` |
+| `src/` or `spec/` | `bin/specs` with the specs likely to be affected (find them with [`bin/find-spec`](#finding-the-spec-for-a-feature)) |
+| `tooling/` or `bin/` | `bin/tooling-tests` |
+| a contributing guide | `bin/update-contributing-tocs` |
+
+CI runs the full suite and the variants; read its result after pushing.
+
+While you edit, the dev watcher reports lint and type errors in `src/` after each save, in
+`tmp/dev.log` and `bin/dev status`. Fix the ones in your own code before running specs; specs
+are slow. `bin/specs` runs anyway, and prints one line after the results when the watcher knows
+of errors:
+
+```
+Watcher: 2 type errors, 1 lint error in src/, run bin/lint and bin/typecheck
+```
+
+`bin/typecheck` only checks `src/`; `bin/lint` also covers `spec/`, `tooling/` and the doc files.
+`bin/tooling-tests` also checks the order in which modules are evaluated, so run it when you
+change the imports between modules.
 
 ### Reading a failure
 
@@ -65,7 +92,7 @@ F1) up.Params → #toQuery → returns the query section for the given object
     Expected 'foo-key=foo%20value&bar-key=bar%20value' to equal 'foo-key=foo+value&bar-key=bar+value'.
 
   Stacktrace:
-    spec/unpoly/classes/params_spec.js:35 in anonymous function
+    spec/unpoly/form/params_spec.js:35 in anonymous function
 
   Debug in browser:
     http://localhost:4000/specs?spec=up.Params%20%23toQuery%20returns%20the%20query%20section
@@ -121,13 +148,13 @@ never compiled, an overlay still on the stack, a fragment inserted in the wrong 
 (overlaps run once):
 
 ```
-bin/test --spec="up.form HTML [up-switch]" --spec="up.Params"
-bin/test --file=spec/unpoly/form_switch_spec.js --file=spec/unpoly/radio_spec.js:88
+bin/specs --spec="up.form HTML [up-switch]" --spec="up.Params"
+bin/specs --file=spec/unpoly/form_switch_spec.js --file=spec/unpoly/radio_spec.js:88
 ```
 
 `--minify` runs the specs against the bundle we actually ship, where every `_`-prefixed
 member is renamed (see [private members](code-style.md#private-members-and-the-minified-build)).
-`bin/test` builds the minified bundles itself when they are missing or stale.
+`bin/specs` builds the minified bundles itself when they are missing or stale.
 
 A failed spec exits non-zero. The spec runner itself is documented in
 [`tooling/README.md`](../../tooling/README.md).
@@ -135,7 +162,7 @@ A failed spec exits non-zero. The spec runner itself is documented in
 
 ## The full test suite is slow
 
-`bin/test --all` takes about **nine minutes**, which is why an unfiltered run needs the flag.
+`bin/specs --all` takes about **nine minutes**, which is why an unfiltered run needs the flag.
 Don't run it after every edit.
 
 **Find the specs that cover your change and run only those.** `bin/find-spec` searches
@@ -167,6 +194,8 @@ exercises, like `--csp=…` for CSP work or `--migrate` for a new polyfill.
 
 ## If you are an agent
 
+**Fix the watcher's lint and type errors in your code before you run specs** (see [above](#before-committing)).
+
 **Filter before you run** (see [above](#the-full-test-suite-is-slow)).
 
 **Give the command a generous timeout**, set from how long the run actually takes. A
@@ -192,9 +221,9 @@ See [Compatibility](compatibility.md#browser-support) for which browsers CI exer
 
 ## How specs are organized
 
-A source file's specs live at the mirrored path. `src/unpoly/form.js` is tested by
-`spec/unpoly/form_spec.js`, and `src/unpoly/classes/params.js` by
-`spec/unpoly/classes/params_spec.js`. Where a group of specs grew too large to live
+A source file's specs live at the mirrored path. `src/unpoly/form.ts` is tested by
+`spec/unpoly/form_spec.js`, and `src/unpoly/form/params.ts` by
+`spec/unpoly/form/params_spec.js`. Where a group of specs grew too large to live
 there, it moved into a sibling file that shares the namespace's prefix — see
 [extracted spec files](#extracted-spec-files) below.
 
@@ -240,9 +269,9 @@ Nested group names concatenate with spaces to form a spec's *full name*, which i
 `--spec` matches against. So the example above can be narrowed at any depth:
 
 ```
-bin/test --spec="up.link"                       # the whole namespace
-bin/test --spec="up.link HTML"                  # only the attribute specs
-bin/test --spec="up.follow()"                   # one function
+bin/specs --spec="up.link"                      # the whole namespace
+bin/specs --spec="up.link HTML"                 # only the attribute specs
+bin/specs --spec="up.follow()"                  # one function
 ```
 
 Full names never change when specs move between files.
@@ -271,8 +300,8 @@ after the quotes; run it with the matching option (`--migrate`).
 Or let `--file` work out the filter from a location:
 
 ```
-bin/test --file=spec/unpoly/classes/params_spec.js        # what that file declares
-bin/test --file=spec/unpoly/classes/params_spec.js:29     # just the group on line 29
+bin/specs --file=spec/unpoly/form/params_spec.js       # what that file declares
+bin/specs --file=spec/unpoly/form/params_spec.js:29    # just the group on line 29
 ```
 
 On an [extracted file](#extracted-spec-files), `--file` runs just the blocks that file
@@ -322,7 +351,7 @@ extendDescribe('up.fragment', function() {
 So the split is invisible from the outside: one suite per namespace, unchanged full names,
 and `beforeEach` hooks from the namespace file still apply.
 
-`bin/self-test` fails if nothing loads an extracted file, or if its `extendDescribe()` chain
+`bin/tooling-tests` fails if nothing loads an extracted file, or if its `extendDescribe()` chain
 doesn't match where it is required. `bin/lint` names any alias you need to redeclare.
 
 
@@ -399,7 +428,7 @@ This keeps the two versions visibly identical apart from the one thing that diff
 ### Fixtures are not compiled
 
 `htmlFixtureList()` inserts elements without running [compilers](https://unpoly.com/api/up.compiler).
-When the feature under test is implemented as a compiler or with `up.attribute()`, call
+When the feature under test is implemented as a compiler (including `registerAttrCompiler()`), call
 `up.hello()` yourself:
 
 ```js
@@ -583,10 +612,49 @@ The ones you'll use constantly:
 Jasmine's `jasmine.createSpy()` and `spyOn()` carry a lot of the weight in function specs.
 
 
+## Reaching internal functions
+
+`window.up` only holds public API. The specs are a separate bundle and can't import from
+`src/unpoly`, so an internal function or class that a spec needs is published flat on
+`up.internal`, under its export name:
+
+```js
+up.internal.sprintf('%o', value)
+const doc = new up.internal.ResponseDoc({ document: html })
+```
+
+When a spec needs an internal that isn't there yet, add it to `src/unpoly/internal.ts`
+(see [Code organization](code-organization.md#namespace-pattern)).
+
+
+## Spying on Unpoly functions
+
+`spyOn(up.form, 'submit')` replaces the function on `window.up`, and
+`spyOn(up.internal, 'trackFields')` replaces it on `up.internal`. Such a spy only catches calls
+that go through the global: your spec's own calls, and calls from user code. Unpoly's own
+modules [import](code-organization.md#namespace-pattern) the function instead, so their calls
+pass the spy without a sound. A `toHaveBeenCalled()` expectation then fails for no visible
+reason. Worse, a `not.toHaveBeenCalled()` expectation passes no matter what Unpoly does, so
+the spec can never fail. Before you trust a negative expectation, check that the same spy
+records a call in the positive case.
+
+To intercept Unpoly's internal callers, the function must be wrapped in `mockable()` where it is
+defined. Then call `.mock()` on it, which returns a regular Jasmine spy:
+
+```js
+const trackFieldsSpy = up.internal.trackFields.mock().and.callThrough()
+up.internal.isSingleton.mock().and.callFake((element) => element.matches('fake-body'))
+```
+
+If the function isn't mockable yet, wrap it in `mockable()` rather than reaching for a
+workaround. `mockable()` costs nothing outside the test suite: it returns the function
+unchanged when Jasmine isn't loaded.
+
+
 ## Specs with special conditions
 
-**Browser capabilities.** `describeFallback()` runs a group with an `up.browser`
-capability stubbed out, so you can cover the degraded path:
+**Browser capabilities.** `describeFallback()` runs a group with a capability check like
+`up.internal.canPushState()` stubbed out, so you can cover the degraded path:
 
 ```js
 describeFallback('canPushState', function() { ... })

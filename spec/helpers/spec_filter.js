@@ -2,7 +2,7 @@
 //
 // Two reasons to own it:
 //
-// (1) It is repeatable. `bin/test --spec=a --spec=b`, and every --file, resolve to a list
+// (1) It is repeatable. `bin/specs --spec=a --spec=b`, and every --file, resolve to a list
 //     of full names, and the run is their union. Jasmine's filter takes one string and
 //     escapes "|", so an alternation cannot express this.
 //

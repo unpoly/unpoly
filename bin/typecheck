@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+// Type-check src/ with TypeScript 7: the loose check (tsconfig.json), the core check
+// (tsconfig.core.json) and the API probe. tooling/build/typecheck.mjs explains them.
+//
+// Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
+// The build doesn't use TypeScript at all: esbuild strips the types. The dev watcher runs the same
+// checks after every change in src/ or a tsconfig, and `bin/specs` says how many errors it found.
+import { runTypecheck } from '../tooling/build/typecheck.mjs'
+
+process.exit(await runTypecheck({ extraArgs: process.argv.slice(2) }))

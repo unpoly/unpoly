@@ -435,7 +435,7 @@ extendDescribe('up.fragment', function() {
         describe('async compilers', function() {
 
           it('does not delay the up.render() promise', async function() {
-            let compilerDeferred = u.newDeferred()
+            let compilerDeferred = up.internal.newDeferred()
             up.compiler('.element', async function() {
               await compilerDeferred
             })
@@ -451,7 +451,7 @@ extendDescribe('up.fragment', function() {
           })
 
           it('delays the up.render().finished promise', async function() {
-            let compilerDeferred = u.newDeferred()
+            let compilerDeferred = up.internal.newDeferred()
             up.compiler('.element', async function() {
               await compilerDeferred
             })
@@ -473,7 +473,7 @@ extendDescribe('up.fragment', function() {
           })
 
           it('delays the up.render().finished promise when opening a new overlay', async function() {
-            let compilerDeferred = u.newDeferred()
+            let compilerDeferred = up.internal.newDeferred()
             up.compiler('.element', async function() {
               await compilerDeferred
             })

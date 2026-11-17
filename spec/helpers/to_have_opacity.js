@@ -22,14 +22,14 @@ function doCompare({ elementOrTarget, expectedOpacity, tolerance = 0.0, property
   if (!element) {
     return {
       pass: false,
-      message: u.sprintf("Expected %o to have %s %o, but the element could not be found", elementOrTarget, propertyLabel, expectedOpacity)
+      message: up.internal.sprintf("Expected %o to have %s %o, but the element could not be found", elementOrTarget, propertyLabel, expectedOpacity)
     }
   }
 
   if (!element.isConnected) {
     return {
       pass: false,
-      message: u.sprintf("Expected %o to have %s %o, but element was detached", elementOrTarget, propertyLabel, expectedOpacity)
+      message: up.internal.sprintf("Expected %o to have %s %o, but element was detached", elementOrTarget, propertyLabel, expectedOpacity)
     }
   }
 
@@ -39,12 +39,12 @@ function doCompare({ elementOrTarget, expectedOpacity, tolerance = 0.0, property
   if (withinTolerance) {
     return {
       pass: true,
-      message: u.sprintf("Expected %o to not have %s %o, but it was %o (tolerance ±%o)", elementOrTarget, propertyLabel, expectedOpacity, actualOpacity, tolerance)
+      message: up.internal.sprintf("Expected %o to not have %s %o, but it was %o (tolerance ±%o)", elementOrTarget, propertyLabel, expectedOpacity, actualOpacity, tolerance)
     }
   } else {
     return {
       pass: false,
-      message: u.sprintf("Expected %o to have %s %o, but it was %o (tolerance ±%o)", elementOrTarget, propertyLabel, expectedOpacity, actualOpacity, tolerance)
+      message: up.internal.sprintf("Expected %o to have %s %o, but it was %o (tolerance ±%o)", elementOrTarget, propertyLabel, expectedOpacity, actualOpacity, tolerance)
     }
   }
 }

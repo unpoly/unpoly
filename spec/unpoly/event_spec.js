@@ -353,7 +353,7 @@ describe('up.event', function() {
 
         it('does not call the listener before Unpoly has booted', function() {
           let isBeforeBoot = true
-          spyOnProperty(up.framework, 'beforeBoot', 'get').and.callFake(() => isBeforeBoot)
+          up.internal.isBeforeBoot.mock().and.callFake(() => isBeforeBoot)
 
           const element = fixture('.element')
           const listener = jasmine.createSpy('listener')
@@ -370,7 +370,7 @@ describe('up.event', function() {
 
         it('does call the listener before Unpoly has booted if it was registered with { beforeBoot: true }', function() {
           let isBeforeBoot = true
-          spyOnProperty(up.framework, 'beforeBoot', 'get').and.callFake(() => isBeforeBoot)
+          up.internal.isBeforeBoot.mock().and.callFake(() => isBeforeBoot)
 
           const element = fixture('.element')
           const listener = jasmine.createSpy('listener')
@@ -500,7 +500,7 @@ describe('up.event', function() {
         })
 
         it('does not parse an [up-data] attribute if the listener function only takes one argument', async function() {
-          const parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
+          const parseDataSpy = up.script.data.mock().and.returnValue({})
 
           const $child = $fixture('.child')
           up.on('click', '.child', function(event) {}) // no-op
@@ -512,7 +512,7 @@ describe('up.event', function() {
         })
 
         it('does not parse an [up-data] attribute if the listener function only takes two arguments', async function() {
-          const parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
+          const parseDataSpy = up.script.data.mock().and.returnValue({})
 
           const $child = $fixture('.child')
           up.on('click', '.child', function(event, $element) {}) // no-op
@@ -658,6 +658,12 @@ describe('up.event', function() {
           expect(clickSpy.calls.count()).toEqual(1)
         })
 
+        it('throws an error when the callback was never registered through up.$on()', function() {
+          up.migrate.warn.mock()
+          const unbind = () => up.$off('click', '.child', function() {})
+          expect(unbind).toThrowError(/never registered with up\.\$on\(\)/)
+        })
+
       })
     }
 
@@ -773,21 +779,34 @@ describe('up.event', function() {
 
         expect(emittedEvent.target).toEqual(element)
       })
+
+      it('triggers an event on the element of a layer passed as the first argument, with that layer as the current layer', async function() {
+        const overlay = await up.layer.open({ mode: 'modal' })
+        const listener = jasmine.createSpy('event listener').and.callFake((event) => [event.type, event.target, up.layer.current])
+        overlay.element.addEventListener('my:event', listener)
+        up.layer.root.element.addEventListener('my:event', listener)
+
+        up.emit(overlay, 'my:event')
+        expect(listener.calls.mostRecent().returnValue).toEqual(['my:event', overlay.element, overlay])
+
+        up.emit(up.layer.root, 'my:event')
+        expect(listener.calls.mostRecent().returnValue).toEqual(['my:event', up.layer.root.element, up.layer.root])
+      })
     })
 
-    describe('up.event.assertEmitted()', function() {
+    describe('up.internal.assertEmitted()', function() {
 
       it('emits the event', function() {
         const eventListener = jasmine.createSpy('event listener')
         up.on('my:event', eventListener)
-        up.event.assertEmitted('my:event', { key: 'value' })
+        up.internal.assertEmitted('my:event', { key: 'value' })
         expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining({ key: 'value' }), jasmine.anything(), jasmine.anything())
       })
 
       it('throws an AbortError if any listener calls event.preventDefault()', function() {
         const eventListener = (event) => event.preventDefault()
         up.on('my:event', eventListener)
-        const fn = () => up.event.assertEmitted('my:event', { key: 'value' })
+        const fn = () => up.internal.assertEmitted('my:event', { key: 'value' })
         expect(fn).toAbort()
       })
     })
@@ -967,6 +986,16 @@ describe('up.event', function() {
 
       it('returns true if meta is pressed during the click', function() {
         const event = Trigger.createMouseEvent('mousedown', { metaKey: 2 })
+        expect(up.event.isModified(event)).toBe(true)
+      })
+
+      it('returns true if alt is pressed during the click', function() {
+        const event = Trigger.createMouseEvent('mousedown', { altKey: true })
+        expect(up.event.isModified(event)).toBe(true)
+      })
+
+      it('returns true if the middle mouse button is used', function() {
+        const event = Trigger.createMouseEvent('mousedown', { button: 1 })
         expect(up.event.isModified(event)).toBe(true)
       })
     })

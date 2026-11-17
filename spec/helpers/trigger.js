@@ -2,11 +2,11 @@ const u = up.util
 const e = up.element
 const $ = jQuery
 
-// Specs cannot dispatch trusted events. We keep the original check for clicks made by
+// Specs cannot dispatch trusted events. We repeat the original check (!event.isTrusted) for clicks made by
 // element.click(), but treat events from Trigger like clicks from a real mouse.
+// A .mock() fake cannot call the original, so keep this in sync with isSyntheticClick() in src/unpoly/event.js.
 beforeEach(function() {
-  const isSyntheticClick = up.event.isSyntheticClick
-  spyOn(up.event, 'isSyntheticClick').and.callFake((event) => isSyntheticClick(event) && !event.simulatesUser)
+  up.internal.isSyntheticClick.mock().and.callFake((event) => !event.isTrusted && !event.simulatesUser)
 })
 
 window.Trigger = (function() {
@@ -114,7 +114,7 @@ window.Trigger = (function() {
 
   function submit(form, options) {
     form = e.get(form)
-    options = u.options(options, {
+    options = up.internal.newOptions(options, {
         cancelable: true,
         bubbles: true
       }
@@ -125,7 +125,7 @@ window.Trigger = (function() {
 
   function change(field, options) {
     field = e.get(field)
-    options = u.options(options, {
+    options = up.internal.newOptions(options, {
         cancelable: false,
         bubbles: true
       }
@@ -136,7 +136,7 @@ window.Trigger = (function() {
 
   function input(field, options) {
     field = e.get(field)
-    options = u.options(options, {
+    options = up.internal.newOptions(options, {
         cancelable: false,
         bubbles: true
       }
@@ -205,19 +205,19 @@ window.Trigger = (function() {
   }
 
   function keydown(element, key, options) {
-    options = u.options(options, { key })
+    options = up.internal.newOptions(options, { key })
     const event = createKeyboardEvent('keydown', options)
     return element.dispatchEvent(event)
   }
 
   function keypress(element, key, options) {
-    options = u.options(options, { key })
+    options = up.internal.newOptions(options, { key })
     const event = createKeyboardEvent('keypress', options)
     element.dispatchEvent(event)
   }
 
   function keyup(element, key, options) {
-    options = u.options(options, { key })
+    options = up.internal.newOptions(options, { key })
     const event = createKeyboardEvent('keyup', options)
     return element.dispatchEvent(event)
   }
@@ -290,7 +290,7 @@ window.Trigger = (function() {
   // Can't use the new Event constructor in IE11 because computer.
   // http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
   function createSimpleEvent(type, options) {
-    options = u.options(options, {
+    options = up.internal.newOptions(options, {
         cancelable: true,
         bubbles: true
       }
@@ -368,7 +368,7 @@ window.Trigger = (function() {
 
   function createKeyboardEvent(type, options) {
     let event
-    options = u.options(options, {
+    options = up.internal.newOptions(options, {
         cancelable: true,
         bubbles: true,
         view: window,

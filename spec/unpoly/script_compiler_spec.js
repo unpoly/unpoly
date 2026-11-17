@@ -105,7 +105,7 @@ extendDescribe('up.script', function() {
           })
 
           it('avoids setting .up-can-clean while the async callback is running (nice-to-have, no public API commitment)', async function() {
-            const blocker = u.newDeferred()
+            const blocker = up.internal.newDeferred()
             up.compiler('.element', async function(_element) {
               await blocker
               return up.util.noop // destructor will be returned after the element is destroyed
@@ -122,7 +122,7 @@ extendDescribe('up.script', function() {
           })
 
           it('runs a destructor if the element was destroyed before the async callback finished', async function() {
-            const blocker = u.newDeferred()
+            const blocker = up.internal.newDeferred()
             const destructor = jasmine.createSpy('destructor')
             up.compiler('.element', async function(_element) {
               await blocker
@@ -213,7 +213,7 @@ extendDescribe('up.script', function() {
             const warnSpy = up.migrate.warn.mock()
             up.compiler('.foo', { keep: true }, function() {})
             helloFixture('.foo')
-            expect(u.sprintf(...warnSpy.calls.argsFor(0))).toContain('found in compiler for ".foo"')
+            expect(up.internal.sprintf(...warnSpy.calls.argsFor(0))).toContain('found in compiler for ".foo"')
           })
         })
       }
@@ -254,9 +254,9 @@ extendDescribe('up.script', function() {
         describe('with { priority }', function() {
 
           it('prints a message explaining that the compiler will only run for future fragments', function() {
-            spyOn(up, 'puts').and.callThrough()
+            const putsSpy = up.internal.printToStandard.mock().and.callThrough()
             up.compiler('.foo', { priority: 10 }, u.noop)
-            expect(up.puts).toHaveBeenCalledWith(
+            expect(putsSpy).toHaveBeenCalledWith(
               jasmine.anything(),
               jasmine.stringContaining('will run for future fragments'),
               jasmine.anything()
@@ -279,9 +279,9 @@ extendDescribe('up.script', function() {
         describe('without { priority }', function() {
 
           it('prints no message explaining when the compiler will run', function() {
-            spyOn(up, 'puts').and.callThrough()
+            const putsSpy = up.internal.printToStandard.mock().and.callThrough()
             up.compiler('.foo', u.noop)
-            expect(up.puts).not.toHaveBeenCalledWith(jasmine.anything(), jasmine.stringContaining('will run'))
+            expect(putsSpy).not.toHaveBeenCalledWith(jasmine.anything(), jasmine.stringContaining('will run'))
           })
 
           it('compiles current fragments', function() {

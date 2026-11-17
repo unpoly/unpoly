@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Build the Unpoly bundles with webpack.
+// Build the Unpoly bundles with esbuild (bundling, TypeScript) and Terser (minifying).
 //   bin/build                          production bundles, gzipped
 //   bin/build --config=development     dev bundles (what bin/dev's watcher builds)
 //   bin/build --config=ci              minified bundles for CI

@@ -51,6 +51,7 @@ like `up.follow()`, `up.submit()` or `up.render()`. In your HTML, set an `[up-ab
 | `'target'` | Aborts earlier requests targeting fragments within *your* targeted fragments. This is the default. |
 | `'layer'` | Aborts all requests targeting a fragment on the same [layer](/api/up.layer) as you. |
 | `'all'` | Aborts all requests targeting any fragment on any layer. |
+| A function (JavaScript only) | Aborts the requests on any layer for which `fn(request)` returns `true`. This emits no `up:fragment:aborted` event, since the function picks requests, not fragments. |
 | `false` | Aborts nothing. |
 
 With `{ abort: false }`, two requests targeting the same fragment are rendered in the order of their responses.
@@ -103,8 +104,9 @@ only requests aborted by screen region let components [react to being aborted](#
 Reacting to aborted requests {#reacting}
 ----------------------------
 
-When requests are aborted through `{ abort }` or `up.fragment.abort()`, an `up:fragment:aborted` event
-is emitted on the element for which requests were aborted, and an `up:request:aborted` event for each aborted request.
+When requests are aborted through `{ abort }` or `up.fragment.abort()`, an `up:request:aborted` event is emitted for
+each aborted request. Unless `{ abort }` is a function, an `up:fragment:aborted` event is also emitted on the element
+for which requests were aborted.
 
 A rendering function whose request was aborted rejects with an `up.Aborted` error.
 Its `{ name }` is `'AbortError'`, like the `DOMException` that `fetch()` and other native APIs reject with when aborted.

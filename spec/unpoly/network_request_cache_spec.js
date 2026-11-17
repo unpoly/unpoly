@@ -949,15 +949,15 @@ extendDescribe('up.network', function() {
               up.request({ url: '/cache-me', cache: true })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(1)
+              expect(up.internal.queue.allRequests.length).toBe(1)
               jasmine.respondWith('response text')
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(0)
+              expect(up.internal.queue.allRequests.length).toBe(0)
               up.request({ url: '/cache-me', cache: false })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(1)
+              expect(up.internal.queue.allRequests.length).toBe(1)
               up.request({ url: '/cache-me', cache: true }).then((cachedResponse) => response = cachedResponse)
               await wait()
 
@@ -971,15 +971,15 @@ extendDescribe('up.network', function() {
               up.request({ url: '/cache-me', cache: true })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(1)
+              expect(up.internal.queue.allRequests.length).toBe(1)
               jasmine.respondWith('old response text')
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(0)
+              expect(up.internal.queue.allRequests.length).toBe(0)
               up.request({ url: '/cache-me', cache: false })
               await wait()
 
-              expect(up.network.queue.allRequests.length).toBe(1)
+              expect(up.internal.queue.allRequests.length).toBe(1)
               jasmine.respondWith('new response text')
               await wait()
 

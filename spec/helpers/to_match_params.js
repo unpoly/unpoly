@@ -5,8 +5,8 @@ beforeEach(function() {
     toMatchParams(util, customEqualityTesters) {
       return {
         compare(actual, expected) {
-          actual = u.wrapValue(up.Params, actual)
-          expected = u.wrapValue(up.Params, expected)
+          actual = up.internal.wrapValue(up.Params, actual)
+          expected = up.internal.wrapValue(up.Params, expected)
 
           return { pass: u.isEqual(actual, expected) }
         }

@@ -18,7 +18,8 @@
   Whether to [abort existing requests](/learn/aborting-requests) before rendering.
 
 @param [up-abortable='true']
-  Whether this request may be aborted by other requests targeting the same fragments or layer.
+  Whether this request may be aborted by another render pass's [`[up-abort]`](/api/up-follow#up-abort) or
+  [`{ abort }`](/api/up.render#options.abort) option, or by `up.fragment.abort()`.
 
   See [aborting requests](/learn/aborting-requests) for details.
 

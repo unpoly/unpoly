@@ -11,14 +11,14 @@ describe('up.layer', function() {
 
     require('./layer_open_spec')
 
-    describe('up.layer.build()', function() {
+    describe('up.internal.buildLayer()', function() {
 
       it('merges all applicable layer configs', function() {
         up.layer.config.any.class = 'from-any'
         up.layer.config.overlay.align = 'from-overlay'
         up.layer.config.drawer.size = 'from-drawer'
 
-        const layer = up.layer.build({ mode: 'drawer' })
+        const layer = up.internal.buildLayer({ mode: 'drawer' })
 
         expect(layer.class).toBe('from-any')
         expect(layer.align).toBe('from-overlay')
@@ -31,7 +31,7 @@ describe('up.layer', function() {
         up.layer.config.overlay.class = 'from-overlay'
         up.layer.config.drawer.class = 'from-drawer'
 
-        const layer = up.layer.build({ mode: 'drawer' })
+        const layer = up.internal.buildLayer({ mode: 'drawer' })
 
         expect(layer.align).toBe('from-overlay')
         expect(layer.class).toBe('from-drawer')
@@ -41,7 +41,7 @@ describe('up.layer', function() {
         it('prints a deprecation warning if the user configured { historyVisible } (which is now { history })', function() {
           up.layer.config.overlay.historyVisible = false
           const warnSpy = up.migrate.warn.mock()
-          up.layer.build({ mode: 'drawer' })
+          up.internal.buildLayer({ mode: 'drawer' })
           expect(warnSpy).toHaveBeenCalled()
         })
 
@@ -50,7 +50,7 @@ describe('up.layer', function() {
           up.layer.config.modal.dismissable = 'button key'
           const warnSpy = up.migrate.warn.mock()
 
-          const layer = up.layer.build({ mode: 'modal' })
+          const layer = up.internal.buildLayer({ mode: 'modal' })
 
           expect(layer.dismissLabel).toBe('Close')
           expect(layer.dismissible).toMatchList(['button', 'key'])
@@ -59,17 +59,17 @@ describe('up.layer', function() {
         })
 
         it('only prints a warning once when the user configured a deprecated key again after opening a layer', function() {
-          const errorSpy = spyOn(up.log, 'error')
+          const errorSpy = up.internal.printToError.mock()
 
           up.layer.config.modal.closable = false
-          up.layer.build({ mode: 'modal' })
+          up.internal.buildLayer({ mode: 'modal' })
           up.layer.config.modal.closable = false
-          up.layer.build({ mode: 'modal' })
+          up.internal.buildLayer({ mode: 'modal' })
 
           expect(up.layer.config.modal).not.toHaveKey('closable')
           expect(up.layer.config.modal.dismissible).toBe(false)
           expect(errorSpy.calls.count()).toBe(1)
-          expect(u.sprintf(...errorSpy.calls.argsFor(0).slice(1))).toBe('Property { closable } has been renamed to { dismissible } (found in up.layer.config.modal)')
+          expect(up.internal.sprintf(...errorSpy.calls.argsFor(0).slice(1))).toBe('Property { closable } has been renamed to { dismissible } (found in up.layer.config.modal)')
         })
 
         describe('when Unpoly boots', function() {
@@ -99,7 +99,7 @@ describe('up.layer', function() {
       })
     })
 
-    // There are more specs for up.Layer.Overlay#accept()
+    // There are more specs for Overlay#accept()
 
     describe('up.layer.dismiss()', function() {
       it('closes the current layer', function() {
@@ -109,7 +109,7 @@ describe('up.layer', function() {
       })
     })
 
-    // There are more specs for up.Layer.Overlay#dismiss()
+    // There are more specs for Overlay#dismiss()
 
     describe('up.layer.dismissOverlays()', function() {
 
@@ -273,30 +273,30 @@ describe('up.layer', function() {
       })
     })
 
-    describe('up.layer.attachedCount', function() {
+    describe('attachedCount of the layer stack', function() {
 
       it('counts the open layers', function() {
         makeLayers(3)
 
-        expect(up.layer.attachedCount).toBe(3)
+        expect(up.layer.root.stack.attachedCount).toBe(3)
       })
 
       it('counts a closed overlay until its element is removed after its exit animation', async function() {
         // A real close animation keeps the closed overlay's element in the DOM.
         const overlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 300 })
         await wait()
-        expect(up.layer.attachedCount).toBe(2)
+        expect(up.layer.root.stack.attachedCount).toBe(2)
 
         overlay.dismiss()
 
         expect(overlay.element).toHaveClass('up-destroying')
         expect(up.layer.count).toBe(1)
-        expect(up.layer.attachedCount).toBe(2)
+        expect(up.layer.root.stack.attachedCount).toBe(2)
 
         await wait(400)
 
         expect(overlay.element).toBeDetached()
-        expect(up.layer.attachedCount).toBe(1)
+        expect(up.layer.root.stack.attachedCount).toBe(1)
       })
     })
 
@@ -646,13 +646,13 @@ describe('up.layer', function() {
       })
     })
 
-    describe('up.layer.normalizeOptions()', function() {
+    describe('up.internal.normalizeLayerOptions()', function() {
 
       describe('snapshotting the current layer', function() {
 
         it('saves the current layer instance to { baseLayer }', function() {
           const options = {}
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ baseLayer: up.layer.current }))
         })
 
@@ -660,13 +660,13 @@ describe('up.layer', function() {
           makeLayers(3)
 
           const options = { baseLayer: up.layer.get(1) }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ baseLayer: up.layer.get(1) }))
         })
 
         it('resolves a given { baseLayer } string to an up.Layer object', function() {
           const options = { baseLayer: 'root' }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ baseLayer: up.layer.root }))
         })
 
@@ -677,7 +677,7 @@ describe('up.layer', function() {
 
           const options = { origin }
 
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ baseLayer: up.layer.root }))
         })
       })
@@ -686,7 +686,7 @@ describe('up.layer', function() {
       describe('for a { layer } string', function() {
         it('does not resolve the { layer } string, since that might resolve to multiple laters layer', function() {
           const options = { layer: 'any' }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ layer: 'any' }))
         })
       })
@@ -695,13 +695,13 @@ describe('up.layer', function() {
 
         it('transfers the mode to the { mode } option and sets { layer: "new" }', function() {
           const options = { layer: 'new cover' }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ layer: 'new', mode: 'cover' }))
         })
 
         it('does not change { layer: "root" }', function() {
           const options = { layer: 'root' }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ layer: 'root' }))
         })
       })
@@ -710,7 +710,7 @@ describe('up.layer', function() {
         describe('for an mode passed as the legacy { flavor } option', function() {
           it('transfers the mode to the { mode } option', function() {
             const options = { flavor: 'cover' }
-            up.layer.normalizeOptions(options)
+            up.internal.normalizeLayerOptions(options)
             expect(options).toEqual(jasmine.objectContaining({ layer: 'new', mode: 'cover' }))
           })
         })
@@ -719,7 +719,7 @@ describe('up.layer', function() {
           it('renames the option and names the layer options in the warning', function() {
             const warnSpy = up.migrate.warn.mock()
             const options = { layer: 'new', closable: false }
-            up.layer.normalizeOptions(options)
+            up.internal.normalizeLayerOptions(options)
             expect(options).toEqual(jasmine.objectContaining({ dismissible: false }))
             expect(options).not.toHaveKey('closable')
             expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'closable', 'dismissible', 'layer options')
@@ -729,8 +729,8 @@ describe('up.layer', function() {
             const warnSpy = up.migrate.warn.mock()
             const origin = fixture('a#origin[href="/path"]')
             const options = { layer: 'new', origin, closable: false }
-            up.layer.normalizeOptions(options)
-            expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property { closable } has been renamed to { dismissible } (found in layer options for <a id="origin" href="/path">)')
+            up.internal.normalizeLayerOptions(options)
+            expect(up.internal.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property { closable } has been renamed to { dismissible } (found in layer options for <a id="origin" href="/path">)')
           })
         })
 
@@ -739,7 +739,7 @@ describe('up.layer', function() {
             it("sets { layer: 'overlay' }", function() {
               const warnSpy = up.migrate.warn.mock()
               const options = { layer: removedLayer }
-              up.layer.normalizeOptions(options)
+              up.internal.normalizeLayerOptions(options)
               expect(options).toEqual(jasmine.objectContaining({ layer: 'overlay' }))
               expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining("Did you mean { layer: 'overlay' }?"))
             })
@@ -750,7 +750,7 @@ describe('up.layer', function() {
           describe(`for the removed { ${removedOption} } option`, function() {
             it('prints a warning', function() {
               const warnSpy = up.migrate.warn.mock()
-              up.layer.normalizeOptions({ layer: 'new', [removedOption]: 'value' })
+              up.internal.normalizeLayerOptions({ layer: 'new', [removedOption]: 'value' })
               expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining(`{ ${removedOption} } has been removed`))
             })
           })
@@ -759,7 +759,7 @@ describe('up.layer', function() {
         describe('for the legacy { layer: "page" } option', function() {
           it('sets { layer: "root" }', function() {
             const options = { layer: 'page' }
-            up.layer.normalizeOptions(options)
+            up.internal.normalizeLayerOptions(options)
             expect(options).toEqual(jasmine.objectContaining({ layer: 'root' }))
           })
         })
@@ -767,7 +767,7 @@ describe('up.layer', function() {
         describe('when only { mode } is passed, but no { layer }', function() {
           it('sets { layer: "new" }', function() {
             const options = { mode: 'drawer' }
-            up.layer.normalizeOptions(options)
+            up.internal.normalizeLayerOptions(options)
             expect(options).toEqual(jasmine.objectContaining({ layer: 'new', mode: 'drawer' }))
           })
         })
@@ -778,14 +778,14 @@ describe('up.layer', function() {
         it('sets a default mode from up.layer.config.mode', function() {
           up.layer.config.mode = 'popup'
           const options = { layer: 'new' }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ layer: 'new', mode: 'popup' }))
         })
 
         it('does not change an existing { mode } option', function() {
           up.layer.config.mode = 'popup'
           const options = { layer: 'new', mode: 'cover' }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ layer: 'new', mode: 'cover' }))
         })
       })
@@ -795,7 +795,7 @@ describe('up.layer', function() {
           makeLayers(3)
 
           const options = { layer: 'swap' }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ baseLayer: up.layer.get(1), layer: 'new' }))
         })
       })
@@ -805,7 +805,7 @@ describe('up.layer', function() {
           makeLayers(3)
 
           const options = { target: up.layer.get(1).element }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ layer: up.layer.get(1) }))
         })
       })
@@ -816,7 +816,7 @@ describe('up.layer', function() {
           makeLayers(3)
 
           const options = { origin: up.layer.get(1).element }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ origin: up.layer.get(1).element, layer: 'origin' }))
         })
 
@@ -824,7 +824,7 @@ describe('up.layer', function() {
           makeLayers(2)
 
           const options = { layer: 'root', origin: up.layer.get(1).element }
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ origin: up.layer.get(1).element, layer: 'root' }))
         })
       })
@@ -832,7 +832,7 @@ describe('up.layer', function() {
       describe('if no layer-related option is given', function() {
         it('sets { layer: "current" }', function() {
           const options = {}
-          up.layer.normalizeOptions(options)
+          up.internal.normalizeLayerOptions(options)
           expect(options).toEqual(jasmine.objectContaining({ layer: 'current' }))
         })
       })
@@ -1366,7 +1366,7 @@ describe('up.layer', function() {
           it('runs an [up-on-accepted] callback first, then reloads', async function() {
             htmlFixtureList('<div class="list" up-source="/list">old list</div>')
             const [_link, overlay] = await openOverlay(`up-on-accepted="nonce-specs-nonce closeCallbackSpy()" up-on-accepted-reload=".list"`)
-            const reloadSpy = spyOn(up, 'reload').and.returnValue(Promise.resolve(new up.RenderResult()))
+            const reloadSpy = up.reload.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
 
             overlay.accept()
             await wait()
@@ -1473,7 +1473,7 @@ describe('up.layer', function() {
           it('runs an [up-on-dismissed] callback first, then reloads', async function() {
             htmlFixtureList('<div class="list" up-source="/list">old list</div>')
             const [_link, overlay] = await openOverlay(`up-on-dismissed="nonce-specs-nonce closeCallbackSpy()" up-on-dismissed-reload=".list"`)
-            const reloadSpy = spyOn(up, 'reload').and.returnValue(Promise.resolve(new up.RenderResult()))
+            const reloadSpy = up.reload.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
 
             overlay.dismiss()
             await wait()
@@ -1501,6 +1501,48 @@ describe('up.layer', function() {
           up.layer.dismiss('dismissal value')
 
           expect(window.closeCallbackSpy).toHaveBeenCalledWith('dismissal value')
+        })
+
+      })
+
+      describe('[up-accept-fragment]', function() {
+
+        it('ignores an empty value when the overlay opens and updates', async function() {
+          const [link] = htmlFixtureList('<a href="/overlay" up-layer="new" up-target="#content" up-accept-fragment="">label</a>')
+
+          Trigger.clickSequence(link)
+          await wait()
+          jasmine.respondWithSelector('#content', { text: 'overlay text' })
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('overlay text')
+
+          await up.render({ fragment: '<div id="content">updated text</div>' })
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('updated text')
+        })
+
+      })
+
+      describe('[up-dismiss-fragment]', function() {
+
+        it('ignores an empty value when the overlay opens and updates', async function() {
+          const [link] = htmlFixtureList('<a href="/overlay" up-layer="new" up-target="#content" up-dismiss-fragment="">label</a>')
+
+          Trigger.clickSequence(link)
+          await wait()
+          jasmine.respondWithSelector('#content', { text: 'overlay text' })
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('overlay text')
+
+          await up.render({ fragment: '<div id="content">updated text</div>' })
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('updated text')
         })
 
       })
@@ -1730,7 +1772,7 @@ describe('up.layer', function() {
           it('shows a confirm message before accepting the overlay', function() {
             const [root, overlay] = makeLayers(2)
             const link = overlay.affix('a[up-accept][up-confirm="Are you sure?"]')
-            const confirmSpy = spyOn(up.browser, 'assertConfirmed')
+            const confirmSpy = up.internal.assertConfirmed.mock()
 
             Trigger.clickSequence(link)
 
@@ -1740,7 +1782,7 @@ describe('up.layer', function() {
 
           it('does not accept the overlay or follow the link if the message is not confirmed', function() {
             const [root, overlay] = makeLayers(2)
-            const confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake(function(options) {
+            const confirmSpy = up.internal.assertConfirmed.mock().and.callFake(function(options) {
               if (options.confirm) {
                 throw new up.Aborted('User aborted')
               }
@@ -1931,7 +1973,7 @@ describe('up.layer', function() {
             const [root, overlay] = makeLayers(2)
             const form = overlay.affix('form[up-accept][up-confirm="Are you sure?"]')
             const submitButton = e.affix(form, 'input[type=submit]')
-            const confirmSpy = spyOn(up.browser, 'assertConfirmed')
+            const confirmSpy = up.internal.assertConfirmed.mock()
 
             Trigger.clickSequence(submitButton)
 
@@ -1941,7 +1983,7 @@ describe('up.layer', function() {
 
           it('does not accept the overlay or submit the form if the message is not confirmed', function() {
             const [root, overlay] = makeLayers(2)
-            const confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake(function(options) {
+            const confirmSpy = up.internal.assertConfirmed.mock().and.callFake(function(options) {
               if (options.confirm) {
                 throw new up.Aborted('User aborted')
               }

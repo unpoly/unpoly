@@ -1,0 +1,83 @@
+import type { UpEvent } from '../event.js'
+import type { RenderOptions } from '../fragment.js'
+
+/**
+The `up:link:follow` event.
+*/
+export interface LinkFollowEvent extends UpEvent {
+  target: Element
+  renderOptions: RenderOptions
+}
+
+/**
+The `up:link:preload` event.
+*/
+export interface LinkPreloadEvent extends UpEvent {
+  target: Element
+  renderOptions: RenderOptions
+}
+
+// It also has the properties that forkEventAsUpClick() copies from the original event.
+// A keyboard event has no { clientX, clientY, button }, so they're missing when Enter or Space activates an element.
+/**
+The `up:click` event.
+*/
+export interface ClickEvent extends UpEvent {
+  target: Element
+  originalEvent: MouseEvent | KeyboardEvent
+  clientX?: number
+  clientY?: number
+  button?: number
+  altKey: boolean
+  ctrlKey: boolean
+  metaKey: boolean
+  shiftKey: boolean
+}
+
+/**
+The `up:deferred:load` event.
+*/
+export interface DeferredLoadEvent extends UpEvent {
+  target: Element
+  renderOptions: RenderOptions
+}
+
+/**
+The settings in `up.link.config`, described in its doc comment.
+*/
+export interface LinkConfig {
+  followSelectors: string[]
+  noFollowSelectors: string[]
+  instantSelectors: string[]
+  noInstantSelectors: string[]
+  preloadSelectors: string[]
+  noPreloadSelectors: string[]
+  clickableSelectors: string[]
+  noClickableSelectors: string[]
+  preloadDelay: number
+}
+
+/**
+Preloads a link or loads a deferred placeholder, once its condition is met (like `'hover'` or `'reveal'`).
+A `LinkFollowIntent` passes render options with an `{ onRequestKnown }` callback, so it can abort
+the request when the user moves away.
+@internal
+*/
+export type FollowCallback = (options?: RenderOptions) => void
+
+/**
+A link expanded with `[up-expand]` remembers the area it expanded to, and the area remembers the link.
+@internal
+*/
+export interface ExpandedElement extends HTMLElement {
+  upExpandedPair?: [area: HTMLElement, link: HTMLElement]
+}
+
+declare global {
+  interface GlobalEventHandlersEventMap {
+    'up:click': ClickEvent
+    'up:deferred:load': DeferredLoadEvent
+    'up:link:follow': LinkFollowEvent
+    'up:link:preload': LinkPreloadEvent
+  }
+}

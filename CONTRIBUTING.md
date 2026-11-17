@@ -21,7 +21,7 @@ Run `bin/outline <guide>` to see a guide's sections with line ranges.
 
 > Tests don't run against `src/` directly, but against a transpiled
 > build in `dist/`.\
-> The `bin/dev` tool boots a build watcher, a test server and the documentation site.\
+> The `bin/dev` tool boots a build watcher (it lints and checks types after every change), a test server and the docs site.\
 > Everything they print lands in `tmp/dev.log`, however the environment was started.
 
 [Read the dev environment guide](docs/contributing/dev-environment.md) before trying out your changes,
@@ -53,9 +53,9 @@ feature, or before reviewing someone else's.
 
 ### [🗂️ Code organization](docs/contributing/code-organization.md)
 
-> Where files live, why Unpoly is a `window.up` global, which namespace owns which topic,
-> how we structure namespaces internally, and how to find tests for a given file.
-> Implementation plans for larger changes go in `docs/plans/`, named after their subject.
+> Where files live, why Unpoly is a `window.up` global, which namespace owns which topic, how
+> namespaces are structured, where their types live, how modules import each other, and how to
+> find tests for a given file. Implementation plans for larger changes go in `docs/plans/`.
 
 [Read the code organization guide](docs/contributing/code-organization.md) before
 adding or moving code.
@@ -65,10 +65,10 @@ adding or moving code.
 
 > Any change must be tested. Tests ("specs") are written in Jasmine.
 > They always run in a real browser, but can be driven from the terminal
-> using `bin/test`. The network is always mocked. We have patterns to wait for
-> async code. The full suite takes ~9 minutes, so find the relevant groups with `bin/find-spec`,
-> run only those (not whole namespaces, which take minutes too), and leave the minified, ES6, CSP
-> and migrate variants to CI.
+> using `bin/specs`. The network is always mocked. We have patterns to wait for
+> async code. Run `bin/typecheck` and `bin/lint` first, which take a second each. The full suite
+> takes ~9 minutes, so find the relevant groups with `bin/find-spec`, run only those (not whole
+> namespaces, which take minutes too), and leave the minified, ES6, CSP and migrate variants to CI.
 
 [Read the full testing guide](docs/contributing/testing.md) before writing or changing a spec.
 Many old specs use deprecated patterns, so don't copy a neighbour.
@@ -77,8 +77,9 @@ Many old specs use deprecated patterns, so don't copy a neighbour.
 ### [📖 Documentation](docs/contributing/documentation.md)
 
 > All public API must be documented thoroughly.
-> API references live in `/*- ... */` doc comments beside the code they describe,
-> written in a superset of JSDoc with custom directives like `@selector`.
+> API references live in Markdown doc files beside the code they describe (`fragment.md`
+> for `fragment.ts`), one entry per symbol, written in a superset of JSDoc with custom
+> directives like `@selector`.
 > Additionally, holistic guides in `src/unpoly/pages` show how to tie multiple features
 > together for common use cases. A sibling repo (`../unpoly-site`) parses and serves all of it.
 
@@ -88,12 +89,13 @@ changing documentation. The directive set is large and you won't guess it.
 
 ### [👗 Code style](docs/contributing/code-style.md)
 
-> No types, no dependencies, no jQuery.
+> How we write TypeScript types and name exports. No dependencies, no jQuery.
 > Byte count is a real constraint that sometimes
 > justifies unconventional code.
-> You can run ESLint with `bin/lint`.
+> Check types with `bin/typecheck` (the build doesn't) and lint with `bin/lint`.
 
-[Skim the code style guide](docs/contributing/code-style.md) before showing your code to someone else.
+[Read the code style guide](docs/contributing/code-style.md) before writing TypeScript, and skim it
+before showing your code to someone else.
 
 
 ### [✉️ Commit conventions](docs/contributing/commit-conventions.md)
@@ -113,7 +115,7 @@ commit.
 > Control flow moves through numerous functions and objects.
 
 [Read the rendering deep-dive](docs/contributing/rendering.md) before touching
-`up.render()` or files in `src/unpoly/classes/change/`.
+`up.render()` or files in `src/unpoly/fragment/rendering/`.
 
 
 ### [🔍 Selector lookup deep-dive](docs/contributing/selector-lookup.md)

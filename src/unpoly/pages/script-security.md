@@ -68,7 +68,7 @@ You can configure a stricter behavior with `up.script.config.evalCallbackPolicy`
 
 ### Running callbacks with a strict CSP {#callback-with-strict-csp}
 
-When your CSP doesn't allow `unsafe-eval`, callbacks like `[up-on-loaded]` will fail with an `up.Blocked` error like this:
+When your CSP doesn't allow `unsafe-eval`, callbacks like `[up-on-loaded]` will fail with an [`up.Blocked`](/api/up.Blocked) error like this:
 
 ```text
 Uncaught up.Blocked: call to Function() blocked by CSP

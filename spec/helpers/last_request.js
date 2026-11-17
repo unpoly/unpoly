@@ -2,7 +2,7 @@ const u = up.util
 const e = up.element
 
 jasmine.lastRequest = function() {
-  return jasmine.Ajax.requests.mostRecent() || up.fail('There is no last request')
+  return jasmine.Ajax.requests.mostRecent() || up.internal.fail('There is no last request')
 }
 
 jasmine.respondWith = function(...args) {

@@ -193,6 +193,7 @@ up.radio.startPolling(element, { interval: 10000 }) // mark: up.radio.startPolli
 ```
 
 The options object may contain any option from `[up-poll]`, like `{ url }` or `{ ifLayer }`.
+To see the options Unpoly parses from an element's attributes, pass it to `up.radio.pollOptions()`.
 
 To stop, pass the element to `up.radio.stopPolling()`:
 

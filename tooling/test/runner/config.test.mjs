@@ -47,7 +47,7 @@ test('distFilenames reflect es6 and minify', () => {
 })
 
 test('a bare argument is an error, not a silently ignored filter', () => {
-  // `bin/test up.form` used to run the entire suite, because non-flag tokens were
+  // `bin/specs up.form` used to run the entire suite, because non-flag tokens were
   // dropped — hostile to exactly the person reaching for --spec.
   assert.throws(() => Config.fromArgv(['up.form']), /Unexpected argument: up\.form/)
   // and it suggests the flag the user meant

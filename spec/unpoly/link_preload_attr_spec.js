@@ -732,7 +732,7 @@ extendDescribe('up.link', function() {
         describe('when the initial page was loaded with a POST request', function() {
 
           beforeEach(function() {
-            spyOn(up.protocol, 'initialRequestMethod').and.returnValue('POST')
+            up.internal.initialRequestMethod.mock().and.returnValue('POST')
             up.link.config.preloadDelay = 0
           })
 

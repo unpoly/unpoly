@@ -7,7 +7,7 @@ Code blocks below are diffs, where `...` marks code left out.
 - [Our example feature](#our-example-feature)
 - [Before you start](#before-you-start)
 - [Where the code goes](#where-the-code-goes)
-- [1. The JavaScript function](#1-the-javascript-function)
+- [1. The function](#1-the-function)
 - [2. The HTML attribute](#2-the-html-attribute)
 - [3. Documentation](#3-documentation)
 - [Opening a pull request](#opening-a-pull-request)
@@ -24,8 +24,8 @@ That pairing is deliberate. Unpoly offers [layered APIs](philosophy.md#layered-a
 a single HTML attribute for the common case, and a JavaScript function for custom integrations.
 Most features you add will require both.
 
-We build it in three passes (the JavaScript function, then the HTML attribute, then
-the documentation) and commit after each.
+We build it in three passes (the function, then the HTML attribute, then the
+documentation) and commit after each.
 
 
 ## Before you start
@@ -49,19 +49,22 @@ git checkout -b up-trim
 ## Where the code goes
 
 Every feature belongs to exactly one [namespace](code-organization.md#responsibilities).
-Forms are the topic of `up.form`, so we work in two files:
+Forms are the topic of `up.form`, so we work in these files:
 
-- `src/unpoly/form.js` for the implementation
+- `src/unpoly/form.ts` for the implementation, which is TypeScript
+- `src/unpoly/fragment/types.ts` for the type of a new option (`up.submit()` takes render options)
 - `spec/unpoly/form_spec.js` for the specs — except the `[up-submit]` specs, which grew
   large enough to live in a sibling file, `spec/unpoly/form_submit_attr_spec.js`
+- `src/unpoly/form.md` for the documentation
 
-Every namespace file `foo.js` has a spec `foo_spec.js`, and a feature with a lot of specs may have
-one of its own. `bin/find-spec "[up-submit]"` tells you which file to open; see
+Every namespace file `foo.ts` has a spec `foo_spec.js` and its docs in `foo.md`, and most keep
+their types in `foo/types.ts`. A feature with a lot of specs may have a spec file of its own.
+`bin/find-spec "[up-submit]"` tells you which file to open; see
 [testing](testing.md#finding-the-spec-for-a-feature) and
 [code organization](code-organization.md#directory-structure).
 
 
-## 1. The JavaScript function
+## 1. The function
 
 Start with the spec. `form_spec.js` keeps its JavaScript API and its HTML API in separate
 example groups, so a function spec goes under `JavaScript`:
@@ -99,41 +102,54 @@ Run only this example. The [`--spec` filter](testing.md#running-tests) matches a
 part of an example's full name:
 
 ```
-bin/test --spec="up.form.trim()"
+bin/specs --spec="up.form.trim()"
 ```
 
 Watch it fail. A failure proves that our test actually covers something.
 
-Now the implementation. `up.form` follows the
-[namespace pattern](code-organization.md#namespace-pattern): an IIFE that returns
-its public symbols. Add the function inside it, and list it in the returned object:
+Now the implementation. `form.ts` follows the
+[namespace pattern](code-organization.md#namespace-pattern): an ES module that exports its
+functions, plus an `api` object with the ones that become public. Add an exported function,
+and list it in `api.form`:
 
 ```diff
- up.form = (function() {
-   ...
- 
-+  function trim(form) {
-+    for (let field of findFields(form)) {
-+      let { value } = field
-+      if (u.isString(value)) {
-+        field.value = value.trim()
-+      }
++export function trim(form: Element): void {
++  for (let field of findFields(form)) {
++    let { value } = field
++    if (u.isString(value)) {
++      field.value = value.trim()
 +    }
 +  }
++}
++
+ ...
  
-   ...
- 
-   return {
+ export const api = {
+   form: {
      ...
+     group: findGroup,
 +    trim,
-   }
- })()
+   },
+   ...
+ }
 ```
 
-Only the symbols in that returned object become public API, so listing `trim` there is
-what publishes `up.form.trim()`.
+The function declares the types of its parameters and its return value, as every named
+function does (see [Code style](code-style.md#writing-types)). `u` is `up.util`, which
+`form.ts` already imports as `import * as u from './util.js'`.
 
-Run the spec again and watch it pass.
+Exporting `trim` lets other modules import it. Only the `api` object reaches `window.up`, so
+listing `trim` there is what publishes `up.form.trim()`.
+
+Before the specs, run the type check and the linter (see [what to run when](testing.md#before-committing)).
+Both take a second or two, while even a single spec takes about fifteen:
+
+```
+bin/typecheck
+bin/lint
+```
+
+Both print nothing when all is well. Then run the spec again and watch it pass.
 
 Commit, [prefixing your message with the namespace](commit-conventions.md) in square brackets:
 
@@ -197,39 +213,60 @@ its effect. This effectively waits for one macrotask, by which all promises (or 
 Run the spec and watch it fail:
 
 ```
-bin/test --spec="up-trim"
+bin/specs --spec="up-trim"
 ```
 
 Attribute values for a form submission are parsed in `up.form.submitOptions()`:
 
 ```diff
-   function submitOptions(form, options, parserOptions) {
-     ...
-     let parser = new up.OptionsParser(form, options, parserOptions)
+ export function submitOptions(form: any, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions {
+   ...
+   let parser = new OptionsParser(form, options, parserOptions)
  
-+    parser.boolean('trim')
-+    if (options.trim) trim(form)
++  parser.boolean('trim')
++  if (options.trim) trim(form)
 +
-     parser.include(destinationOptions)
-     ...
-     return options
-   }
+   parser.include(destinationOptions)
+   ...
+   return options
+ }
 ```
 
 `parser.boolean('trim')` reads an `[up-trim]` attribute from the form and sets
 `options.trim` (unless already defined). When the option is set, we trim form fields before `destinationOptions()` serializes
 the fields into `options.params`.
 
+`bin/typecheck` doesn't accept this yet:
+
+```
+src/unpoly/form.ts(178,15): error TS2339: Property 'trim' does not exist on type 'RenderOptions'.
+```
+
+`up.submit()` takes render options, and `RenderOptions` lists every option it knows. Like
+all of up.fragment's types, it lives in `fragment/types.ts`. Add the new option next to the
+other form options:
+
+```diff
+ export interface RenderOptions {
+   ...
+   // The button that submitted a form (up.submit()), or false for none.
+   submitButton?: Element | false
++  // Whether to trim the fields of a submitted form (up.submit()).
++  trim?: boolean
+   ...
+ }
+```
+
 Note that we never touched `up.form.submit()`. It renders whatever `submitOptions()`
 returns, so it now supports a `{ trim: true }` option without changes (simplified):
 
-```js
-function submit(form, options) {
-  return up.render(submitOptions(form, options))
+```ts
+export function submit(form: e.ElementOrSelector, options?: RenderOptions): RenderJob {
+  return render(submitOptions(form, options))
 }
 ```
 
-Run the spec again and watch it pass.
+Run `bin/typecheck` and `bin/lint` again, then the spec, and watch it pass.
 
 We can now commit:
 
@@ -240,23 +277,28 @@ git commit -m "[form] Support [up-trim] modifier on submitting forms"
 
 ## 3. Documentation
 
-All public API must be documented. Doc comments live beside the code they describe, in
-a [superset of JSDoc](documentation.md) with directives like `@function`, `@selector`
-and `@param`. We added three surfaces, so we document three things.
+All public API must be documented. The documentation for `form.ts` lives beside it in
+`form.md`, a [doc file](documentation.md#doc-files) with one entry per feature. Entries are
+written in a [superset of JSDoc](documentation.md) with directives like `@function`,
+`@selector` and `@param`. We added three surfaces, so we document three things.
 
-`up.form.trim()` is a new function, so it needs a doc comment of its own. New API starts out `@experimental` and will be promoted to `@stable` when we're still happy with it some releases later.
+`up.form.trim()` is a new function, so it needs a doc entry of its own. Each entry starts with
+an H1 naming the feature, and a line of five dashes separates it from its neighbors. We put
+the new entry where `trim()` sits in `form.ts`. New API starts out `@experimental` and will
+be promoted to `@stable` when we're still happy with it some releases later.
 
 ```diff
-+  /*-
-+  Removes leading and trailing whitespace from all text inputs in the given form.
++# up.form.trim()
 +
-+  @function up.form.trim
-+  @param {Element} form
-+  @experimental
-+  */
-   function trim(form) {
-     ...
-   }
++Removes leading and trailing whitespace from all text inputs in the given form.
++
++@function up.form.trim
++@param {Element} form
++@experimental
++
++-----
++
+ # up.form.submitButtons()
 ```
 
 `up.submit()` only gains a new option. Its params are grouped into `@section`s, and
@@ -264,22 +306,22 @@ some sections pull shared text from a partial with `@mix` — so add the new `@p
 into the section it belongs to, at the section's indentation:
 
 ```diff
-   /*-
-   ...
-   @function up.submit
-   ...
-   @section Request
-     @mix up.submit/request
+ # up.submit()
+
+ ...
+ @function up.submit
+ ...
+ @section Request
+   @mix up.submit/request
 +
-+    @param {boolean} [options.trim=false]
-+      Whether to remove leading and trailing whitespace from all text inputs
-+      before submitting.
-   ...
-   @stable
-   */
++  @param {boolean} [options.trim=false]
++    Whether to remove leading and trailing whitespace from all text inputs
++    before submitting.
+ ...
+ @stable
 ```
 
-The comment says `@function up.submit`, not `up.form.submit`, because the function is
+The entry says `@function up.submit`, not `up.form.submit`, because the function is
 [aliased](code-organization.md#namespace-pattern) onto the `up` global — which is
 also why its doc page is `/api/up.submit`.
 
@@ -289,23 +331,20 @@ Same for the `[up-submit]` selector, which gains a new attribute. Note how prose
 quoted:
 
 ```diff
-   /*-
-   ...
-   @selector [up-submit]
-   ...
-   @section Request
-     @param action
-       ...
-+
-+    @param [up-trim='false']
-+      Whether to remove leading and trailing whitespace from all text inputs
-+      before submitting.
-   ...
-   @stable
-   */
-   up.on('submit', config.selectorFn('submitSelectors'), function(event, form) {
+ # [up-submit]
+
+ ...
+ @selector [up-submit]
+ ...
+ @section Request
+   @param action
      ...
-   })
++
++  @param [up-trim='false']
++    Whether to remove leading and trailing whitespace from all text inputs
++    before submitting.
+ ...
+ @stable
 ```
 
 A small modifier like this needs no [guide page](documentation.md). Those are for
@@ -326,6 +365,6 @@ git commit -m "[docs] Document up.form.trim() and [up-trim]"
 
 Push the branch and [open a single pull request](https://github.com/unpoly/unpoly/compare) for your three commits.
 
-Opening a PR will start [CI](commit-conventions.md#continuous-integration), which runs the whole test suite
-in six configurations.\
+Opening a PR will start [CI](commit-conventions.md#continuous-integration), which runs the type
+check, the linter and the whole test suite in seven configurations.\
 Once CI is green, a human should review your code.

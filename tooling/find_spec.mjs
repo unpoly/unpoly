@@ -1,5 +1,5 @@
 // Finds specs by a phrase in their describe()/it() titles, and turns a file or line into
-// --spec filters. See bin/find-spec and `bin/test --file`.
+// --spec filters. See bin/find-spec and `bin/specs --file`.
 //
 // Everything works on the whole suite, parsed once with acorn: a spec's full name depends
 // on more than the file it is written in. We start from spec/specs.js and follow every

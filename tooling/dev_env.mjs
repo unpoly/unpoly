@@ -3,7 +3,7 @@
 //
 // One process table, one supervisor, one pid file, no special cases. `bin/dev`
 // runs the supervisor in the foreground (logs on your terminal, Ctrl-C stops it);
-// `bin/test` spawns the very same supervisor in the background (logs to
+// `bin/specs` spawns the very same supervisor in the background (logs to
 // tmp/dev.log) when nothing is running yet. Both spawn it *detached*, so its pid
 // doubles as a process group id and a single kill(-pid) sweeps every descendant.
 //
@@ -41,13 +41,13 @@ const PROJECT_ROOT = path.dirname(path.dirname(SUPERVISOR))
 
 // Absolute, not cwd-relative, so every caller refers to the same files no matter which
 // directory it was invoked from. The build status is anchored the same way (see
-// build_status.mjs), so `bin/test` works from a subdirectory too.
+// build_status.mjs), so `bin/specs` works from a subdirectory too.
 const PID_FILE = path.join(PROJECT_ROOT, 'tmp/dev.pid')
 const LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev.log')
 // Not a second log: where a supervisor's *raw* stdout and stderr go when it runs in the
 // background. Almost always empty — the supervisor writes tmp/dev.log itself (see
 // createLog()), so this only catches what never reached the log writer — an import error, a syntax slip in this very
-// file — which would otherwise vanish and leave `bin/test` reporting a start that failed
+// file — which would otherwise vanish and leave `bin/specs` reporting a start that failed
 // for no stated reason. It cannot be tmp/dev.log itself: two writers holding independent
 // offsets on one file interleave into garbage.
 const CRASH_LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev-crash.log')
@@ -102,10 +102,23 @@ export async function isDevEnvRunning() {
 
 // The build errors from the watcher's most recent build, or null if the last build
 // was clean (or there is no status yet). Lets `bin/dev status` surface a broken
-// build the same way `bin/test` does.
+// build the same way `bin/specs` does.
 export function lastBuildErrors(read = readStatus) {
   const status = read()
   return status && status.ok === false ? (status.errors || '(no error output captured)') : null
+}
+
+// The type errors from the watcher's most recent type check, or null if it found none (or is
+// still checking, or the watcher doesn't check types).
+export function lastTypeErrors(read = readStatus) {
+  const types = read()?.types
+  return types?.state === 'done' && types.ok === false ? (types.errors || '(no error output captured)') : null
+}
+
+// The lint errors in src/ from the watcher's most recent round, or null if it found none.
+export function lastLintErrors(read = readStatus) {
+  const lint = read()?.lint
+  return lint?.ok === false ? (lint.errors || '(no error output captured)') : null
 }
 
 // --- Starting --------------------------------------------------------------
@@ -140,7 +153,7 @@ export async function startUnderLock(openStdio, { probe = devEnvState, spawnIt =
   // Only now, past the point of no return, do we touch the log — opening it truncates,
   // and a start that turns back here would otherwise wipe a live environment's log. The
   // lock does not help with that: a winner releases it in milliseconds and then boots
-  // for ~15s, during which a second `bin/test` sees 'booting' and turns back right here.
+  // for a few seconds, during which a second `bin/specs` sees 'booting' and turns back right here.
   const { stdio, env, close } = openStdio()
   try {
     const supervisor = spawnIt(stdio, claim, env)
@@ -275,7 +288,7 @@ export async function stopDevEnv() {
 function existingEnvError(state, pid) {
   const error = new Error(alreadyRunning(state, pid))
   // 'unidentified' deliberately excluded from devEnvExists: it means we cannot *prove*
-  // an environment exists, and bin/test refuses to run in that state — so `bin/dev start`
+  // an environment exists, and bin/specs refuses to run in that state — so `bin/dev start`
   // must not report success for it either. It is still an expected refusal, not a bug,
   // hence `expected`: the caller prints the message rather than a stack trace.
   error.devEnvExists = state !== 'unidentified'
@@ -287,7 +300,7 @@ function alreadyRunning(state, pid) {
   switch (state) {
     case 'foreign':
       // Naming the other checkout matters: the ports are shared but tmp/dev.pid is not, so a
-      // sibling clone's environment reads as 'foreign' here while `bin/test` separately
+      // sibling clone's environment reads as 'foreign' here while `bin/specs` separately
       // reports *this* checkout's watcher as gone. Both messages are true and together they
       // sent someone looking in the wrong place.
       return `A dev environment is running that bin/dev did not start — possibly from another checkout of this repository, since port ${PORTS.specServer} is shared. Stop it where you started it, or set PORT_OFFSET to move this checkout's ports (see docs/contributing/dev-environment.md#running-more-than-one-checkout).`
@@ -376,7 +389,7 @@ export async function withStartLock(body) {
 
 // Signals the process group led by `pid`. Everything we spawn is detached, so its
 // pid *is* a group id. There is deliberately no fallback to signalling the bare
-// pid: that would hit one process and leave the sh/npm/webpack/Ruby descendants we
+// pid: that would hit one process and leave the sh/npm/esbuild/Ruby descendants we
 // are trying to sweep, while reporting success.
 function killGroup(pid, signal = 'SIGTERM') {
   try {
@@ -424,7 +437,7 @@ function superviseDevEnv() {
       shell: true,
       cwd: proc.cwd ? path.resolve(proc.cwd) : PROJECT_ROOT,
       // Children are piped, so they see no terminal and turn their own colors off —
-      // which silently cost us webpack's coloured errors even when a human was watching.
+      // which silently cost us the build's coloured errors even when a human was watching.
       // proc.env stays last so a process can still overrule us.
       env: { ...process.env, ...(wantColor() ? { FORCE_COLOR: '1' } : {}), ...proc.env },
       stdio: ['ignore', 'pipe', 'pipe'],

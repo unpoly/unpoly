@@ -100,7 +100,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const element = fixture('.element')
         up.radio.startPolling(element)
@@ -119,7 +119,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const element = fixture('.element')
         up.radio.startPolling(element)
@@ -140,7 +140,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const container = fixture('.container')
         const element = e.affix(container, '.element')
@@ -162,7 +162,7 @@ describe('up.radio', function() {
 
         await up.layer.open({ content: '<div class="element">element</div>' })
         const element = up.fragment.get('.element', { layer: 'overlay' })
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
         up.radio.startPolling(element)
 
         await wait(timingTolerance)
@@ -181,7 +181,7 @@ describe('up.radio', function() {
 
         await up.layer.open({ content: '<div class="element">element</div>' })
         const element = up.fragment.get('.element', { layer: 'overlay' })
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
         up.radio.startPolling(element)
 
         await wait(timingTolerance)
@@ -194,7 +194,6 @@ describe('up.radio', function() {
       })
 
       it('keeps polling when the polling fragment is aborted through its own reloading', async function() {
-        up.radio.config.pollAbortable = false
         const interval = 150
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
@@ -349,13 +348,61 @@ describe('up.radio', function() {
 
     })
 
+    describe('up.radio.pollOptions()', function() {
+
+      it('parses the fragment\'s [up-poll] attributes', function() {
+        const [fragment] = htmlFixtureList(`
+          <div id="score" up-poll up-interval="5000" up-if-layer="any" up-href="/score">Score: 1400</div>
+        `)
+
+        const options = up.radio.pollOptions(fragment)
+
+        expect(options).toEqual(jasmine.objectContaining({ interval: 5000, ifLayer: 'any', url: '/score' }))
+      })
+
+      it('defaults the interval to up.radio.config.pollInterval', function() {
+        up.radio.config.pollInterval = 1234
+        const [fragment] = htmlFixtureList('<div id="score" up-poll>Score: 1400</div>')
+
+        const options = up.radio.pollOptions(fragment)
+
+        expect(options).toEqual(jasmine.objectContaining({ interval: 1234, ifLayer: 'front', background: true, failTarget: ':none' }))
+      })
+
+      it('overrides attributes with the given options', function() {
+        const [fragment] = htmlFixtureList('<div id="score" up-poll up-interval="5000" up-href="/score">Score: 1400</div>')
+
+        const options = up.radio.pollOptions(fragment, { interval: 200, url: '/other' })
+
+        expect(options).toEqual(jasmine.objectContaining({ interval: 200, url: '/other' }))
+      })
+
+      it('accepts a selector for the fragment', function() {
+        htmlFixtureList('<div id="score" up-poll up-interval="5000">Score: 1400</div>')
+
+        const options = up.radio.pollOptions('#score')
+
+        expect(options.interval).toBe(5000)
+      })
+
+      it('does not change the given options object', function() {
+        const [fragment] = htmlFixtureList('<div id="score" up-poll up-interval="5000">Score: 1400</div>')
+        const givenOptions = { url: '/other' }
+
+        up.radio.pollOptions(fragment, givenOptions)
+
+        expect(givenOptions).toEqual({ url: '/other' })
+      })
+
+    })
+
     describe('up.radio.stopPolling()', function() {
 
       it("stops polling the given, polling element", async function() {
         const interval = 150
         const timingTolerance = interval / 3
 
-        const reloadSpy = spyOn(up, "reload").and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const element = fixture(".element")
         up.radio.startPolling(element, { interval })

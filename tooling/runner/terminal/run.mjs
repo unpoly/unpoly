@@ -15,10 +15,10 @@ import { Config } from '../config.mjs'
 import { serverURL, isServerRunning, startServer } from '../server/server.mjs'
 import { waitForFreshBuild, newestSourceMtime, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
 import { runBuild } from '../../build/build.mjs'
-import { PROJECT_ROOT } from '../../build/build_status.mjs'
+import { PROJECT_ROOT, readStatus } from '../../build/build_status.mjs'
 import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
-import { buildFailure } from './formatter.mjs'
+import { buildFailure, checksHint } from './formatter.mjs'
 import { specsURL } from './urls.mjs'
 import { parseLocation, parseSuite, readSources, specFiltersFor } from '../../find_spec.mjs'
 import { isDevEnvRunning, startDevEnv } from '../../dev_env.mjs'
@@ -86,7 +86,7 @@ const isMinified = (name) => name.includes('.min.')
 // which is why the caller only asks once a build is green — see runDev().
 // The minified bundles this config asks for that dist/ cannot serve: absent, or older than the
 // newest source. They are the only artifacts that can be *silently* stale — the dev watcher
-// never builds them (see tooling/build/webpack/development.js), while waitForFreshBuild() has
+// never builds them (see the development config in tooling/build/bundles.mjs), while waitForFreshBuild() has
 // already established that everything it does build is current. Testing a stale one fails
 // whichever specs cover the newest work, which reads exactly like a regression in that work.
 //
@@ -124,19 +124,19 @@ export async function runDev(argv, env) {
     if (!config.all) {
       console.error(pc.red('Running every spec takes ~9 minutes. Narrow the run, or ask for all of it:'))
       console.error('')
-      console.error(`  ${pc.bold('bin/find-spec "phrase"')}        find the groups that cover your change`)
-      console.error(`  ${pc.bold('bin/test --spec="up.form"')}     run those groups`)
-      console.error(`  ${pc.bold('bin/test --file=path[:line]')}   run what a file, or one line, declares`)
-      console.error(`  ${pc.bold('bin/test --all')}                run everything anyway`)
+      console.error(`  ${pc.bold('bin/find-spec "phrase"')}         find the groups that cover your change`)
+      console.error(`  ${pc.bold('bin/specs --spec="up.form"')}    run those groups`)
+      console.error(`  ${pc.bold('bin/specs --file=path[:line]')}  run what a file, or one line, declares`)
+      console.error(`  ${pc.bold('bin/specs --all')}               run everything anyway`)
       return CONFIG_ERROR
     }
     console.error(pc.blue('Running every spec — expect ~9 minutes.'))
   }
 
-  // Start one in the background if none is up, so `bin/test` needs no manual setup.
+  // Start one in the background if none is up, so `bin/specs` needs no manual setup.
   if (!(await isDevEnvRunning())) {
     try {
-      console.error(pc.blue('Starting the dev environment in the background — the first build may take ~15s…'))
+      console.error(pc.blue('Starting the dev environment in the background — the first build may take a few seconds…'))
       await startDevEnv()
       console.error(pc.blue('Dev environment kept running in the background (logs in tmp/dev.log) — stop with `bin/dev stop`.'))
       console.error('')
@@ -146,13 +146,19 @@ export async function runDev(argv, env) {
     }
   }
 
+  let build
   try {
-    const build = await waitForFreshBuild()
+    build = await waitForFreshBuild()
     // The watcher never reacted, so nothing needed building. Say which file that was: reading
     // the name is what tells you whether to shrug (a guide page) or look closer (a source file
     // the watcher should have picked up).
     if (build.unbuiltEdit) {
       console.error(pc.blue(`No rebuild for ${build.unbuiltEdit} — running against the current build.`))
+    }
+    // The watcher missed a change, and only rebuilt because we asked. Worth knowing, since the
+    // next missed change may be one we can't see either.
+    if (build.missedEdit) {
+      console.error(pc.yellow(`The build watcher had not noticed ${build.missedEdit}. It rebuilt on request.`))
     }
   } catch (error) {
     if (error instanceof BuildFailedError) {
@@ -167,20 +173,20 @@ export async function runDev(argv, env) {
   }
 
   // The watcher leaves the minified bundles alone, so build them here rather than run against
-  // whatever `dist` happens to hold. `bin/test` already starts a dev environment when none is
+  // whatever `dist` happens to hold. `bin/specs` already starts a dev environment when none is
   // running; this is the same courtesy for the one artifact that environment does not produce.
   let outdated = outdatedMinifiedFiles(config)
   if (outdated.length) {
     console.error(pc.blue(`The dev watcher does not build ${outdated.join(', ')} — building it once…`))
     let code = await runBuild(['--config=minified'])
-    // webpack has printed its own errors; 6 is this runner's "the build is not usable" code.
+    // The build has printed its own errors; 6 is this runner's "the build is not usable" code.
     if (code !== 0) return 6
     console.error('')
   }
 
   // Only now, with a green build behind us, does an absent bundle mean anything: `dist` is
   // gitignored, so before the watcher's first build *everything* is missing. Asking up
-  // front turned every fresh clone's first `bin/test` into a hard error naming files the
+  // front turned every fresh clone's first `bin/specs` into a hard error naming files the
   // watcher was about to produce — and it sent you to the CI build, which also produces
   // the minified ones, so it never recurred for anyone who hit it once.
   //
@@ -190,11 +196,36 @@ export async function runDev(argv, env) {
   if (missing.length) {
     console.error(pc.red(missing.every(isMinified)
       ? `Missing from dist/: ${missing.join(', ')}. The dev watcher never builds the minified bundles — run \`bin/build --config=minified\` once.`
-      : `Missing from dist/: ${missing.join(', ')}, although the build reported success. Check tooling/build/webpack/development.js.`))
+      : `Missing from dist/: ${missing.join(', ')}, although the build reported success. Check the development config in tooling/build/bundles.mjs.`))
     return 4
   }
 
-  return await drive(config)
+  // Lint and type errors don't stop the specs: they are often in another file than the code under
+  // test (a changed signature breaks its callers), and a refactoring may want to see the specs
+  // before every caller is fixed. We mention them after the results.
+  let code = await drive(config)
+  process.stdout.write(checksHint(await settledStatus()))
+  return code
+}
+
+// The watcher's status once its round and type check are done. A type check takes ~0.5 s and has
+// usually finished before the specs, so we don't wait long for one: after `timeoutMs`, we take
+// the last status we read. Its lint errors stand until the next round has linted, and a type
+// check that is still running has no result (`types.ok` is null). `read`, `now` and `sleep` are
+// seams for the self-tests.
+export async function settledStatus({
+  read = () => readStatus(),
+  now = Date.now,
+  sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  timeoutMs = 1_000,
+} = {}) {
+  let deadline = now() + timeoutMs
+  while (true) {
+    let status = read()
+    if (status?.state === 'idle' && status.types?.state !== 'checking') return status
+    if (now() >= deadline) return status
+    await sleep(100)
+  }
 }
 
 export async function runCI(argv, env) {

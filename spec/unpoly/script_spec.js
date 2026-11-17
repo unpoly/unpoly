@@ -105,7 +105,7 @@ describe('up.script', function() {
 
         expect(destructorSpy).not.toHaveBeenCalled()
 
-        up.script.clean(element)
+        up.internal.clean(element)
 
         expect(destructorSpy).toHaveBeenCalled()
       })
@@ -121,7 +121,7 @@ describe('up.script', function() {
         expect(destructorSpy1).not.toHaveBeenCalled()
         expect(destructorSpy2).not.toHaveBeenCalled()
 
-        up.script.clean(element)
+        up.internal.clean(element)
 
         expect(destructorSpy1).toHaveBeenCalled()
         expect(destructorSpy2).toHaveBeenCalled()
@@ -137,7 +137,7 @@ describe('up.script', function() {
         expect(destructorSpy1).not.toHaveBeenCalled()
         expect(destructorSpy2).not.toHaveBeenCalled()
 
-        up.script.clean(element)
+        up.internal.clean(element)
 
         expect(destructorSpy1).toHaveBeenCalled()
         expect(destructorSpy2).toHaveBeenCalled()
@@ -391,7 +391,7 @@ describe('up.script', function() {
 
     require('./script_hello_spec')
 
-    describe('up.script.clean()', function() {
+    describe('up.internal.clean()', function() {
 
       it('allows compilers to return a function to call when the compiled element is cleaned', function() {
         const destructor = jasmine.createSpy('destructor')
@@ -401,7 +401,7 @@ describe('up.script', function() {
         up.hello(container)
         expect(destructor).not.toHaveBeenCalled()
 
-        up.script.clean(container)
+        up.internal.clean(container)
         expect(destructor).toHaveBeenCalled()
       })
 
@@ -413,7 +413,7 @@ describe('up.script', function() {
         const container = fixture('.container .child')
         up.hello(container)
 
-        up.script.clean(container)
+        up.internal.clean(container)
 
         expect(destructor1).toHaveBeenCalled()
         expect(destructor2).toHaveBeenCalled()
@@ -427,7 +427,7 @@ describe('up.script', function() {
         const container = fixture('.container .child')
         up.hello(container)
 
-        up.script.clean(container)
+        up.internal.clean(container)
 
         expect(destructor1).toHaveBeenCalled()
         expect(destructor2).toHaveBeenCalled()
@@ -442,7 +442,7 @@ describe('up.script', function() {
         const element = fixture('.one.two')
         up.hello(element)
 
-        up.script.clean(element)
+        up.internal.clean(element)
 
         expect(destructor1).toHaveBeenCalled()
         expect(destructor2).toHaveBeenCalled()
@@ -455,7 +455,7 @@ describe('up.script', function() {
 
         const container = fixture('.container .child')
 
-        const clean = () => up.script.clean(container)
+        const clean = () => up.internal.clean(container)
         expect(clean).not.toThrowError()
       })
 
@@ -469,7 +469,7 @@ describe('up.script', function() {
           up.destructor(element, crashingDestructor)
 
           await jasmine.expectGlobalError(destroyError, function() {
-            const clean = () => up.script.clean(element)
+            const clean = () => up.internal.clean(element)
             expect(clean).not.toThrowError()
           })
         })
@@ -487,7 +487,7 @@ describe('up.script', function() {
           const element = fixture('.element')
           up.hello(element)
 
-          await jasmine.expectGlobalError(destroyError, () => up.script.clean(element))
+          await jasmine.expectGlobalError(destroyError, () => up.internal.clean(element))
 
           expect(destructorBefore).toHaveBeenCalled()
           expect(destructorAfter).toHaveBeenCalled()
@@ -495,68 +495,68 @@ describe('up.script', function() {
       })
     })
 
-    describe('up.script.findAssets()', function() {
+    describe('up.internal.findAssets()', function() {
 
       it('finds a link[rel=stylesheet] in the head', function() {
         const link = fixture(document.head, 'link[rel="stylesheet"][href="/styles.css"]')
-        expect(up.script.findAssets()).toContain(link)
+        expect(up.internal.findAssets()).toContain(link)
       })
 
       it('does not find a link[rel=stylesheet] in the body', function() {
         const link = fixture(document.body, 'link[rel="stylesheet"][href="/styles.css"]')
-        expect(up.script.findAssets()).not.toContain(link)
+        expect(up.internal.findAssets()).not.toContain(link)
       })
 
       it('does not find a link[rel=alternate]', function() {
         const link = fixture(document.body, 'link[rel="alternate"][type="application/rss+xml"][title="RSS Feed"][href="/feed"]')
-        expect(up.script.findAssets()).not.toContain(link)
+        expect(up.internal.findAssets()).not.toContain(link)
       })
 
       it('finds a script[src] in the head', function() {
         const script = fixture(document.head, 'script[src="/foo.js"][nonce="specs-nonce"]')
-        expect(up.script.findAssets()).toContain(script)
+        expect(up.internal.findAssets()).toContain(script)
       })
 
       it('does not find a script[src] in the body', function() {
         const script = fixture(document.body, 'script[src="/foo.js"][nonce="specs-nonce"]')
-        expect(up.script.findAssets()).not.toContain(script)
+        expect(up.internal.findAssets()).not.toContain(script)
       })
 
       it('does not find an inline script in the head', function() {
         const script = fixture(document.head, 'script', { text: 'console.log("hello from inline script")', nonce: 'specs-nonce' })
-        expect(up.script.findAssets()).not.toContain(script)
+        expect(up.internal.findAssets()).not.toContain(script)
       })
 
       it('finds an arbitrary element in the head with [up-asset]', function() {
         const base = fixture(document.head, 'base[href="/pages"]')
-        expect(up.script.findAssets()).toEqual([])
+        expect(up.internal.findAssets()).toEqual([])
 
         base.setAttribute('up-asset', '')
-        expect(up.script.findAssets()).toEqual([base])
+        expect(up.internal.findAssets()).toEqual([base])
       })
 
       it('allows to opt out with [up-asset=false]', function() {
         const link = fixture(document.head, 'link[rel="stylesheet"][href="/styles.css"][up-asset="false"]')
-        expect(up.script.findAssets()).not.toContain(link)
+        expect(up.internal.findAssets()).not.toContain(link)
       })
 
       it('finds elements matching a selector pushed to up.script.config.assetSelectors', function() {
         const meta = fixture(document.head, 'meta[name="app-version"][content="1.2.3"]')
-        expect(up.script.findAssets()).not.toContain(meta)
+        expect(up.internal.findAssets()).not.toContain(meta)
 
         up.script.config.assetSelectors.push('meta[name="app-version"]')
 
-        expect(up.script.findAssets()).toContain(meta)
+        expect(up.internal.findAssets()).toContain(meta)
       })
 
       it('allows to opt out by configuring up.script.config.noAssetSelectors', function() {
         const link = fixture(document.head, 'link[rel="stylesheet"][href="/excluded.css"]')
         up.script.config.noAssetSelectors.push('link[href="/excluded.css"]')
-        expect(up.script.findAssets()).not.toContain(link)
+        expect(up.internal.findAssets()).not.toContain(link)
       })
     })
 
-    describe('up.script.cspNonce()', function() {
+    describe('up.internal.cspNonce()', function() {
 
       beforeEach(function() {
         // Remove the CSP meta to start with a clean slate.
@@ -567,29 +567,29 @@ describe('up.script', function() {
 
       it('returns undefined if the <head> has no <meta name="csp-nonce>"', function() {
         expect(document.head).not.toHaveSelector('meta[name="csp-nonce"]')
-        expect(up.script.cspNonce()).toBeUndefined()
+        expect(up.internal.cspNonce()).toBeUndefined()
       })
 
       it('returns the content from a <meta name="csp-nonce">', function() {
         up.element.affix(document.head, 'meta[name="csp-nonce"][content="custom-nonce"]')
-        expect(up.script.cspNonce()).toBe('custom-nonce')
+        expect(up.internal.cspNonce()).toBe('custom-nonce')
       })
 
       it('returns a string assigned to up.script.config.cspNonce', function() {
         up.element.affix(document.head, 'meta[name="csp-nonce"][content="ignored-nonce"]')
         up.script.config.cspNonce = 'config-nonce'
-        expect(up.script.cspNonce()).toBe('config-nonce')
+        expect(up.internal.cspNonce()).toBe('config-nonce')
       })
 
       it('evals a function assigned to up.script.config.cspNonce', function() {
         up.element.affix(document.head, 'meta[name="csp-nonce"][content="ignored-nonce"]')
         up.script.config.cspNonce = () => 'function-nonce'
-        expect(up.script.cspNonce()).toBe('function-nonce')
+        expect(up.internal.cspNonce()).toBe('function-nonce')
       })
 
     })
 
-    describe('up.script.warnOfUnsafeCSP()', function() {
+    describe('up.internal.warnOfUnsafeCSP()', function() {
 
       let warnSpy
 
@@ -611,9 +611,9 @@ describe('up.script', function() {
         up.script.config.scriptElementPolicy = 'pass'
         up.script.config.evalCallbackPolicy = 'pass'
         up.script.config.cspWarnings = false
-        let cspInfo = up.CSPInfo.fromHeader(CSP_PRESETS['strict-dynamic'])
+        let cspInfo = up.internal.CSPInfo.fromHeader(CSP_PRESETS['strict-dynamic'])
 
-        up.script.warnOfUnsafeCSP(cspInfo)
+        up.internal.warnOfUnsafeCSP(cspInfo)
 
         expect(warnSpy).not.toHaveBeenCalled()
       })
@@ -623,21 +623,21 @@ describe('up.script', function() {
         const warnArgs = [jasmine.stringContaining("A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments")]
 
         function itWarnsFor(cspName) {
-          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+          const cspString = CSP_PRESETS[cspName] ?? up.internal.fail('Unknown CSP preset' + cspName)
 
           it(`warns with a ${cspName} CSP`, function() {
-            let cspInfo = up.CSPInfo.fromHeader(cspString)
-            up.script.warnOfUnsafeCSP(cspInfo)
+            let cspInfo = up.internal.CSPInfo.fromHeader(cspString)
+            up.internal.warnOfUnsafeCSP(cspInfo)
             expect(warnSpy).toHaveBeenCalledWith(...warnArgs)
           })
         }
 
         function itDoesNotWarnFor(cspName) {
-          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+          const cspString = CSP_PRESETS[cspName] ?? up.internal.fail('Unknown CSP preset' + cspName)
 
           it(`does not warn with a ${cspName} CSP`, function() {
-            let cspInfo = up.CSPInfo.fromHeader(cspString)
-            up.script.warnOfUnsafeCSP(cspInfo)
+            let cspInfo = up.internal.CSPInfo.fromHeader(cspString)
+            up.internal.warnOfUnsafeCSP(cspInfo)
             expect(warnSpy).not.toHaveBeenCalledWith(...warnArgs)
           })
         }
@@ -701,21 +701,21 @@ describe('up.script', function() {
         const warnArgs = [jasmine.stringContaining("An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks")]
 
         function itWarnsFor(cspName) {
-          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+          const cspString = CSP_PRESETS[cspName] ?? up.internal.fail('Unknown CSP preset' + cspName)
 
           it(`warns with a ${cspName} CSP`, function() {
-            let cspInfo = up.CSPInfo.fromHeader(cspString)
-            up.script.warnOfUnsafeCSP(cspInfo)
+            let cspInfo = up.internal.CSPInfo.fromHeader(cspString)
+            up.internal.warnOfUnsafeCSP(cspInfo)
             expect(warnSpy).toHaveBeenCalledWith(...warnArgs)
           })
         }
 
         function itDoesNotWarnFor(cspName) {
-          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+          const cspString = CSP_PRESETS[cspName] ?? up.internal.fail('Unknown CSP preset' + cspName)
 
           it(`does not warn with a ${cspName} CSP`, function() {
-            let cspInfo = up.CSPInfo.fromHeader(cspString)
-            up.script.warnOfUnsafeCSP(cspInfo)
+            let cspInfo = up.internal.CSPInfo.fromHeader(cspString)
+            up.internal.warnOfUnsafeCSP(cspInfo)
             expect(warnSpy).not.toHaveBeenCalledWith(...warnArgs)
           })
         }
@@ -770,7 +770,7 @@ describe('up.script', function() {
 
           describe('when the page nonce is known', function() {
             beforeEach(function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('secret000')
+              up.internal.cspNonce.mock().and.returnValue('secret000')
             })
 
             itDoesNotWarnFor('host-based')
@@ -783,7 +783,7 @@ describe('up.script', function() {
 
           describe('when the page nonce is not known', function() {
             beforeEach(function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              up.internal.cspNonce.mock().and.returnValue(undefined)
             })
 
             itDoesNotWarnFor('host-based')
@@ -802,49 +802,49 @@ describe('up.script', function() {
 
     require('./script_adopt_new_fragment_spec')
 
-    describe('up.script.adoptDetachedHeadAsset()', function() {
+    describe('up.internal.adoptDetachedHeadAsset()', function() {
 
       function itBehavesLikeExamples() {
 
         describe('scripts', function() {
 
           it('rewrites a matching [nonce]', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+            up.internal.cspNonce.mock().and.returnValue('page000')
 
-            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const script = up.element.createFromSelector('script[nonce="response111"][src="external.js"]')
-            up.script.adoptDetachedHeadAsset(script, cspInfo)
+            up.internal.adoptDetachedHeadAsset(script, cspInfo)
 
             expect(script).toHaveProperty('nonce', 'page000')
           })
 
           it('does not rewrite a non-matching [nonce]', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+            up.internal.cspNonce.mock().and.returnValue('page000')
 
-            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const script = up.element.createFromSelector('script[nonce="wrong222"][src="external.js"]')
-            up.script.adoptDetachedHeadAsset(script, cspInfo)
+            up.internal.adoptDetachedHeadAsset(script, cspInfo)
 
             expect(script).toHaveProperty('nonce', 'wrong222')
           })
 
           it('does not rewrite a matching [nonce] when the page nonce is not known', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            up.internal.cspNonce.mock().and.returnValue(undefined)
 
-            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const script = up.element.createFromSelector('script[nonce="response111"][src="external.js"]')
-            up.script.adoptDetachedHeadAsset(script, cspInfo)
+            up.internal.adoptDetachedHeadAsset(script, cspInfo)
 
             expect(script).toHaveProperty('nonce', 'response111')
           })
 
           it('does not change an element without a [nonce] attribute', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+            up.internal.cspNonce.mock().and.returnValue('page000')
 
-            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const script = up.element.createFromSelector('script[src="external.js"]')
             const scriptHTMLBefore = script.outerHTML
-            up.script.adoptDetachedHeadAsset(script, cspInfo)
+            up.internal.adoptDetachedHeadAsset(script, cspInfo)
 
             expect(script.nonce).toBeBlank()
             expect(script.outerHTML).toEqual(scriptHTMLBefore)
@@ -855,11 +855,11 @@ describe('up.script', function() {
         describe('inline styles (not supported)', function() {
 
           it('does not rewrite the [nonce] of inline <style> elements using the script-src nonce', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+            up.internal.cspNonce.mock().and.returnValue('page000')
 
-            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const style = up.element.createFromSelector('style[nonce="response111"]')
-            up.script.adoptDetachedHeadAsset(style, cspInfo)
+            up.internal.adoptDetachedHeadAsset(style, cspInfo)
 
             expect(style).toHaveProperty('nonce', 'response111')
           })
@@ -867,7 +867,7 @@ describe('up.script', function() {
         })
 
         it('does not trigger up:assets:changed if a script elements is identical after the [nonce] was rewritten', async function() {
-          spyOn(up.script, 'cspNonce').and.returnValue('specs-nonce')
+          up.internal.cspNonce.mock().and.returnValue('specs-nonce')
           const listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
 
@@ -987,14 +987,14 @@ describe('up.script', function() {
           describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 
             beforeEach(function() {
-              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
-              this.cspInfo ??= up.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111'`)
+              up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
+              this.cspInfo ??= up.internal.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111'`)
             })
 
             it('returns a throwing function for a callback without nonce', function() {
               let code = 'window.callbackSpy()'
               let renderOptions = { onLoaded: code }
-              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
               let fn = renderOptions.onLoaded
               expect(fn).toThrowError(up.Blocked)
               expect(window.callbackSpy).not.toHaveBeenCalled()
@@ -1003,7 +1003,7 @@ describe('up.script', function() {
             it('returns an executable function for a callback with the correct nonce', function() {
               let code = 'nonce-specs-nonce window.callbackSpy()'
               let renderOptions = { onLoaded: code }
-              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
               let fn = renderOptions.onLoaded
               expect(fn).not.toThrowError(up.Blocked)
               expect(window.callbackSpy).toHaveBeenCalled()
@@ -1012,7 +1012,7 @@ describe('up.script', function() {
             it('returns a throwing function for a callback with an incorrect nonce', function() {
               let code = 'nonce-wrong222 window.callbackSpy()'
               let renderOptions = { onLoaded: code }
-              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
               let fn = renderOptions.onLoaded
               expect(fn).toThrowError(up.Blocked)
               expect(window.callbackSpy).not.toHaveBeenCalled()
@@ -1027,13 +1027,13 @@ describe('up.script', function() {
           describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 
             beforeEach(function() {
-              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+              up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
             })
 
             it('returns a throwing function for a callback without nonce', function() {
               let code = 'window.callbackSpy()'
               let renderOptions = { onLoaded: code }
-              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
               let fn = renderOptions.onLoaded
               expect(fn).toThrowError(up.Blocked)
               expect(window.callbackSpy).not.toHaveBeenCalled()
@@ -1042,27 +1042,27 @@ describe('up.script', function() {
             it('returns a throwing function a callback with the correct nonce', function() {
               let code = 'nonce-specs-nonce window.callbackSpy()'
               let renderOptions = { onLoaded: code }
-              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
               let fn = renderOptions.onLoaded
               expect(fn).toThrowError(up.Blocked)
               expect(window.callbackSpy).not.toHaveBeenCalled()
             })
 
             it('returns a throwing function a callback with the correct nonce, but the page nonce is not known to Unpoly', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              up.internal.cspNonce.mock().and.returnValue(undefined)
               let code = 'nonce-specs-nonce window.callbackSpy()'
               let renderOptions = { onLoaded: code }
-              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
               let fn = renderOptions.onLoaded
               expect(fn).toThrowError(up.Blocked)
               expect(window.callbackSpy).not.toHaveBeenCalled()
             })
 
             it('returns a throwing function for a callback with an incorrect nonce', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              up.internal.cspNonce.mock().and.returnValue(undefined)
               let code = 'nonce-wrong222 window.callbackSpy()'
               let renderOptions = { onLoaded: code }
-              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
               let fn = renderOptions.onLoaded
               expect(fn).toThrowError(up.Blocked)
               expect(window.callbackSpy).not.toHaveBeenCalled()
@@ -1077,13 +1077,13 @@ describe('up.script', function() {
           describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 
             beforeEach(function() {
-              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+              up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
             })
 
             it('returns an executable function for a callback with the correct nonce', function() {
               let code = 'nonce-specs-nonce window.callbackSpy()'
               let renderOptions = { onLoaded: code }
-              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
               let fn = renderOptions.onLoaded
               expect(fn).not.toThrowError(up.Blocked)
               expect(window.callbackSpy).toHaveBeenCalled()
@@ -1093,7 +1093,7 @@ describe('up.script', function() {
               it('returns an executable function for a callback without a nonce', function() {
                 let code = 'window.callbackSpy()'
                 let renderOptions = { onLoaded: code }
-                up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+                up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
                 let fn = renderOptions.onLoaded
                 expect(fn).not.toThrowError(up.Blocked)
                 expect(window.callbackSpy).toHaveBeenCalled()
@@ -1104,7 +1104,7 @@ describe('up.script', function() {
               it('returns a throwing function for a callback without a nonce', function() {
                 let code = 'window.callbackSpy()'
                 let renderOptions = { onLoaded: code }
-                up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+                up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
                 let fn = renderOptions.onLoaded
                 expect(fn).toThrowError(up.Blocked) // new Function() throws EvalError internally
                 expect(window.callbackSpy).not.toHaveBeenCalled()
@@ -1113,7 +1113,7 @@ describe('up.script', function() {
               it('returns a noop function for a callback with an incorrect nonce', function() {
                 let code = 'nonce-wrong222 window.callbackSpy()'
                 let renderOptions = { onLoaded: code }
-                up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+                up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
                 let fn = renderOptions.onLoaded
                 // We would prefer to detect the violation and throw up.Blocked here.
                 // Unfortunately the securitypolicyviolation event is emitted async after our eval,
@@ -1124,10 +1124,10 @@ describe('up.script', function() {
 
               if (!pageNonce) {
                 it('returns an executable function for a callback with a correct nonce, but the page nonce is not known to Unpoly', function() {
-                  spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                  up.internal.cspNonce.mock().and.returnValue(undefined)
                   let code = 'nonce-specs-nonce window.callbackSpy()'
                   let renderOptions = { onLoaded: code }
-                  up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+                  up.internal.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
                   let fn = renderOptions.onLoaded
                   expect(fn).not.toThrowError(up.Blocked)
                   expect(window.callbackSpy).toHaveBeenCalled()
@@ -1256,26 +1256,26 @@ describe('up.script', function() {
         describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 
           beforeEach(function() {
-            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
           })
 
           it('returns a throwing function for a callback without nonce', function() {
             let code = 'window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
+            let fn = up.internal.parseCallback(code)
             expect(fn).toThrowError(up.Blocked)
             expect(window.callbackSpy).not.toHaveBeenCalled()
           })
 
           it('returns an executable function for a callback with the correct nonce', function() {
             let code = 'nonce-specs-nonce window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
+            let fn = up.internal.parseCallback(code)
             expect(fn).not.toThrowError(up.Blocked)
             expect(window.callbackSpy).toHaveBeenCalled()
           })
 
           it('returns a throwing function for a callback with an incorrect nonce', function() {
             let code = 'nonce-wrong222 window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
+            let fn = up.internal.parseCallback(code)
             expect(fn).toThrowError(up.Blocked)
             expect(window.callbackSpy).not.toHaveBeenCalled()
           })
@@ -1289,35 +1289,35 @@ describe('up.script', function() {
         describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 
           beforeEach(function() {
-            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
           })
 
           it('returns a throwing function for a callback without nonce', function() {
             let code = 'window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
+            let fn = up.internal.parseCallback(code)
             expect(fn).toThrowError(up.Blocked)
             expect(window.callbackSpy).not.toHaveBeenCalled()
           })
 
           it('returns a throwing function a callback with the correct nonce', function() {
             let code = 'nonce-specs-nonce window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
+            let fn = up.internal.parseCallback(code)
             expect(fn).toThrowError(up.Blocked)
             expect(window.callbackSpy).not.toHaveBeenCalled()
           })
 
           it('returns a throwing function a callback with the correct nonce, but the page nonce is not known to Unpoly', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            up.internal.cspNonce.mock().and.returnValue(undefined)
             let code = 'nonce-specs-nonce window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
+            let fn = up.internal.parseCallback(code)
             expect(fn).toThrowError(up.Blocked)
             expect(window.callbackSpy).not.toHaveBeenCalled()
           })
 
           it('returns a throwing function for a callback with an incorrect nonce', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            up.internal.cspNonce.mock().and.returnValue(undefined)
             let code = 'nonce-wrong222 window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
+            let fn = up.internal.parseCallback(code)
             expect(fn).toThrowError(up.Blocked)
             expect(window.callbackSpy).not.toHaveBeenCalled()
           })
@@ -1331,12 +1331,12 @@ describe('up.script', function() {
         describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 
           beforeEach(function() {
-            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
           })
 
           it('returns an executable function for a callback with the correct nonce', function() {
             let code = 'nonce-specs-nonce window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
+            let fn = up.internal.parseCallback(code)
             expect(fn).not.toThrowError(up.Blocked)
             expect(window.callbackSpy).toHaveBeenCalled()
           })
@@ -1344,7 +1344,7 @@ describe('up.script', function() {
           if (specs.config.csp === 'none') {
             it('returns an executable function for a callback without a nonce', function() {
               let code = 'window.callbackSpy()'
-              let fn = up.script.parseCallback(code)
+              let fn = up.internal.parseCallback(code)
               expect(fn).not.toThrowError(up.Blocked)
               expect(window.callbackSpy).toHaveBeenCalled()
             })
@@ -1353,14 +1353,14 @@ describe('up.script', function() {
           if (specs.config.csp === 'nonce-only') {
             it('returns a throwing function for a callback without a nonce', function() {
               let code = 'window.callbackSpy()'
-              let fn = up.script.parseCallback(code)
+              let fn = up.internal.parseCallback(code)
               expect(fn).toThrowError(up.Blocked) // new Function() throws EvalError internally
               expect(window.callbackSpy).not.toHaveBeenCalled()
             })
 
             it('returns a noop function for a callback with an incorrect nonce', function() {
               let code = 'nonce-wrong222 window.callbackSpy()'
-              let fn = up.script.parseCallback(code)
+              let fn = up.internal.parseCallback(code)
               // We would prefer to detect the violation and throw up.Blocked here.
               // Unfortunately the securitypolicyviolation event is emitted async after our eval,
               // and we don't want to be async ourselves.
@@ -1370,9 +1370,9 @@ describe('up.script', function() {
 
             if (!pageNonce) {
               it('returns an executable function for a callback with a correct nonce, but the page nonce is not known to Unpoly', function() {
-                spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                up.internal.cspNonce.mock().and.returnValue(undefined)
                 let code = 'nonce-specs-nonce window.callbackSpy()'
-                let fn = up.script.parseCallback(code)
+                let fn = up.internal.parseCallback(code)
                 expect(fn).not.toThrowError(up.Blocked)
                 expect(window.callbackSpy).toHaveBeenCalled()
               })
@@ -1433,7 +1433,7 @@ describe('up.script', function() {
         it('exposes the first arg as `event` by default', function() {
           let event = { type: 'test' }
           let code = 'nonce-specs-nonce window.callbackSpy(event)'
-          let fn = up.script.parseCallback(code)
+          let fn = up.internal.parseCallback(code)
           expect(() => fn(event)).not.toThrowError(up.Blocked)
           expect(window.callbackSpy).toHaveBeenCalledWith(event)
         })
@@ -1441,14 +1441,14 @@ describe('up.script', function() {
         it('exposes properties of the first arg with { expandObject } option', function() {
           let event = { type: 'test', prop1: 'value1', prop2: 'value2' }
           let code = 'nonce-specs-nonce window.callbackSpy(prop1, prop2)'
-          let fn = up.script.parseCallback(code, { expandObject: ['prop1', 'prop2'] })
+          let fn = up.internal.parseCallback(code, { expandObject: ['prop1', 'prop2'] })
           expect(() => fn(event)).not.toThrowError(up.Blocked)
           expect(window.callbackSpy).toHaveBeenCalledWith('value1', 'value2')
         })
 
         it('exposes properties of the first arg with { expandObject } option when the function is called again', function() {
           let code = 'nonce-specs-nonce window.callbackSpy(prop1, prop2)'
-          let fn = up.script.parseCallback(code, { expandObject: ['prop1', 'prop2'] })
+          let fn = up.internal.parseCallback(code, { expandObject: ['prop1', 'prop2'] })
           fn({ prop1: 'first1', prop2: 'first2' })
           fn({ prop1: 'second1', prop2: 'second2' })
           expect(window.callbackSpy.calls.allArgs()).toEqual([['first1', 'first2'], ['second1', 'second2']])
@@ -1456,7 +1456,7 @@ describe('up.script', function() {
 
         it('allows to configure arg names with { argNames } option', function() {
           let code = 'nonce-specs-nonce window.callbackSpy(arg1, arg2)'
-          let fn = up.script.parseCallback(code, { argNames: ['arg1', 'arg2'] })
+          let fn = up.internal.parseCallback(code, { argNames: ['arg1', 'arg2'] })
           expect(() => fn('foo', 'bar')).not.toThrowError(up.Blocked)
           expect(window.callbackSpy).toHaveBeenCalledWith('foo', 'bar')
         })

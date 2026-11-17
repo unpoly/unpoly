@@ -1,6 +1,6 @@
 // Remaps stack-trace frames from bundle positions (dist/specs.js:11887:34) back
-// to original source (spec/unpoly/form_spec.js:877:9) using the .map files webpack
-// emits next to each bundle. Async because SourceMapConsumer is async.
+// to original source (spec/unpoly/form_spec.js:877:9) using the .map files the build
+// writes next to each bundle. Async because SourceMapConsumer is async.
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -36,7 +36,10 @@ export function createRemapper(projectRoot) {
     // Stack columns are 1-based; source-map wants 0-based.
     const pos = consumer.originalPositionFor({ line: Number(lineStr), column: Number(colStr) - 1 })
     if (!pos || !pos.source) return line
-    const source = pos.source.replace(/^webpack:\/\/[^/]*\//, '').replace(/^\.\//, '')
+    // A map lists its sources relative to itself (../spec/unpoly/form_spec.js for dist/specs.js.map).
+    // We print them relative to the project root.
+    const mapDir = path.dirname(path.join(projectRoot, urlPath))
+    const source = path.relative(projectRoot, path.resolve(mapDir, pos.source))
     return line.replace(full, `${source}:${pos.line}:${pos.column + 1}`)
   }
 

@@ -1,0 +1,233 @@
+import * as u from '../util.js'
+import * as e from '../element.js'
+import { guard, UpError } from '../error.js'
+import { disableContainerTemp, type Params } from '../form.js'
+import {
+  getFragment, insertTemp, provideNodes, type ContentValue, type NodesValue, type RenderOptions,
+} from '../fragment.js'
+import {
+  layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerDismissEvent,
+} from '../layer.js'
+import { printToStandard } from '../log.js'
+import type { UpRequest, UpResponse } from '../network.js'
+import { resolvePreviewFns } from '../status.js'
+
+// Everything an `up.Preview` needs to know.
+interface PreviewOptions {
+  // Missing when opening a layer.
+  fragment?: Element
+  request: UpRequest
+  renderOptions: RenderOptions
+  cleaner: u.Cleaner
+}
+
+export class Preview {
+  declare fragment?: Element
+  declare request: UpRequest
+  declare renderOptions: u.PlainObject
+  declare _cleaner: u.Cleaner
+
+  constructor({ fragment, request, renderOptions, cleaner }: PreviewOptions) {
+    this.fragment = fragment
+    this.request = request
+    this.renderOptions = renderOptions
+    this._cleaner = cleaner
+  }
+
+  undo(undoFn: u.UndoFunction): void {
+    if (this.ended) {
+      // We might have the idea to immediately undo an effect when the preview has ended,
+      // but it might lead to infinite loops in cases like this:
+      //
+      //    up.preview('broken', function(preview) {
+      //      preview.show('#element')
+      //      return () => preview.hide('#element')
+      //    })
+      reportError(new UpError('Preview used after end of request'))
+    } else {
+      this._cleaner.guard(undoFn)
+    }
+  }
+
+  get origin(): Element | undefined {
+    return this.request.origin
+  }
+
+  get params(): Params {
+    return this.request.params
+  }
+
+  // A layer, or 'new' when the request opens an overlay. A render pass's request always targets one.
+  get layer(): Layer | 'new' {
+    return this.request.layer!
+  }
+
+  get ended(): boolean {
+    return this.request.ended
+  }
+
+  get expiredResponse(): UpResponse | undefined {
+    return this.renderOptions.expiredResponse
+  }
+
+  get revalidating(): boolean {
+    return !!this.expiredResponse
+  }
+
+  run(value: unknown, options: u.PlainObject = {}): void {
+    for (let fn of resolvePreviewFns(value)) {
+      // A preview function may return an undo function. undo() ignores other values.
+      this.undo(guard(fn, this, options) as u.UndoFunction)
+    }
+  }
+
+  revert(): void {
+    this._cleaner.clean()
+  }
+
+  setAttrs(attrs: u.PlainObject): void
+  setAttrs(element: e.ElementOrSelector, attrs: u.PlainObject): void
+  setAttrs(...args: unknown[]): void {
+    let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
+    this.undo(e.setAttrsTemp(element, attrs))
+  }
+
+  addClass(klass: string): void
+  addClass(element: e.ElementOrSelector, klass: string): void
+  addClass(...args: unknown[]): void {
+    let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
+    this.undo(e.addClassTemp(element, klass))
+  }
+
+  addClassBatch(elements: Iterable<Element>, classes: string[]): void {
+    for (let element of elements) {
+      for (let klass of classes) {
+        this.addClass(element, klass)
+      }
+    }
+  }
+
+  removeClass(klass: string): void
+  removeClass(element: e.ElementOrSelector, klass: string): void
+  removeClass(...args: unknown[]): void {
+    let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
+    this.undo(e.removeClassTemp(element, klass))
+  }
+
+  setStyle(styles: e.StyleProps): void
+  setStyle(element: e.ElementOrSelector, styles: e.StyleProps): void
+  setStyle(...args: unknown[]): void {
+    let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
+    this.undo(e.setStyleTemp(element, styles))
+  }
+
+  disable(...args: [element?: e.ElementOrSelector]): void {
+    let [element] = this._parseMutatorArgs(args, 'val')
+    this.undo(disableContainerTemp(element, { preview: true }))
+  }
+
+  insert(tempValue: NodesValue): void
+  insert(reference: e.ElementOrSelector, tempValue: NodesValue): void
+  insert(reference: e.ElementOrSelector, position: InsertPosition, tempValue: NodesValue): void
+  insert(...args: unknown[]): void {
+    // (1) tempValue can have on of the following forms:
+    //     - A string of HTML
+    //     - A CSS selector string matching a template
+    //     - An Element node
+    //     - A Text node
+    //     - A NodeList with mixed Element and Text nodes
+    // (2) When tempValue resolves to multiple nodes, it will be wrapped
+    //     in an <up-wrapper> container.
+    let [reference, position = 'beforeend', tempValue] = this._parseMutatorArgs(args, 'val', u.isAdjacentPosition, 'val')
+    this.undo(insertTemp(reference, position, tempValue))
+  }
+
+  show(...args: [element?: e.ElementOrSelector]): void {
+    let [element] = this._parseMutatorArgs(args, 'val')
+    this.undo(e.showTemp(element))
+  }
+
+  hide(...args: [element?: e.ElementOrSelector]): void {
+    let [element] = this._parseMutatorArgs(args, 'val')
+    this.undo(e.hideTemp(element))
+  }
+
+  hideContent(...args: [parent?: e.ElementOrSelector]): void {
+    let [parent] = this._parseMutatorArgs(args, 'val')
+    // Place all children in a wrapper so we can hide text nodes.
+    let wrapper = e.wrapChildren(parent)
+    e.hide(wrapper)
+    this.undo(() => e.unwrap(wrapper))
+  }
+
+  showPlaceholder(placeholder: NodesValue): void
+  showPlaceholder(parent: e.ElementOrSelector, placeholder: NodesValue): void
+  showPlaceholder(...args: unknown[]): void {
+    let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
+
+    // We do not need to wrap a NodeList of mixed Text and Element nodes.
+    // Both swapContent() and openLayer() can deal with that.
+    let placeholderNodes = provideNodes(placeholderReference, { origin: this.origin })
+
+    printToStandard('[up-placeholder]', 'Showing placeholder %o', placeholderReference)
+
+    if (parent) {
+      this.swapContent(parent, placeholderNodes)
+    } else if (this.layer === 'new') {
+      this.openLayer(placeholderNodes, { closeAnimation: false })
+      // Now that the renderOptions have served as defaults for openLayer(),
+      // we can disable animations for the upcoming render pass. This way
+      // we don't see flickering when another overlay opens with the final content.
+      this.renderOptions.openAnimation = false
+    }
+  }
+
+  swapContent(newContent: NodesValue): void
+  swapContent(parent: e.ElementOrSelector, newContent: NodesValue): void
+  swapContent(...args: unknown[]): void {
+    let [parent, newContent] = this._parseMutatorArgs(args, 'val', 'val')
+    this.hideContent(parent)
+    this.insert(parent, newContent)
+  }
+
+  openLayer(content: ContentValue, options: u.PlainObject = {}): Layer {
+    let undoDismissValue = ':undo-preview'
+
+    let onDismiss = ({ value }: LayerDismissEvent) => {
+      // Abort the request when the user dismisses the overlay,
+      // but not when we ourselves dismiss it when reverting.
+      if (value !== undoDismissValue) this.request.abort({ reason: 'Preview overlay dismissed' })
+    }
+
+    open({
+      ...u.pick(this.renderOptions, [...OVERLAY_VISUAL_KEYS, 'target']),
+      ...options,
+      content,
+      abort: false,
+      onDismiss
+    })
+
+    // The new overlay is already in the stack. However, this function must be be sync and cannot
+    // wait a microtask for (the fulfilled) up.layer.open() promise.
+    let overlay = layerStack.front
+
+    this.undo(() => overlay.dismiss(undoDismissValue, { preventable: false }))
+
+    return overlay
+  }
+
+  // oxlint-disable-next-line typescript/no-explicit-any -- parsed arguments of any type
+  _parseMutatorArgs(args: unknown[], ...specs: u.ArgSpec[]): any[] {
+    let [element, ...rest] = u.parseArgs(args, ...specs)
+    // (1) up.fragment.get(undefined) returns undefined
+    // (2) up.fragment.get(Element) returns the element
+    // (3) this.fragment is undefined when opening a new layer
+    element = getFragment(element, { layer: this.layer, origin: this.origin }) || this.fragment
+    return [element, ...rest]
+  }
+
+}
+
+export const api = {
+  Preview,
+}

@@ -28,11 +28,17 @@
 @param {boolean|string|Function(request): boolean} [options.abort='target']
   Whether to abort existing requests before rendering.
 
+  A function is called with each pending `up.Request` in any layer, and aborts it by returning `true`.
+  It is not called with this render pass's own request, with a request whose response the pass reuses
+  from the [cache](/learn/caching), or with requests made with
+  [`{ abortable: false }`](/api/up.render#options.abortable).
+  This emits `up:request:aborted`, but no `up:fragment:aborted`, since the function picks requests, not fragments.
+
   See [aborting requests](/learn/aborting-requests) for details and a list of options.
 
 @param {boolean} [options.abortable=true]
-  Whether the request may be aborted by other requests [targeting](/learn/targeting-fragments)
-  the same fragments or layer.
+  Whether this request may be aborted by another render pass's [`{ abort }`](/api/up.render#options.abort) option,
+  or by `up.fragment.abort()`.
 
   See [Aborting rules in layers](/learn/aborting-requests#layers).
 

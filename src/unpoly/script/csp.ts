@@ -1,0 +1,531 @@
+import * as u from '../util.js'
+import * as e from '../element.js'
+import { Blocked, fail, NotImplemented } from '../error.js'
+import { parseRenderCallback } from '../fragment.js'
+import { printToStandard, printToWarn } from '../log.js'
+import { blockScripts, cspNonce, findScripts, isScript, scriptConfig } from '../script.js'
+import type * as t from './types.js'
+
+// The names and values of the arguments for a callback string, and its `this`.
+interface EvalEnv {
+  argNames: string[]
+  argValues: unknown[]
+  thisContext?: unknown
+}
+
+// A message to log and its substitution values.
+type LogDescriptor = [message: string, ...vars: unknown[]]
+
+const NONCE_PATTERN = /'nonce-([^']+)'/g
+
+function findNonces(cspPart: string): string[] {
+  let matches = cspPart.matchAll(NONCE_PATTERN)
+  return u.map(matches, '1')
+}
+
+export class CSPInfo {
+  declare declaration: string
+  declare nonces: string[]
+
+  constructor(declaration = '', nonces: string[] = []) {
+    this.declaration = declaration
+    this.nonces = nonces
+  }
+
+  isStrictDynamic(): boolean {
+    return this.declaration.includes("'strict-dynamic'")
+  }
+
+  isUnsafeEval(): boolean {
+    return this.declaration.includes("'unsafe-eval'")
+  }
+
+  static fromHeader(cspHeader?: string | null): CSPInfo {
+    let results: Record<string, [declaration: string, nonces: string[]]> = {}
+
+    if (cspHeader) {
+      let declarations = cspHeader.split(/\s*;\s*/)
+      for (let declaration of declarations) {
+        let directive = declaration.match(/^(script|default)-src\s/)?.[1]
+        if (directive) {
+          results[directive] = [declaration, findNonces(declaration)]
+        }
+      }
+    }
+
+    let bestResult = results.script || results.default
+    if (bestResult) {
+      return new this(...bestResult)
+    } else {
+      return this.none()
+    }
+  }
+
+  static none(): CSPInfo {
+    return new this()
+  }
+
+}
+
+// The inline script that _runAsScriptElement() inserts can only reach us through the global `up`.
+declare module '../../unpoly.js' {
+  interface Up {
+    /** @internal */
+    noncedEval?: EvalEnv & { value?: unknown, error?: unknown }
+  }
+}
+
+export class NonceableCallback {
+  declare script: string
+  declare nonce?: string
+
+  constructor(script: string, nonce?: string) {
+    this.script = script
+    this.nonce = nonce
+  }
+
+  static fromCallbackString(string: string): NonceableCallback {
+    // With the s flag, the pattern matches any string, including one with line breaks.
+    let match = string.match(/^(nonce-(\S+)\s)?(.*)$/s)!
+    return new this(match[3], match[2])
+  }
+
+  unsafeEval(evalEnv: EvalEnv): unknown {
+    if (this.nonce) {
+      return this._runAsScriptElement(evalEnv)
+    } else {
+      return this._runAsFunction(evalEnv)
+    }
+  }
+
+  toCallbackString(): string {
+    return `nonce-${this.nonce} ${this.script}`
+  }
+
+  _runAsFunction({ argNames, argValues, thisContext }: EvalEnv): unknown {
+    let fn = new Function(...argNames, this.script)
+    return fn.apply(thisContext, argValues)
+  }
+
+  _runAsScriptElement(evalEnv: EvalEnv): unknown {
+    // A strict CSP will block use of `eval()` or `new Function()`.
+    // What we can do instead is insert an inline script that is allowed per a [nonce] attr.
+    let wrappedScript = `
+      try {
+        up.noncedEval.value = (function(${evalEnv.argNames.join()}) {
+          ${this.script}
+        }).apply(up.noncedEval.thisContext, up.noncedEval.argValues)
+      } catch (error) {
+        up.noncedEval.error = error
+      }
+    `
+
+    let scriptElement
+    try {
+      up.noncedEval = { ...evalEnv }
+      scriptElement = e.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
+      if (up.noncedEval.error) {
+        throw up.noncedEval.error
+      } else {
+        return up.noncedEval.value
+      }
+    } finally {
+      // Delete rather than assign undefined, so window.up has no key left that is undefined.
+      delete up.noncedEval
+      scriptElement?.remove()
+    }
+  }
+
+}
+
+// Something that may carry a nonce, like a `<script>` element or an `[up-on-…]` attribute.
+interface PolicyItem {
+  readNonce(): string | undefined
+  writeNonce(nonce: string): void
+  logBlockedDescriptor(): LogDescriptor
+  block(): void
+}
+
+// Options in an X-Up-Open-Layer header that start with "on", but take a selector instead of a callback.
+const NON_CALLBACK_KEYS = ['onAcceptedReload', 'onDismissedReload']
+
+export function warnOfUnsafeCSP(cspInfo = CSPInfo.none()): void {
+  if (scriptConfig.cspWarnings) {
+    let pageNonce = cspNonce()
+    new EvalCallbackPolicy(pageNonce, cspInfo).warnOfUnsafeCSP()
+    new BodyScriptElementPolicy(pageNonce, cspInfo).warnOfUnsafeCSP()
+  }
+}
+
+export function evalCallback(nonceableCallback: NonceableCallback, evalEnv: EvalEnv): unknown {
+  const policy = new EvalCallbackPolicy(cspNonce(), CSPInfo.none())
+
+  // There are multiple reasons why we explicitly check if a callback is allowed,
+  // instead of relying on the document's CSP checks:
+  //
+  // (A) The user might have configured a blocking script policy in up.script.config.evalCallbackPolicy.
+  //     This policy might be stricter than the CSP, e.g. to prevent callbacks entirely.
+  // (B) While we proactively block scripts in new fragments, we may have unprocessed scripts
+  //     from the initial page load, or from an attacker that has some control over the HTML.
+  // (C) We might have a nonced callback, meaning we need to execute using a <script nonce> element.
+  //     With a viral strict-dynamic CSP the browser will happily let Unpoly execute *any* <script>,
+  //     even if a nonce is missing or incorrect. In this case we want to explicitly check for
+  //     a valid nonce. Otherwise an attacker could set an [up-on-loaded] callback with an incorrect nonce,
+  //     trigger <script nonce> execution and run arbitrary JavaScript.
+  if (policy.passesItem(nonceableCallback.nonce)) {
+    try {
+      return nonceableCallback.unsafeEval(evalEnv)
+    } catch (error) {
+      if (error instanceof EvalError) {
+        throw new Blocked(error.message)
+      } else {
+        throw error
+      }
+    }
+  } else {
+    // We don't rewrite the callback string in the DOM.
+    throw new Blocked('Blocked callback: ' + nonceableCallback.script)
+  }
+}
+
+export function adoptNewFragment(fragment: Element, cspInfo = CSPInfo.none()): void {
+  // Only parse the page nonce once for adopting multiple items.
+  // TODO: Consider moving page nonce parsing to CSPInfo
+  let pageNonce = cspNonce()
+  let evalCallbackPolicy = new EvalCallbackPolicy(pageNonce, cspInfo)
+  let scriptElementPolicy = new BodyScriptElementPolicy(pageNonce, cspInfo)
+
+  adoptScriptElements(fragment, scriptElementPolicy)
+  adoptAttrCallbacks(fragment, evalCallbackPolicy)
+}
+
+export function adoptDetachedHeadAsset(asset: Element, cspInfo = CSPInfo.none()): void {
+  if (!isScript(asset)) return
+
+  // (A) These assets are not normally going to be inserted into the page, but may emit up:assets:changed.
+  // (B) We need to adopt script[nonce] attributes for the comparison, and in case the user wants to insert manually.
+  // (C) We don't block untrusted scripts for the same reason.
+  let item = new ScriptElementItem(asset)
+  new DetachedAssetPolicy(cspNonce(), cspInfo).processItem(item)
+}
+
+export function adoptRenderOptionsFromHeader(object: u.PlainObject, cspInfo = CSPInfo.none()): void {
+  let policy = new EvalCallbackPolicy(cspNonce(), cspInfo)
+
+  for (let key of Object.keys(object)) {
+    let script = object[key]
+
+    // Any other on* key is a callback, so a mistyped key fails with "Unknown callback".
+    if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && u.isString(script)) {
+      let item = new ObjectPropertyItem(object, key)
+      policy.processItem(item)
+      object[key] = parseRenderCallback(key, object[key])
+    }
+  }
+}
+
+function adoptScriptElements(root: Element, policy: Policy): void {
+  for (let script of findScripts(root)) {
+    let item = new ScriptElementItem(script)
+    policy.processItem(item)
+  }
+}
+
+function adoptAttrCallbacks(root: Element, policy: Policy): void {
+  // TODO: It is weird that we keep a list of callback options in render_options.ts, but the list of nonceable attrs is in up.script? Maybe at least move them together?
+  for (let attribute of scriptConfig.nonceableAttributes) {
+    let matches = e.subtree(root, e.attrSelector(attribute))
+    for (let element of matches) {
+      let item = new AttributeItem(element, attribute)
+      policy.processItem(item)
+    }
+  }
+}
+
+// The arguments of a policy's constructor, which its subclasses pass on.
+type PolicyArgs = [pageNonce: string | undefined, cspInfo: CSPInfo]
+
+class Policy {
+  declare pageNonce?: string
+  declare cspInfo: CSPInfo
+  declare _validNonces: Set<string>
+
+  constructor(pageNonce: string | undefined, cspInfo: CSPInfo) {
+    this.pageNonce = pageNonce
+
+    // TODO: Consider moving nonce checking to CSPInfo
+    this.cspInfo = cspInfo
+
+    this._validNonces = new Set(cspInfo.nonces)
+    // (A) Allow the page nonce for up.script.evalCallback(), which checks an already adopted callback.
+    // (B) Allow the page nonce for developers who do keep their nonces stable across sessions.
+    if (pageNonce) this._validNonces.add(pageNonce)
+  }
+
+  isValidNonce(nonce?: string): boolean {
+    return !!nonce && this._validNonces.has(nonce)
+  }
+
+  tryRewriteNonce(allowedItem: PolicyItem, nonce = allowedItem.readNonce()): void {
+    // (A) Only rewrite nonces if we know a better nonce from <meta name="csp-nonce">. Don't set "undefined".
+    // (B) Even with "pass" we only want to adopt valid nonces. Otherwise we might accidentally allow a
+    //     script with disallowed hostname in a host-based CSPs that also has nonces for callbacks.
+    if (this.pageNonce && this.isValidNonce(nonce)) {
+      allowedItem.writeNonce(this.pageNonce)
+    }
+  }
+
+  warnOfUnsafeCSP(): void {
+    throw new NotImplemented()
+  }
+
+  processItem(item: PolicyItem): void {
+    // We need the nonce twice below. Only read it once for performance.
+    let nonce = item.readNonce()
+    let blocked = !this.passesItem(nonce)
+
+    if (blocked) {
+      // (A) Script elements need to be blocked on adoption, as inserting a script immediately executes them.
+      // (B) Callback strings will get another check during execution. We still block them during adoption for debuggability.
+      this.log(...item.logBlockedDescriptor())
+      item.block()
+    } else {
+      this.tryRewriteNonce(item, nonce)
+    }
+  }
+
+  passesItem(_itemNonce?: string): boolean {
+    throw new NotImplemented()
+  }
+
+  log(..._descriptorArgs: LogDescriptor): void {
+    throw new NotImplemented()
+  }
+
+}
+
+class DetachedAssetPolicy extends Policy {
+
+  passesItem(_itemNonce?: string): boolean {
+    return true
+  }
+
+}
+
+// The keys of up.script.config that hold a policy.
+type PolicyConfigProp = 'evalCallbackPolicy' | 'scriptElementPolicy'
+
+class ConfigurablePolicy extends Policy {
+  declare _configProp: PolicyConfigProp
+  declare policyString: t.PolicyString
+
+  constructor(configProp: PolicyConfigProp, pageNonce: string | undefined, cspInfo: CSPInfo) {
+    // Page nonce and CSP info must be known for #resolveAuto()
+    super(pageNonce, cspInfo)
+
+    this._configProp = configProp
+
+    let policyString = scriptConfig[configProp]
+    if (policyString === 'auto') policyString = this.resolveAuto()
+    if (policyString === 'nonce' && !this.pageNonce) {
+      this.warn('Enforcing nonces requires a <meta name="csp-nonce">.')
+      policyString = 'block'
+    }
+    this.policyString = policyString
+  }
+
+  resolveAuto(): t.PolicyString {
+    throw new NotImplemented()
+  }
+
+  passesItem(itemNonce?: string): boolean {
+    switch (this.policyString) {
+      // Always pass. Script must pass CSP.
+      // Bad idea for a strict-dynamic CSP, which allows everything.
+      case 'pass': return true
+
+      // Always block, regardless of CSP.
+      case 'block': return false
+
+      // Block any non-nonced scripts.
+      // Nonces will be checked in processItem().
+      case 'nonce': return this.isValidNonce(itemNonce)
+
+      default: fail('Unknown policy: %s = %o', this.configExpression(), this.policyString)
+    }
+  }
+
+  log(...descriptorArgs: LogDescriptor): void {
+    printToStandard(this.configExpression(), ...descriptorArgs)
+  }
+
+  warn(...descriptorArgs: LogDescriptor): void {
+    printToWarn(this.configExpression(), ...descriptorArgs)
+  }
+
+  configExpression(): string {
+    return 'up.script.config.' + this._configProp
+  }
+
+}
+
+class EvalCallbackPolicy extends ConfigurablePolicy {
+
+  constructor(...args: PolicyArgs) {
+    super('evalCallbackPolicy', ...args)
+  }
+
+  resolveAuto(): t.PolicyString {
+    // When the user inserted a <meta name="csp-nonce">, we assume their intent is to
+    // enforce nonces for any callback.
+    if (this.pageNonce) {
+      return 'nonce'
+    } else {
+      return 'pass'
+    }
+  }
+
+  warnOfUnsafeCSP(): void {
+    if (this.policyString === 'pass' && this.cspInfo.isUnsafeEval()) {
+      this.warn(`An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks. Consider setting ${this.configExpression()} = 'nonce'.`)
+    }
+  }
+
+}
+
+class BodyScriptElementPolicy extends ConfigurablePolicy {
+
+  constructor(...args: PolicyArgs) {
+    super('scriptElementPolicy', ...args)
+  }
+
+  resolveAuto(): t.PolicyString {
+    // (A) With a strict-dynamic CSP, it's a good idea to enforce nonces in the new content.
+    //     Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
+    // (B) Don't assume 'nonce' when we see a <meta name="csp-nonce">. The user might want to provide
+    //     a nonce for Unpoly callbacks, but still use a hostname-based allowlist.
+    if (this.cspInfo.isStrictDynamic()) {
+      return 'nonce'
+    } else {
+      return 'pass'
+    }
+  }
+
+  warnOfUnsafeCSP(): void {
+    if (this.policyString === 'pass' && this.cspInfo.isStrictDynamic()) {
+      this.warn(`A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments. Consider setting ${this.configExpression()} = 'nonce'.`)
+    }
+  }
+
+}
+
+
+class StringCallbackItem implements PolicyItem {
+  declare _cacheCallback?: NonceableCallback
+
+  readNonce(): string | undefined {
+    return this._getCallback().nonce
+  }
+
+  writeNonce(nonce: string): void {
+    let callback = this._getCallback()
+    callback.nonce = nonce
+    this.writeCallbackString(callback.toCallbackString())
+  }
+
+  _getCallback(): NonceableCallback {
+    return this._cacheCallback ||= NonceableCallback.fromCallbackString(this.readCallbackString())
+  }
+
+  logBlockedDescriptor(): LogDescriptor {
+    throw new NotImplemented()
+  }
+
+  block(): void {
+    this.writeCallbackString('/* blocked */')
+  }
+
+  readCallbackString(): string {
+    throw new NotImplemented()
+  }
+
+  writeCallbackString(_newString: string): void {
+    throw new NotImplemented()
+  }
+
+}
+
+class AttributeItem extends StringCallbackItem {
+  declare _element: Element
+  declare _attribute: string
+
+  constructor(element: Element, attribute: string) {
+    super()
+    this._element = element
+    this._attribute = attribute
+  }
+
+  logBlockedDescriptor(): LogDescriptor {
+    return ['Blocked callback attribute: %s', e.attrSelector(this._attribute, this.readCallbackString())]
+  }
+
+  // We only build an item for an element with the attribute.
+  readCallbackString(): string {
+    return this._element.getAttribute(this._attribute)!
+  }
+
+  writeCallbackString(newString: string): void {
+    this._element.setAttribute(this._attribute, newString)
+  }
+
+}
+
+class ObjectPropertyItem extends StringCallbackItem {
+  declare _object: u.PlainObject
+  declare _key: string
+
+  constructor(object: u.PlainObject, key: string) {
+    super()
+    this._object = object
+    this._key = key
+  }
+
+  logBlockedDescriptor(): LogDescriptor {
+    return ['Blocked string callback: { %s: %o }', this._key, this.readCallbackString()]
+  }
+
+  readCallbackString(): string {
+    return this._object[this._key]
+  }
+
+  writeCallbackString(newString: string): void {
+    this._object[this._key] = newString
+  }
+
+}
+
+class ScriptElementItem implements PolicyItem {
+  declare _element: HTMLScriptElement
+
+  constructor(element: HTMLScriptElement) {
+    this._element = element
+  }
+
+  readNonce(): string {
+    return this._element.nonce
+  }
+
+  writeNonce(nonce: string): void {
+    // Set an attribute (instead of the property), so the change is reflected in the DOM explorer for easier debugging
+    this._element.setAttribute('nonce', nonce)
+  }
+
+  logBlockedDescriptor(): LogDescriptor {
+    return ['Blocked <script> element: %o', this._element]
+  }
+
+  block(): void {
+    blockScripts(this._element)
+  }
+
+}

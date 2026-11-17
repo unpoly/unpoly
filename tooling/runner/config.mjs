@@ -174,7 +174,7 @@ export class Config {
     let raw = envToRaw(env)
     for (let token of argv) {
       let match = /^--([^=]+)(?:=(.*))?$/.exec(token)
-      // A bare word is a mistake, not a filter: `bin/test up.form` silently ran the
+      // A bare word is a mistake, not a filter: `bin/specs up.form` silently ran the
       // whole suite, which is the opposite of what anyone typing that intends.
       if (!match) {
         throw new Error(`Unexpected argument: ${token}. Did you mean --spec="${token}"?`)
@@ -187,7 +187,7 @@ export class Config {
       let value = match[2] ?? 'true'
       if (LIST_KEYS.includes(key)) {
         // Repeating a flag adds to it. Anything from the environment is the starting
-        // point, so `SPEC=foo bin/test --spec=bar` runs both.
+        // point, so `SPEC=foo bin/specs --spec=bar` runs both.
         raw[key] = [...parseList(raw[key]), value]
       } else {
         raw[key] = value

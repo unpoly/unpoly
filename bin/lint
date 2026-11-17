@@ -1,17 +1,7 @@
 #!/usr/bin/env node
-// Lint src/, spec/ and tooling/ with ESLint. For src/ these are the same rules the webpack
-// build enforces, run standalone. The build lints nothing else -- the specs bundle sets
-// lint: false and the tooling is never bundled -- so this is the only thing that checks
-// them, in particular no-undef, which catches a spec file using something from another
-// file's scope. CI runs this as its own step.
-//
-// bin/ is not linted: its executables are extensionless, which ESLint will not match.
-import { spawn } from 'node:child_process'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+// Lint src/, spec/ and tooling/ with Oxlint, and check api collisions and the API doc files.
+// tooling/lint/run_lint.mjs explains the checks. Extra arguments are forwarded to Oxlint, so
+// `bin/lint --fix` works.
+import { runLint } from '../tooling/lint/run_lint.mjs'
 
-const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const eslintBin = path.join(projectRoot, 'node_modules', '.bin', 'eslint')
-
-let child = spawn(eslintBin, ['src', 'spec', 'tooling', ...process.argv.slice(2)], { stdio: 'inherit', cwd: projectRoot })
-child.on('exit', (code) => process.exit(code ?? 1))
+process.exit(await runLint({ extraArgs: process.argv.slice(2) }))
