@@ -97,7 +97,7 @@ export type ListenerSelector = string | (() => string)
 /**
 Options for `up.on()`.
 */
-export interface ListenerOptions {
+export interface ListenerOptions<E = Event> {
   passive?: boolean
   once?: boolean
   capture?: boolean
@@ -105,7 +105,7 @@ export interface ListenerOptions {
   Only call the listener for events that pass this check.
   @internal
   */
-  guard?: (event: Event) => boolean
+  guard?: (event: E) => boolean
   /**
   Also call the listener before Unpoly has booted. Defaults to `true` for `up:framework:*` events.
   @internal
@@ -119,8 +119,8 @@ The arguments for `up.on()` after its event types: an optional selector, optiona
 export type ListenerArgs<E> =
   | [listener: ListenerCallback<E>]
   | [selector: ListenerSelector, listener: ListenerCallback<E>]
-  | [options: ListenerOptions, listener: ListenerCallback<E>]
-  | [selector: ListenerSelector, options: ListenerOptions, listener: ListenerCallback<E>]
+  | [options: ListenerOptions<E>, listener: ListenerCallback<E>]
+  | [selector: ListenerSelector, options: ListenerOptions<E>, listener: ListenerCallback<E>]
 
 /**
 Where `up.emit()` emits an event: an element, the document, the window, a list with one element, or a layer.

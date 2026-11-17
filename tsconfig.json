@@ -9,6 +9,8 @@
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
+    // A callback's parameters must accept everything its caller passes.
+    "strictFunctionTypes": true,
 
     "target": "es2024",
     "lib": ["es2024", "dom", "dom.iterable"],

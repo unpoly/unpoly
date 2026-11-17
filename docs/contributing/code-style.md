@@ -38,7 +38,7 @@ Besides the [public-API probe](documentation.md#public-api-must-exist), which ch
 documented API exists in the types, `bin/typecheck` checks with TypeScript 7 against two
 configs:
 
-- `tsconfig.json` checks all of `src/` with loose settings.
+- `tsconfig.json` checks all of `src/` with loose settings, but with `strictFunctionTypes` on.
 - `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) with
   `noImplicitAny` and `strictNullChecks` on. `unpoly-migrate` isn't part of this check, so core
   can't use the API that only migrate adds, like `up.migrate.deprecated()` or `config.patch()`.
@@ -183,6 +183,10 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
 
   `!` only where something guarantees the value. Where a value may be missing, write the code
   that handles it (`?? 0`, `x && …`), even if a built-in would cope with `undefined`.
+- All of `src/` passes `strictFunctionTypes`: a callback must accept every value it is called
+  with. A tester that gets any value takes `unknown` and narrows it. When a callback should get
+  a narrower type, make the type that calls it generic (like `SelectorTracker<E>`), instead of
+  narrowing the callback's parameter.
 - When a function resolves its argument by reassigning it (`element = getFragment(element)`),
   TypeScript narrows the parameter to a member of its declared type: an `ElementOrSelector`
   becomes an `Element`, never the `HTMLElement` that `getFragment()` returns. When that's enough,
@@ -198,7 +202,7 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
 
   Callers get the typed signature, and the body stays as it was. This works for methods, whose
   parameters TypeScript compares bivariantly. A function declaration's overload must be
-  assignable to its implementation once `strictFunctionTypes` is on (TS2394), so a function
+  assignable to its implementation under `strictFunctionTypes` (TS2394), so a function
   resolves into a new local instead (`let element = getFragment(elementOrSelector)!`, like
   `animate()`). A function expression passed to `mockable()` can't have overloads. Type its rest
   parameter as a union of tuples (like `trackFields()` does).

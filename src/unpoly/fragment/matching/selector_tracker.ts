@@ -3,15 +3,15 @@ import { on, type UnbindFunction } from '../../event.js'
 import { afterMutate } from '../../fragment.js'
 
 // Called when an element starts matching. May return a function that is called when it stops matching.
-type SelectorTrackerAddCallback = (element: Element) => ((element: Element) => void) | void
+type SelectorTrackerAddCallback<E extends Element> = (element: E) => ((element: E) => void) | void
 
-export class SelectorTracker {
-  declare _selectFn: () => Iterable<Element>
-  declare _addCallback: SelectorTrackerAddCallback
-  declare _knownMatches: Map<Element, (element: Element) => void>
+export class SelectorTracker<E extends Element = Element> {
+  declare _selectFn: () => Iterable<E>
+  declare _addCallback: SelectorTrackerAddCallback<E>
+  declare _knownMatches: Map<E, (element: E) => void>
   declare _syncScheduled: boolean
 
-  constructor(selectFn: () => Iterable<Element>, addCallback: SelectorTrackerAddCallback) {
+  constructor(selectFn: () => Iterable<E>, addCallback: SelectorTrackerAddCallback<E>) {
     this._selectFn = selectFn
     this._addCallback = addCallback
     this._knownMatches = new Map()
@@ -74,7 +74,7 @@ export class SelectorTracker {
     this._runRemoveCallbacks(this._knownMatches)
   }
 
-  _runRemoveCallbacks(map: Map<Element, (element: Element) => void>): void {
+  _runRemoveCallbacks(map: Map<E, (element: E) => void>): void {
     for (let [element, removeCallback] of map) {
       removeCallback(element)
     }

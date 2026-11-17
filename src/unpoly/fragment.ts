@@ -1011,7 +1011,7 @@ export function insertTemp(
 
 export function trackSelector<E extends Element>(
   selectFn: () => u.List<E>,
-  callback: (element: E) => ((element: Element) => void) | void,
+  callback: (element: E) => ((element: E) => void) | void,
 ): u.UndoFunction {
   let tracker = new SelectorTracker(selectFn, callback)
   return tracker.start()

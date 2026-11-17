@@ -177,7 +177,7 @@ function resolvePreviewString(str: string): t.PreviewFunction[] {
   })
 }
 
-function getActiveElements({ origin, activeElements }: u.PlainObject): Element[] {
+function getActiveElements({ origin, activeElements }: RenderOptions): Element[] {
   activeElements ||= u.wrapList(origin)
   // If the link area was grown with [up-expand], we highlight the [up-expand] container.
   return u.flatMap(activeElements, findActivatableAreas)
