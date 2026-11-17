@@ -42,15 +42,13 @@ Blame-Ignore: true
 
 `git blame` skips the commits listed in `.git-blame-ignore-revs`. GitHub reads that file
 on its own; locally, run `git config blame.ignoreRevsFile .git-blame-ignore-revs` once.
-The file is generated from the trailers:
+The file lists each commit's full SHA below a `# <subject>` comment, oldest first. It also
+lists a few mechanical commits from before the trailer existed, so don't regenerate it.
+Whoever lands a mechanical commit on master appends it in a follow-up commit:
 
 ```sh
-git log --format=%H --grep='^Blame-Ignore: true' > .git-blame-ignore-revs
+git log -1 --format='# %s%n%H' <sha> >> .git-blame-ignore-revs
 ```
-
-The file doesn't exist yet. We generate it when the TypeScript migration is merged into
-master. From then on, whoever lands a mechanical commit on master runs the command
-again and commits the result.
 
 
 ## Continuous integration

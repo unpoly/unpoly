@@ -1,0 +1,156 @@
+# [build] Move classes and errors into folders named after their namespace
+2ac7a970acdd50d59d7aaef15ed3474a3d80c340
+# [migrate] Move unpoly-migrate's class patches into folders mirroring src/unpoly
+e7df47f39774a2456d96946bfbebf187248269ce
+# [event] Rename classes and functions that collide with browser globals
+9fee906e4e65ae11abed7592aa0ad0c64625119a
+# [framework] Export each module's config under a qualified name
+6a3ff7e9f3914d5d0b7c1cca1222770b1ee6c5b6
+# [framework] Give exports names that need no alias at the import site
+8f3a5373e3cb59e36c104e3c764a4237ffbb11ee
+# [fragment] Rename successKey() to toSuccessKey()
+c866f24f9c612bd7105edfc9d44362f859399af1
+# [framework] Import util and element as namespaces
+9680f8b15b15965ee613179d0fd57215863ca419
+# [fragment] Import util and element as namespaces in the render core
+0e2f44fe240dc061a42da61588d40daace8f10da
+# [framework] Import each main module once, and classes from the module that owns them
+e4e9eebf8139b59c52de499549af87db05e81fad
+# [fragment] Import each main module once in the render core
+ecc8aa55e4ce828629ccad42b5b5db9434c2db50
+# [util] Re-export Rect, FIFOCache and UpURLPattern from util.ts
+2ad305c388cb8110b3197bae1a504e6ee1b8643e
+# [util] Move the types of util and element into util/types.ts and element/types.ts
+066ff4cf20eccc1783a757973f29f755169bd019
+# [event] Move the types of up.event, up.viewport and up.status into types.ts
+68a65dd413500bd467a35080e144201fca34bf92
+# [network] Move network and protocol types into types.ts
+a80b3cc51c2d04a1df58f7685f3dd3810e02d773
+# [form] Move up.form's types to form/types.ts
+e9993420a9467417732733a69374eaa664079dbe
+# [fragment] Move up.fragment's types into fragment/types.ts
+2dcf14b18713e64d011d527016ce436b993aef35
+# [layer] Move up.layer's types to layer/types.ts
+791bfa82acc4b29caaaa3a208de4d440fa6cb9cf
+# [script] Move script's and link's types into script/types.ts and link/types.ts
+8f7fde067dbe1435001db1443ab757627f476aad
+# [history] Move up.history's types into history/types.ts
+ee9d1473094018da8f695093d5158a27c77ab596
+# [radio] Move up.radio's types into radio/types.ts
+e7cbaedd48a67571d7db17b2177264d0209f8794
+# [motion] Move up.motion's types into motion/types.ts
+ade04f5627aa03a3ed56e33081a4b785de621e37
+# [framework] Import a module's types from its types.ts inside its own folder
+e4aa379974b91acac9f5122b343d337c27ff3dbb
+# [framework] Import types from other modules with inline type specifiers in every types.ts
+95ffa4cc8e6e4adec27964270cb0ca0b22b0ebe7
+# [fragment] Move the render core's shared types into fragment/types.ts
+85d4e8d85911581234f7ed5554739d4826d06fa8
+# [migrate] Move up.migrate's types into migrate/types.ts
+a5357a03360467ceedbba1d1e4ab6b6313bc76f4
+# [layer] Move the up.Layer#historyVisible polyfill to unpoly-migrate's layer/base.ts
+ea36c56c3909b81c8162f74bec9efe0bbb6066a5
+# [script] Alias up.util at the top of unpoly-migrate's script.ts, like the other migrate files
+6b08a23c80d0c08cfe962f57d2391259db806699
+# [docs] Move API doc comments next to their sources as Markdown files
+dc13e6831a7c2402c12c8a96819a9f0bd19097ba
+# [types] Leave nested functions' return types to inference
+bb683aface935cae7f8b20d7d17ed8bcedb53fea
+# [fragment] Leave nested functions' return types to inference in the render core
+ce9c4a22fff0effd4b6be08cf52511a87fb6cc74
+# [types] Leave uninitialized lets to inference
+220851997bfae3f9dbd414deb607b62dd99ea2a8
+# [fragment] Name the layer plan files after their classes
+744f655178757dbb7e6bcfc68ec8f61eaae9d36f
+# [fragment] Rename the Addition class to LayerPlan
+c2a170716a859d711369a96923cb80e8aa626d69
+# [fragment] Call the layer plans by their class names in comments
+4a12f52ad03e76057a17eebc5e31ef7a8dcbb3bc
+# [fragment] Name the render stage files after their future functions
+5b14889e5656af52838d4ee70061e5c7a0b2fce4
+# [layer] Move CloseLayer to layer/close_layer.ts
+a139de189a3d0bbe91cfffca9d24c280aa51dc31
+# [fragment] Export render option helpers individually instead of as a RenderOptions object
+1a55df509131c32b412b3b08bb8843f2d4b386d3
+# [fragment] Group the fragment files into matching/ and rendering/
+9ee384e1eaa9b28b6f891c84e22135938e02a153
+# [network] Name the request sender files after their future functions
+e6f9d3775b2169175c31b7bd7f3ecff4947a69ce
+# [viewport] Name the reveal file after its future function
+5101de35c2d745b583f8f93ce2c1a32e784a064d
+# [event] Rename emitParsed() to emitEvent() and assertParsedEmitted() to assertEventEmitted()
+a1d4c1ce414cf8d4c52ff6ad2347c03a4a28ba6e
+# [error] Group the error classes in error/errors.ts
+22b0074e39bac449ed8c3e9e3627eb2aebf14e03
+# [event] Group the event helpers in emission.ts and listeners.ts
+1fe5cc53de433b2be9330c22192b688922c19868
+# [layer] Group the overlay modes in layer/overlay_modes.ts and dissolve layer/modes/
+e4aa246698acc867d966c49b54d9e1453a7542b2
+# [layer] Move the overlay modes into overlay.ts
+b10ccfbc288d21e3345c8c11c1aa4434cd0ac610
+# [layer] Rename layer/base.ts to layer/layer.ts
+1dcbbc3f24bfd310d4e5bd66f30cc4173f2b9aec
+# [script] Group CSPInfo, NonceableCallback and the script gate in script/csp.ts
+75455844b35764aacb4e6c2342c962d27f8aafdf
+# [network] Group sendWithXHR() and submitWithForm() in network/transports.ts
+285fdc7b489e718215253f1c869ff0729bcdea61
+# [fragment] Put the exported functions on top of render_from_content.ts
+593e034091888f3c9fc2bc3e65d422cf5bcf0719
+# [fragment] Rename fragment_finder.ts to find_fragment.ts, after the only function it exports
+86f1773622a40a58f272f1b8491b92272e091120
+# [fragment] Call a kept element's match a KeepMatch
+d28f15b9b0acbdbf174cb47eb14da4f841d9dba0
+# [fragment] Rename FragmentFinderOptions to FindFragmentOptions
+4538920fca9c55bd5df5c34fba0173d7efc3e257
+# [types] Type every overload implementation's rest parameter as any[]
+84d531749b04ecb3fbc5cc4b085bebffe50233bc
+# [docs] Write this.name instead of CoffeeScript's @name in code comments
+28087fde658b2cfa7227f197dd71dfb0c127d102
+# [event] Turn the last doc directive block in a .ts file into a plain comment
+93686d0be33bfeec788103f5ac43d88c2322e29c
+# [fragment] Fix an indentation in timeOf()
+9689b9468b92cdbf7c105c05ced4a3e64356e077
+# [types] Import util as a type in every types.ts
+cd3efca7aafa1e858e3e1e9ddb75646b558ac0e3
+# [protocol] Move ProtocolConfig into protocol.ts and drop the protocol/ folder
+1311f0a1262d776763446ff6306754ca04a7dcfd
+# [docs] Write this.name instead of CoffeeScript's @name in render comments
+0b12a282d59191db7a6ce9506fb184fef765c3fd
+# [util] Delete the remaining commented-out code and its orphaned specs
+7376595ef00a4b155de33890c2d7ac87b71903b3
+# [layer] Rename LayerCloseOptions to CloseLayerOptions, and CloseLayerOptions to CloseLayerArgs
+07522d0abed1a255077da20b329d83adccf87017
+# [event] Rename the internal listener and emission types
+9f6d6f70d6bc54e36a3cd040dd65218dce44f876
+# [form] Rename FoundValidationSolution to TargetedSolution
+8c86934f836deba1a0ec510e17406a238ee1c0ac
+# [event] Rename function types from …Fn to …Function
+4e73923d59c9f33fc9b092ab1860af7086ff8ba4
+# [util] Wrap signatures longer than 140 characters, one parameter per line
+6a5b8a04dfb9a1fdb31bdef1d7068b5b60dfd75a
+# [fragment] Wrap the render core's signatures longer than 140 characters
+56895f0c4779d4abf77706f990031ea7fd65a8b2
+# [framework] Rename exports that don't stand on their own at the import site
+0ff0e674e0cba9ba385d7a8f07eb643a0a173100
+# [fragment] Use the qualified export names in the render core
+4bcd66cebb8c8bc773a4a2f46ccf73916584b98c
+# [framework] Write imports that contain only types as import type
+00401507d29d14b25a53f2c96799067d29f2e7b8
+# [fragment] Write the render core's type-only imports as import type
+87e3b60068f3540d16db96c0865c898073256b6d
+# [framework] Move internal types that only one file uses into that file
+d2117ad7dafff4d5efc827b4e60abfc0fc725e48
+# [framework] Remove commented-out code
+63564c10f994f23849ada28b4b9452634c3480f1
+# [fragment] Rename getSmart() to getFragment()
+1eca8b1f7a79c1765747a8b48b5400a6442154eb
+# [fragment] Rename getSmart() to getFragment() in the render core
+bc31e31abdc91a5db729473994433e0053958d9a
+# [types] Comment local types with // and exported ones with /** */
+86b3a676d61df0f5a0f89f154c4723ab2561077f
+# [fragment] Say again why renderFromContent() lets the layer lookup change its options
+b19342793eb05330a0dbca19cfe6cf610dfc5b44
+# [types] Remove stale and self-evident comments
+d50b8a694eb5ffddc175fb06327baea9dc82f40c
+# [types] Reword two comments that read like casts
+d9c4d653ecc8d7ab6d5f9a83ae956ddd66d59301
