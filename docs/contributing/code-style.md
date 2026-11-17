@@ -71,14 +71,16 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   }
   ```
 
-  This includes functions that aren't exported, class methods, and an arrow function assigned
-  to an untyped `const` at module level. Agents (and humans) read code with `grep`, not by
+  This includes functions that aren't exported, class methods, and a function expression at
+  module level, like one passed to `mockable()`. Agents (and humans) read code with `grep`, not by
   hovering, and an explicit type catches an accidental widening where it happens. A nested
   function's body is right next to it, and its return type flows into whatever checks its call.
 
   Inline callbacks and functions that get their type from context stay inferred. So do
   functions in an object literal, and a named function whose body only returns a function
   (both the outer and the returned one).
+- **Function declarations at module level.** Write `function x() { … }`, not
+  `const x = () => …`, except where a wrapper like `mockable()` needs an expression.
 - **Local variables are inferred.** Annotate one where inference can't do it (see
   [Strict checks](#strict-checks)), or where a type helps the reader.
 - **Don't annotate a `let` without an initializer.** TypeScript infers its type from the

@@ -3,7 +3,9 @@ const submitSelectorFn = up.form.config.selectorFn('submitSelectors')
 const preloadSelectorFn = up.link.config.selectorFn('preloadSelectors')
 
 // Links and forms can open overlays, so old layer attributes are translated on both.
-const layerOpenerSelectorFn = (): string => [followSelectorFn(), submitSelectorFn()].join()
+function layerOpenerSelectorFn(): string {
+  return [followSelectorFn(), submitSelectorFn()].join()
+}
 
 up.migrate.renamedAttribute('up-flavor', 'up-mode', { scope: layerOpenerSelectorFn })
 up.migrate.renamedAttribute('up-closable', 'up-dismissible', { scope: layerOpenerSelectorFn })

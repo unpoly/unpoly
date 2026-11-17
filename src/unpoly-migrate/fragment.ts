@@ -28,7 +28,9 @@ up.fragment.config.patch(function(config) {
 })
 
 // Names the call site of a render pass in a warning about its options.
-const renderOptionsSource = (options: RenderOptions): FixKeyOptions => ({ label: 'render options', detail: options.origin || options.url || options.target })
+function renderOptionsSource(options: RenderOptions): FixKeyOptions {
+  return { label: 'render options', detail: options.origin || options.url || options.target }
+}
 
 // Core calls this hook in renderFromContent().
 up.migrate.handleResponseDocOptions = (docOptions) => up.migrate.fixKey(docOptions, 'html', 'document', renderOptionsSource(docOptions))
