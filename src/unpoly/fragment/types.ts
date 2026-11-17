@@ -303,7 +303,7 @@ export interface FragmentProcessorOptions {
   // updateSteps() passes null when it has no steps.
   fragment?: HTMLElement | null
   // What { focus: 'auto' } or { scroll: 'auto' } means, as another processable value.
-  autoMeans?: ScrollOption | FocusOption
+  autoMeans?: ProcessorOption
   origin?: Element
   layer?: Layer
 }
