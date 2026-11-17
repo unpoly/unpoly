@@ -257,7 +257,7 @@ export function watchOptions(
   options.origin ||= field
 
   // The callback to [up-watch] is not parsed here.
-  // It is parsed in watchRoot(), which calls watchCallbackFromElement().
+  // It is parsed in watchRoot().
 
   return options
 }
@@ -467,17 +467,13 @@ export function watch(root: e.ElementOrSelector, callback: t.WatchCallback): Unb
 export function watch(root: e.ElementOrSelector, options: t.WatchOptions, callback: t.WatchCallback): UnbindFunction
 export function watch(...args: unknown[]): UnbindFunction {
   let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
-  return watchRoot(e.getOne(root), options, callback) // unwrap jQuery
+  return new FieldWatcher(e.getOne(root), options, callback).start() // unwrap jQuery
 }
 
-// The [up-watch] compiler passes no callback, so the root's attribute gives it.
-function watchRoot(root: Element, options: t.WatchOptions, callback?: t.WatchCallback): UnbindFunction {
-  callback ||= watchCallbackFromElement(root) || fail('No callback given for up.watch()')
-  return new FieldWatcher(root, options, callback).start()
-}
-
-function watchCallbackFromElement(element: Element): t.WatchCallback | undefined {
-  return callbackAttr(element, 'up-watch', { argNames: ['value', 'name', 'options'] })
+// For the [up-watch] attribute, which holds the callback's code.
+function watchRoot(root: Element): UnbindFunction {
+  let callback = callbackAttr(root, 'up-watch', { argNames: ['value', 'name', 'options'] })!
+  return new FieldWatcher(root, {}, callback).start()
 }
 
 export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): UnbindFunction {
@@ -667,7 +663,7 @@ export function install(): void {
     return new Switcher(switcher).start()
   })
 
-  registerAttrCompiler('up-watch', (formOrField) => watchRoot(formOrField, {}))
+  registerAttrCompiler('up-watch', watchRoot)
 
   registerCompiler('[up-validate]', { rerun: true }, function(element) {
     // There are non-intuitive ways that an [up-validate] field can find its way into a <form>,
