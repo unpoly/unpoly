@@ -1,6 +1,6 @@
 import * as u from '../../util.js'
 import type { LayerMode } from '../../layer.js'
-import { restoreScroll, reveal, revealHash, scrollToPosition } from '../../viewport.js'
+import { restoreScroll, reveal, revealHash, scrollToPosition, type RevealMax } from '../../viewport.js'
 import type * as t from '../types.js'
 import { FragmentProcessor } from './fragment_processor.js'
 
@@ -9,7 +9,7 @@ interface FragmentScrollingOptions extends t.FragmentProcessorOptions {
   hash?: string
   mode?: LayerMode
   revealTop?: boolean
-  revealMax?: number | ((viewportHeight: number) => number)
+  revealMax?: RevealMax
   revealSnap?: number
   revealPadding?: number
   scrollBehavior?: ScrollBehavior

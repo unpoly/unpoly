@@ -12,7 +12,7 @@ import type { RequestCondition, RequestTesterOptions, UpRequest, UpResponse } fr
 import type { FragmentHungryEvent } from '../radio.js'
 import type { CSPInfo } from '../script.js'
 import type { PreviewFunction } from '../status.js'
-import type { FocusCapsule } from '../viewport.js'
+import type { FocusCapsule, RevealMax } from '../viewport.js'
 import type { RenderResult } from './rendering/render_result.js'
 
 /**
@@ -160,7 +160,7 @@ export interface RenderOptions {
   revealSnap?: number
   revealTop?: boolean
   revealPadding?: number
-  revealMax?: number | ((viewportHeight: number) => number)
+  revealMax?: RevealMax
   saveScroll?: boolean
 
   // Focus
