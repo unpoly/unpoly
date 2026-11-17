@@ -51,18 +51,18 @@ Configures defaults for scrolling.
   @param {number} [config.revealPadding]
     The desired padding between a [revealed](/api/up.reveal) element and the
     closest [viewport](/api/up.viewport) edge (in pixels).
-  @param {number} [config.revealMax]
+  @param {number|false|Function(Element): number} [config.revealMax]
     A number indicating how many top pixel rows of a tall element to [reveal](/api/up.reveal).
 
     Defaults to 50% of the available window height.
 
     You may set this to `false` to always reveal as much of the element as the viewport allows.
 
-    You may also pass a function that receives an argument `{ viewportRect, elementRect }` and returns
-    a maximum height in pixels. Each given rectangle has properties `{ top, right, bottom, left, width, height }`.
+    You may also pass a function that receives the revealed element and returns
+    a maximum height in pixels.
 
     @experimental
-  @param {number} [config.revealTop=false]
+  @param {boolean} [config.revealTop=false]
     Whether to always scroll a [revealed](/api/up.reveal) element to the top.
 
     By default Unpoly will scroll as little as possible to make the element visible.
