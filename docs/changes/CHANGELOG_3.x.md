@@ -1,6 +1,8 @@
 Unreleased
 ----------
 
+- Unpoly is now about 10% smaller. [`unpoly.min.js`](/learn/install) weighs 54.7 KB (minified and gzipped), down from 61.0 KB. If your bundler minifies `unpoly.js` itself, you save a similar amount.
+- The npm package now contains source maps for the unminified scripts and stylesheets, like `unpoly.js` and `unpoly.css`. Your browser's developer tools can now show Unpoly's original source code when you debug. The npm package is about 30% larger to download, but the files your app loads don't get bigger.
 - Fix a bug where [`[up-confirm="false"]`](/api/up-follow#up-confirm) and `[data-confirm="false"]` showed a confirmation dialog with the text "false". Rails renders `data: { confirm: false }` this way. These values now mean that no confirmation is needed.
 - Fix a bug where [`up.element.affix()`](/api/up.element.affix) and [`up.element.createFromSelector()`](/api/up.element.createFromSelector) threw an error when a quoted attribute value contained a `]` character, like in `input[name="user[email]"]`.
 - Fix a bug where rendering a [fallback target](/learn/targeting-fragments#providing-a-fallback-target) from a `{ document }`, `{ fragment }` or `{ response }` [aborted](/learn/aborting-requests) requests in the primary target, although the primary target was not updated. This happened with `{ abort: 'target' }`, which is the default.
@@ -17,6 +19,8 @@ Unreleased
 - Fix a bug where a [URL pattern](/api/url-patterns) with only exclusions, like `-/admin/*`, threw a `TypeError`. It now matches every URL except the excluded ones.
 - Fix a bug where a function passed as [`{ abort }`](/api/up.render#options.abort) received the abort options instead of each pending request, and did not abort the requests it returned `true` for.
 - Fix a bug where [`up.validate()`](/api/up.validate) threw a `TypeError` when given a jQuery collection with an `{ origin }` option.
+- Fix a bug where [`up.request()`](/api/up.request) threw a `TypeError` when its `{ layer }` option matched no layer, like `{ layer: 'overlay' }` while no overlay was open. The request's [`layer`](/api/up.Request#layer) is now `undefined`.
+- Fix a bug where an overlay with an empty [`[up-accept-fragment]`](/api/up-layer-new#up-accept-fragment) or `[up-dismiss-fragment]` attribute threw an error when it opened or updated a fragment. An empty value is now ignored.
 - When Unpoly adds or changes a history entry, it now calls the browser's History API once instead of twice. Browsers limit how often a page may change its history, so apps that update history often are less likely to hit that limit.
 - ⚠️ Rendering into the `<html>` element now throws an `up.CannotTarget` error. It would swap or duplicate `<head>` and `<body>`. Make a full page load instead.
 - [`up.error.muteUncriticalRejection()`](/api/up.error.muteUncriticalRejection) is now public API. It ignores the expected rejections of a promise you don't handle, like an aborted request or an error response, so they don't show up as "Uncaught (in promise)" in the error console.
