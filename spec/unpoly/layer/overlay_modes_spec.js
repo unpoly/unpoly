@@ -332,20 +332,27 @@ describe('ModalLayer', function() {
       })
 
       it('consistently shifts and unshifts if multiple overlays are opened and closed concurrently', async function() {
-        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(25)
         up.motion.config.enabled = true
 
         fixture('div', { style: { height: '10000px' } })
         expect(document).toHaveVerticalScrollbar()
 
-        const openModal = (duration) => up.layer.open({
+        // Both return a promise that settles when the open or close animation has finished.
+        const openModal = (duration) => new Promise((resolve) => up.layer.open({
           mode: 'modal',
           content: '<div style="height: 10000px"></div>',
           animation: 'fade-in',
-          duration
-        })
-        const dismissModal = (duration) => up.layer.dismiss(null, { animation: 'fade-out', duration })
+          duration,
+          onFinished: resolve,
+        }))
+        const dismissModal = (duration) => new Promise((resolve) => up.layer.dismiss(null, {
+          animation: 'fade-out',
+          duration,
+          onFinished: resolve,
+        }))
 
+        // This overlay usually is still opening when we close it below, so it closes without an animation.
+        // The assertions hold either way: we await its dismissal before asserting.
         openModal(300)
         expect(up.layer.count).toBe(2)
         expect(document).not.toHaveVerticalScrollbar()
@@ -354,44 +361,37 @@ describe('ModalLayer', function() {
         expect(up.layer.count).toBe(3)
         expect(document).not.toHaveVerticalScrollbar()
 
-        openModal(100)
+        // Wait until the front overlay has opened. Only then does it get a close animation.
+        await openModal(100)
         expect(up.layer.count).toBe(4)
         expect(document).not.toHaveVerticalScrollbar()
 
-        await wait(10)
+        const slowBox = up.layer.front.getBoxElement()
+        const slowDismissed = dismissModal(300)
 
-        expect(up.layer.count).toBe(4)
-        expect(document).not.toHaveVerticalScrollbar()
-
-        await wait(150)
-        expect(up.layer.count).toBe(4)
-        expect(document).not.toHaveVerticalScrollbar()
-
-        dismissModal(300)
-        await wait()
+        // Hold the close animation half-way, so its overlay stays in the DOM while we close the others.
+        const slowCloseAnimation = await jasmine.seekAnimation(slowBox, 150)
 
         expect(up.layer.count).toBe(3)
         expect(document).not.toHaveVerticalScrollbar()
 
-        await wait(10)
-
-        dismissModal(0)
+        await dismissModal(0)
         expect(up.layer.count).toBe(2)
         expect(document).not.toHaveVerticalScrollbar()
 
-        dismissModal(100)
-
-        // Layer count reduces immediately
+        await dismissModal(100)
         expect(up.layer.count).toBe(1)
 
-        // Only when the viewport element has been removed (after close animation), the original scrollbar is restored.
-        await wait(150)
+        // The stack has no overlays left, but the overlay with the slow close animation still covers the page.
+        // Its viewport has its own scrollbar, so the document must not show a second one.
+        await expectAsync(slowDismissed).toBePending()
+        expect(slowBox).toBeAttached()
+        expect(document).not.toHaveVerticalScrollbar()
 
-        expect(document).toHaveVerticalScrollbar()
-
-        await wait(300)
-
-        expect(up.layer.count).toBe(1)
+        // Only when the last overlay element has been removed, the document scrollbar is restored.
+        slowCloseAnimation.play()
+        await slowDismissed
+        expect(slowBox).toBeDetached()
         expect(document).toHaveVerticalScrollbar()
       })
 
