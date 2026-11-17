@@ -6,7 +6,8 @@ import type * as t from './types.js'
 type SelectorKey<S> = { [K in keyof S]-?: S[K] extends string[] ? K : never }[keyof S] & string
 
 // Returns whether an element matches the selector of a config property. See `up.util.Config#matchesFn()`.
-type MatchesFunction = (element: Element, condition?: string) => boolean
+// Testers for u.presence() also get null, like `document.activeElement`.
+type MatchesFunction = (element: Element | null | undefined, condition?: string) => boolean
 
 /**
 A config object with the settings `S`, like `up.network.config`.
@@ -61,8 +62,8 @@ export class Config<S extends object> {
     Object.defineProperties(this, Object.getOwnPropertyDescriptors(this._blueprintFn()))
   }
 
-  matches(element: Element, prop: SelectorKey<S>, condition?: string): boolean {
-    return element?.matches(this.selector(prop, condition))
+  matches(element: Element | null | undefined, prop: SelectorKey<S>, condition?: string): boolean {
+    return !!element?.matches(this.selector(prop, condition))
   }
 
   matchesFn(prop: SelectorKey<S>): MatchesFunction {

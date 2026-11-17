@@ -298,8 +298,8 @@ function isArguments(value: unknown): boolean {
   return Object.prototype.toString.call(value) === '[object Arguments]'
 }
 
-export function isAdjacentPosition(value: string): boolean {
-  return /^(before|after)/.test(value)
+export function isAdjacentPosition(value: unknown): boolean {
+  return isString(value) && /^(before|after)/.test(value)
 }
 
 export function wrapList<V>(value: V): t.WrappedList<V>
