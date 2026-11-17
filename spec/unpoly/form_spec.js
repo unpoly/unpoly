@@ -84,7 +84,7 @@ describe('up.form', function() {
           // The browser's own lookup finds the form in the root layer.
           expect(overlayInput.form).toBe(rootForm)
 
-          expect(up.form.get(overlayInput)).toBeMissing()
+          expect(up.form.get(overlayInput)).toBeUndefined()
         })
 
         it('returns the associated form for a submit button outside the form', function() {
@@ -109,14 +109,20 @@ describe('up.form', function() {
           expect(up.form.get(input)).toBe(formB)
         })
 
-        it('returns a missing value for a field within a form when its [form] attribute matches no form, like the browser', function() {
+        it('returns undefined for a field within a form when its [form] attribute matches no form, like the browser', function() {
           const [form, input] = htmlFixtureList(`
             <form>
               <input name="email" form="unknown-form">
             </form>
           `)
 
-          expect(up.form.get(input)).toBeMissing()
+          expect(up.form.get(input)).toBeUndefined()
+        })
+
+        it('returns undefined for a field outside any form', function() {
+          const [input] = htmlFixtureList('<input name="email">')
+
+          expect(up.form.get(input)).toBeUndefined()
         })
 
       })
@@ -136,10 +142,10 @@ describe('up.form', function() {
           expect(up.form.get(group)).toBe(form)
         })
 
-        it('returns a missing value if the div is not in a form', function() {
+        it('returns undefined if the div is not in a form', function() {
           const [div] = htmlFixtureList('<div></div>')
 
-          expect(up.form.get(div)).toBeMissing()
+          expect(up.form.get(div)).toBeUndefined()
         })
 
       })

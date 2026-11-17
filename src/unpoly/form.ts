@@ -534,7 +534,7 @@ function parseValidateArgs(originOrTarget: e.ElementOrSelector, ...args: unknown
   return options
 }
 
-export function getForm(element: Element): HTMLFormElement | null | undefined {
+export function getForm(element: Element): HTMLFormElement | undefined {
   return getLiteralForm(element) || getAssociatedForm(element) || getClosestForm(element)
 }
 
@@ -544,10 +544,11 @@ function getLiteralForm(element: Element): HTMLFormElement | undefined {
   if (element instanceof HTMLFormElement) return element
 }
 
-function getClosestForm(element: Element): HTMLFormElement | null | undefined {
+function getClosestForm(element: Element): HTMLFormElement | undefined {
   // Return the closest form for vanilla fields, or any non-field element within a form (like a form group).
   // Like the browser, a [form] attribute decides alone, even when it matches no form in our layer.
-  if (!element.hasAttribute('form')) return element.closest('form')
+  // Like up.fragment.get(), we return undefined instead of the browser's null.
+  if (!element.hasAttribute('form')) return element.closest('form') ?? undefined
 }
 
 function getAssociatedForm(element: Element): HTMLFormElement | undefined {

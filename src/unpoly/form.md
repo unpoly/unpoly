@@ -1182,10 +1182,10 @@ When the attribute matches no form in the element's layer, no form is returned, 
 @function up.form.get
 @param {Element} element
   A `<form>`, a field, a submit button or any other element within a form.
-@return {Element|null|undefined}
+@return {Element|undefined}
   The form for the given element.
 
-  Returns `null` or `undefined` if the element has no form.
+  Returns `undefined` if the element has no form.
 @experimental
 
 -----
