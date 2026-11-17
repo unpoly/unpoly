@@ -17,7 +17,7 @@ export function createRemapper(projectRoot) {
     let consumer = null
     try {
       const rawMap = JSON.parse(readFileSync(path.join(projectRoot, urlPath) + '.map', 'utf8'))
-      consumer = await new SourceMapConsumer(rawMap)
+      consumer = new SourceMapConsumer(rawMap)
     } catch {
       consumer = null
     }

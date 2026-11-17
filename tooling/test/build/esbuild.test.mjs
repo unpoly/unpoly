@@ -16,7 +16,7 @@ test('puts "use strict" first inside the IIFE, not at the top of the file', () =
 test('moves the source map down by the line it inserts', async () => {
   let { js, map } = insertStrictDirective(JS, MAP)
   let line = js.split('\n').findIndex((text) => text.includes('up.x')) + 1
-  let consumer = await new SourceMapConsumer(JSON.parse(map))
+  let consumer = new SourceMapConsumer(JSON.parse(map))
   assert.deepEqual(consumer.originalPositionFor({ line, column: 2 }), { source: 'foo.js', line: 5, column: 0, name: null })
 })
 
