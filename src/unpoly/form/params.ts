@@ -10,6 +10,14 @@ import type * as t from './types.js'
 // Without FormData#entries(), specs inspect the original entries.
 interface InspectableFormData extends FormData { originalArray?: t.ParamEntry[] }
 
+// The properties of an <input> or <select> that Params#addField() reads.
+interface AddedField extends t.Field {
+  type?: string
+  checked?: boolean
+  files?: FileList | null
+  selectedOptions?: HTMLCollectionOf<HTMLOptionElement>
+}
+
 export class Params {
   declare entries: t.ParamEntry[]
 
@@ -259,26 +267,26 @@ export class Params {
     return params
   }
 
-  // oxlint-disable-next-line typescript/no-explicit-any -- any kind of field
-  addField(field: any, { includeDisabled }: { includeDisabled?: boolean } = {}): void {
-    field = e.getOne(field) // unwrap jQuery
+  addField(fieldOrSelector: e.ElementOrSelector, { includeDisabled }: { includeDisabled?: boolean } = {}): void {
+    // Unwraps jQuery. A field is an <input>, <select>, <textarea> or a custom control.
+    let field = e.getOne(fieldOrSelector) as AddedField
 
     // A field is excluded from a form submission if it has no name, or if it is disabled.
     let name = readFieldName(field)
     if (!name || (readFieldDisabled(field) && !includeDisabled && !field.upPreviewDisabled)) return
 
     let { tagName, type } = field
-    let values = []
+    let values: u.List<unknown> = []
 
     if (tagName === 'SELECT') {
       // A <select> can have multiple selected options.
-      values = u.map(field.selectedOptions, 'value')
+      values = u.map(field.selectedOptions!, 'value')
     } else if ((type === 'checkbox') || (type === 'radio')) {
       if (field.checked) values = [readFieldValue(field)]
     } else if (type === 'file') {
       // The value of an input[type=file] is the local path displayed in the form.
-      // The actual File objects are in the #files property.
-      values = field.files
+      // The actual File objects are in the #files property, which a file input always has.
+      values = field.files!
     } else {
       // A custom control may expose a { name } without a readable { value },
       // in which case it has nothing to contribute.
@@ -287,7 +295,8 @@ export class Params {
     }
 
     for (let value of values) {
-      this.add(name, value)
+      // A custom control's value may be of any type.
+      this.add(name, value as t.ParamValue)
     }
   }
 
