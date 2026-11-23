@@ -13,10 +13,17 @@ export interface FrameworkBootedEvent extends UpEvent { mode: BootMode }
 /** The `up:framework:reset` event. */
 export interface FrameworkResetEvent extends UpEvent {}
 
+/**
+The `up:framework:evaled` event, emitted once all of Unpoly's modules are evaluated.
+@internal
+*/
+export interface FrameworkEvaledEvent extends UpEvent {}
+
 declare global {
   interface GlobalEventHandlersEventMap {
     'up:framework:boot': FrameworkBootEvent
     'up:framework:booted': FrameworkBootedEvent
+    'up:framework:evaled': FrameworkEvaledEvent
     'up:framework:reset': FrameworkResetEvent
   }
 }

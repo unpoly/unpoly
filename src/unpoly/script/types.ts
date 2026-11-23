@@ -100,6 +100,12 @@ export interface AssetsChangedEvent extends UpEvent {
 }
 
 /**
+The `up:compilers:before` event, emitted on a fragment before compilers run on it.
+@internal
+*/
+export interface CompilersBeforeEvent extends UpEvent {}
+
+/**
 The settings in `up.script.config`, described in its doc comment.
 */
 export interface ScriptConfig {
@@ -153,5 +159,6 @@ export type PolicyString = 'pass' | 'block' | 'nonce' | 'auto'
 declare global {
   interface GlobalEventHandlersEventMap {
     'up:assets:changed': AssetsChangedEvent
+    'up:compilers:before': CompilersBeforeEvent
   }
 }

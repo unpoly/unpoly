@@ -229,7 +229,8 @@ export interface LayerLocationChangedEvent extends UpEvent {
 }
 
 /**
-The properties of the `up:layer:accept`, `up:layer:accepted`, `up:layer:dismiss` and `up:layer:dismissed` events.
+The properties of the `up:layer:accept`, `up:layer:accepting`, `up:layer:accepted`, `up:layer:dismiss`,
+`up:layer:dismissing` and `up:layer:dismissed` events.
 */
 export interface LayerCloseEvent extends UpEvent {
   layer: Layer
@@ -242,11 +243,23 @@ export interface LayerCloseEvent extends UpEvent {
 /** The `up:layer:accept` event. */
 export interface LayerAcceptEvent extends LayerCloseEvent {}
 
+/**
+The `up:layer:accepting` event, emitted when an overlay starts closing, after no listener prevented `up:layer:accept`.
+@internal
+*/
+export interface LayerAcceptingEvent extends LayerCloseEvent {}
+
 /** The `up:layer:accepted` event. */
 export interface LayerAcceptedEvent extends LayerCloseEvent {}
 
 /** The `up:layer:dismiss` event. */
 export interface LayerDismissEvent extends LayerCloseEvent {}
+
+/**
+The `up:layer:dismissing` event, emitted when an overlay starts closing, after no listener prevented `up:layer:dismiss`.
+@internal
+*/
+export interface LayerDismissingEvent extends LayerCloseEvent {}
 
 /** The `up:layer:dismissed` event. */
 export interface LayerDismissedEvent extends LayerCloseEvent {}
@@ -254,8 +267,10 @@ export interface LayerDismissedEvent extends LayerCloseEvent {}
 declare global {
   interface GlobalEventHandlersEventMap {
     'up:layer:accept': LayerAcceptEvent
+    'up:layer:accepting': LayerAcceptingEvent
     'up:layer:accepted': LayerAcceptedEvent
     'up:layer:dismiss': LayerDismissEvent
+    'up:layer:dismissing': LayerDismissingEvent
     'up:layer:dismissed': LayerDismissedEvent
     'up:layer:location:changed': LayerLocationChangedEvent
     'up:layer:open': LayerOpenEvent
