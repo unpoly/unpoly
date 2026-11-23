@@ -154,3 +154,5 @@ b19342793eb05330a0dbca19cfe6cf610dfc5b44
 d50b8a694eb5ffddc175fb06327baea9dc82f40c
 # [types] Reword two comments that read like casts
 d9c4d653ecc8d7ab6d5f9a83ae956ddd66d59301
+# [framework] Name internals in comments by their code names
+d57dacbb43b534f9ca0d1c26fb77be68340a297a
