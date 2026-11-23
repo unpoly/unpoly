@@ -16,7 +16,9 @@ export type * from './history/types.js'
 
 // How to report the next location change. See `up:location:changed`.
 interface HistoryTrackOptions {
-  reason?: t.LocationChangeReason
+  // With 'detect' we tell 'hash' from 'pop' once we know the new location.
+  // With null we emit no event.
+  reason?: t.LocationChangeReason | 'detect' | null
   // The change was made by Unpoly, which has already updated the page.
   alreadyHandled?: boolean
   // Ignore the next location change.

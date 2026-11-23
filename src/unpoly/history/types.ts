@@ -2,9 +2,9 @@ import type { UpEvent } from '../event.js'
 import type { RenderOptions } from '../fragment.js'
 
 /**
-Why the location changed. `'detect'` is only used internally: we tell `'hash'` from `'pop'` later.
+Why the location changed. See `up:location:changed`.
 */
-export type LocationChangeReason = 'push' | 'replace' | 'pop' | 'hash' | 'detect' | null
+export type LocationChangeReason = 'push' | 'replace' | 'pop' | 'hash'
 
 /**
 What Unpoly can update in the browser history. See `up.history.config.enabled`.
