@@ -8,8 +8,10 @@
 
 The button or link that opened this overlay.
 
+Returns `undefined` if the overlay wasn't opened by an element, e.g. when it was opened with `up.layer.open()` without an `{ origin }`.
+
 @property up.Layer#origin
-@param {Element} origin
+@param {Element|undefined} origin
   The element that opened this overlay.
 @stable
 
@@ -21,8 +23,10 @@ The [size](/learn/customizing-overlays#overlay-sizes) of this overlay.
 
 Returns a string like `'medium'` or `'large'`.
 
+Returns `undefined` for the root layer, and for an overlay without a size, like a cover.
+
 @property up.Layer#size
-@param {string} size
+@param {string|undefined} size
   This layer's size setting.
 @stable
 
@@ -32,10 +36,12 @@ Returns a string like `'medium'` or `'large'`.
 
 The [position](/learn/customizing-overlays#popup-position) of this popup or drawer overlay.
 
-Returns a string like `'top'`, '`right`', `'bottom'` or `'left'`.
+Returns a string like `'top'`, `'right'`, `'bottom'` or `'left'`.
+
+Returns `undefined` for an overlay that isn't a popup or drawer.
 
 @property up.Layer#position
-@param {string} [position]
+@param {string|undefined} position
   This layer's position setting.
 @stable
 
@@ -50,7 +56,7 @@ Returns a string like `'left'` or `'top'`.
 Returns `undefined` for an overlay that isn't a popup.
 
 @property up.Layer#align
-@param {string} align
+@param {string|undefined} align
   This layer's alignment setting.
 @stable
 

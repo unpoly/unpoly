@@ -340,7 +340,7 @@ console.log(layer.mode) // logs "modal"
       See [History in overlays](/learn/history-in-overlays).
 
 @section Animation
-  @param {string|Function|boolean} [options.animation='fade-in']
+  @param {string|Function|false} [options.animation='fade-in']
     The opening animation.
 
   @param {string} [options.easing='ease']
@@ -350,7 +350,7 @@ console.log(layer.mode) // logs "modal"
   @param {number} [options.duration=175]
     The duration of the opening animation in milliseconds.
 
-  @param {string|Function|boolean} [options.closeAnimation='fade-out']
+  @param {string|Function|false} [options.closeAnimation='fade-out']
     The closing animation.
 
   @param {string} [options.closeEasing='ease']
@@ -531,8 +531,10 @@ up.on('up:layer:open', function(event) {
 
   Listeners can inspect and change the options.
   All options for `up.layer.open()` can be used.
-@param {Element} event.origin
+@param {Element|undefined} event.origin
   The link element that is opening the overlay.
+
+  Will be `undefined` if the overlay is opened without an origin element, e.g. with `up.layer.open()` without an `{ origin }`.
 @param event.preventDefault()
   Prevents this overlay from opening.
 
@@ -565,8 +567,10 @@ See [Customizing overlays](/learn/customizing-overlays) for other methods to cha
 the overlay appearance.
 
 @event up:layer:opened
-@param {Element} event.origin
+@param {Element|undefined} event.origin
   The link element that is opening the overlay.
+
+  Will be `undefined` if the overlay is opened without an origin element, e.g. with `up.layer.open()` without an `{ origin }`.
 @param {up.Layer} event.layer
   The [layer object](/api/up.Layer) that is opening.
 @stable

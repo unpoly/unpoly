@@ -324,7 +324,7 @@ up.layer.parent // returns the root layer
 ```
 
 @property up.Layer#parent
-@param {up.Layer} parent
+@param {up.Layer|undefined} parent
   This layer's parent layer.
 @stable
 
@@ -342,7 +342,7 @@ A layer can have at most one child layer. Opening an overlay on a layer with an 
 first dismiss the existing child before replacing it with the new child.
 
 @property up.Layer#child
-@return {up.Layer} child
+@param {up.Layer|undefined} child
   This layer's direct child overlay.
 @stable
 
@@ -562,11 +562,13 @@ up.layer.parent.asCurrent(function() {
 up.layer.current // returns the modal overlay
 ```
 
+@function up.Layer#asCurrent
 @param {Function()} fn
   The synchronous function to call.
 
   Async functions are not supported.
-@function up.Layer#asCurrent
+@return {any}
+  The return value of `fn`.
 @stable
 
 -----
