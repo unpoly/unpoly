@@ -232,10 +232,12 @@ up.emit('my:event', { foo: 'bar' })
 @function up.emit
 
 @section Event
-  @param {Element|jQuery} [target=document]
+  @param {Element|jQuery|up.Layer} [target=document]
     The element on which the event is triggered.
 
     If omitted, the event will be emitted on the `document`.
+
+    If you pass a layer, the event is emitted on that layer, like with the `{ layer }` option.
 
   @param {string} eventType
     The event type, e.g. `my:event`.
@@ -256,7 +258,7 @@ up.emit('my:event', { foo: 'bar' })
 
     Alternatively the target element may be passed as the first argument.
 
-  @param {string|Array} [props.log]
+  @param {string|Array|false} [props.log]
     A message to print to the [log](/api/up.log) when the event is emitted.
 
     Pass `false` to not log this event emission.
@@ -330,6 +332,8 @@ up.event.onEscape(function(event) {
 @function up.event.onEscape
 @param {Function(Event)} listener
   The listener function that will be called when `Escape` is pressed.
+@return {Function()}
+  A function that unbinds the event listener when called.
 @experimental
 
 -----
