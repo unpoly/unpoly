@@ -35,6 +35,8 @@ const BROKEN = {
   // No import or export, so Oxlint parses it as a script.
   'unpoly/no-octal': { 'script.js': "window.octal = 010 + '\\07'\n" },
   'unpoly/top-level-return-types': { 'module.ts': 'export function topLevelReturnTypes() {}\n' },
+  // Only on for core, by path.
+  'unpoly/no-up-internal': { 'src/unpoly/module.ts': 'export function noUpInternal(): void { up.internal.sprintf() }\n' },
 }
 
 test('the canary below covers every rule of .oxlintrc.json that runs in JavaScript', () => {
@@ -50,8 +52,8 @@ function lintBroken() {
     let rules = Object.keys(BROKEN)
     let targets = []
     for (let [index, files] of Object.values(BROKEN).entries()) {
-      mkdirSync(path.join(root, String(index)))
       for (let [file, content] of Object.entries(files)) {
+        mkdirSync(path.dirname(path.join(root, String(index), file)), { recursive: true })
         writeFileSync(path.join(root, String(index), file), content)
         targets.push(path.join(String(index), file))
       }
@@ -66,7 +68,8 @@ function lintBroken() {
     let errors = Object.fromEntries(rules.map((rule) => [rule, {}]))
     for (let { filename, severity, code } of report.diagnostics) {
       if (severity !== 'error') continue
-      let [index, file] = filename.split(path.sep)
+      let [index, ...file] = filename.split(path.sep)
+      file = file.join('/')
       ;(errors[rules[index]][file] ??= new Set()).add(code)
     }
     return errors

@@ -132,6 +132,20 @@ test('no-octal reports a legacy octal escape in a string, also in a file that Ox
   assert.deepEqual(lines, { 'script.js': [1, 2, 3, 4] })
 })
 
+test('no-up-internal reports up.internal and window.up.internal, but no other key of up', (t) => {
+  let lines = lint(t, 'no-up-internal', {
+    'module.ts': [
+      'up.internal.sprintf()',
+      'window.up.internal.sprintf()',
+      'up.migrate.loaded',
+      'up.fragment.internal',
+      'other.internal',
+      '',
+    ].join('\n'),
+  })
+  assert.deepEqual(lines, { 'module.ts': [1, 2] })
+})
+
 test('namespace-aliases allows a namespace import as the object of a member access, for values and types', (t) => {
   let lines = lint(t, 'namespace-aliases', {
     'module.ts': [

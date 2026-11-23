@@ -199,12 +199,37 @@ function isTypePosition(identifier) {
   return identifier.parent.type === 'TSTypeQuery'
 }
 
+// Core (src/unpoly) never reaches itself through the global: it imports what it needs. `up.internal`
+// only exists for the specs and unpoly-migrate, which are separate bundles. A low-level module
+// that can't import a function has it injected, like `setConfigErrorPrinter()`. `.oxlintrc.json`
+// turns this on for core only. See docs/contributing/code-organization.md.
+const noUpInternal = {
+  meta: {
+    type: 'problem',
+    docs: { description: 'Disallow `up.internal` in core' },
+    schema: [],
+  },
+  create(context) {
+    return {
+      // `up.internal` and `window.up.internal`
+      'MemberExpression[computed=false][property.name="internal"]'(node) {
+        let { object } = node
+        if (object.type === 'MemberExpression' && !object.computed && object.object.name === 'window') object = object.property
+        if (object.type === 'Identifier' && object.name === 'up') {
+          context.report({ node, message: 'Core must not use `up.internal`. Import the function instead, or have it injected if you can\'t.' })
+        }
+      },
+    }
+  },
+}
+
 export default {
   meta: { name: 'unpoly' },
   rules: {
     'declare-class-fields': declareClassFields,
     'namespace-aliases': namespaceAliases,
     'no-octal': noOctal,
+    'no-up-internal': noUpInternal,
     'top-level-return-types': topLevelReturnTypes,
   },
 }

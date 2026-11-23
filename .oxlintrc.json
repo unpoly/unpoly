@@ -178,6 +178,15 @@
       }
     },
     {
+      // Core never reaches itself through the global. The specs and unpoly-migrate may use
+      // up.internal, since they are separate bundles that can't import from core. The leading
+      // `**/` lets tooling/test/lint/config_canary.test.mjs lint a file outside the project.
+      "files": ["**/src/unpoly.ts", "**/src/unpoly/**"],
+      "rules": {
+        "unpoly/no-up-internal": "error"
+      }
+    },
+    {
       "files": ["spec/**/*.js"],
       "globals": {
         "jasmine": "writable",

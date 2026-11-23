@@ -319,6 +319,11 @@ when neither is possible, have the function injected: the low-level module expor
 the namespace that owns the function calls it from `install()`. That's how `Config` gets
 `printToError()` from `log.ts` (`setConfigErrorPrinter()`).
 
+`bin/lint` reports `up.internal` in core (`unpoly/no-up-internal`). The only places where core
+uses the global on purpose are the hooks that `unpoly-migrate` replaces (`up.migrate.*`, see
+[Code style](code-style.md#the-global-up-and-unpoly-migrate)) and code that runs outside our
+bundle, like the script that `script/csp.ts` evaluates.
+
 ### Imports, exports and types
 
 A **main module** is a namespace file directly in `src/unpoly/`, like `fragment.ts` or
