@@ -36,16 +36,15 @@ well. The dev watcher runs the same checks after every change. When to run what 
 
 Besides the [public-API probe](documentation.md#public-api-must-exist), which checks that
 documented API exists in the types, `bin/typecheck` checks with TypeScript 7 against two
-configs:
+configs with the same settings (see [Strict checks](#strict-checks)):
 
-- `tsconfig.json` checks all of `src/` with loose settings, but with `strictFunctionTypes` on.
-- `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) with
-  `noImplicitAny` and `strictNullChecks` on. `unpoly-migrate` isn't part of this check, so core
-  can't use the API that only migrate adds, like `up.migrate.deprecated()` or `config.patch()`.
+- `tsconfig.json` checks all of `src/`.
+- `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) on its own.
+  `unpoly-migrate` isn't part of this check, so core can't use the API that only migrate adds,
+  like `up.migrate.deprecated()` or `config.patch()`.
 
-`bin/typecheck` prints an error that both checks find twice; the watcher lists it once. Your
-editor reads `tsconfig.json`, so it shows the loose check's errors, but not the ones only the
-core check finds. When all of `src/` passes a setting, move it to `tsconfig.json`.
+Your editor reads `tsconfig.json`, so it doesn't show the errors that only the core check finds.
+`bin/typecheck` prints them after `tsconfig.json`'s.
 
 Adding or changing types shouldn't change what the build emits. Compare `unpoly.min.js` before
 and after. A change that removes a cast or an `any`, together with its explanatory comment, may
@@ -167,11 +166,11 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
 
 ### Strict checks
 
-- Core code has no implicit `any`: type every parameter, and an empty `{}` or `[]` that
+- All of `src/` has no implicit `any`: type every parameter, and an empty `{}` or `[]` that
   collects values. Callbacks get their parameter types from the function
   they're passed to (`up.compiler()`, `up.on()`), so prefer typing that function over annotating
   each callback.
-- Core code passes `strictNullChecks`. When TypeScript says a value may be `null` or
+- All of `src/` passes `strictNullChecks`. When TypeScript says a value may be `null` or
   `undefined`, and the function you pass it to already handles that, widen the parameter's
   type (`origin?: Element`). When something guarantees the value, assert it with `!`, and say
   what guarantees it in a comment unless the code nearby shows it. Don't add a runtime check

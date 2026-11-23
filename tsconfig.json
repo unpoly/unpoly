@@ -4,11 +4,11 @@
   "compilerOptions": {
     "noEmit": true,
 
-    // Loose, because unpoly-migrate doesn't pass the stricter settings yet. tsconfig.core.json
-    // checks core with them.
+    // Not all of `strict` (which TypeScript 7 turns on by default) yet: src/ doesn't pass
+    // noImplicitThis, useUnknownInCatchVariables and strictBindCallApply.
     "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     // A callback's parameters must accept everything its caller passes.
     "strictFunctionTypes": true,
 

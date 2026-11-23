@@ -36,7 +36,8 @@ test('an error without a location is filed under tsc', () => {
   })
 })
 
-// A project of its own, so the test doesn't depend on src/. Its core check is stricter, like ours.
+// A project of its own, so the test doesn't depend on src/. Like ours, its core check leaves out
+// unpoly-migrate, which adds a key to `Up`.
 function project(t, files) {
   let root = mkdtempSync(path.join(tmpdir(), 'typecheck-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
@@ -45,16 +46,16 @@ function project(t, files) {
     writeFileSync(path.join(root, file), content)
   }
   write('tsconfig.json', JSON.stringify({
-    compilerOptions: { noEmit: true, strict: false, target: 'es2024', lib: ['es2024', 'dom'], module: 'preserve', moduleDetection: 'force', types: [], skipLibCheck: true },
+    compilerOptions: { noEmit: true, strict: false, noImplicitAny: true, target: 'es2024', lib: ['es2024', 'dom'], module: 'preserve', moduleDetection: 'force', types: [], skipLibCheck: true },
     include: ['src/**/*.ts'],
   }))
   write('tsconfig.core.json', JSON.stringify({
     extends: './tsconfig.json',
-    compilerOptions: { noImplicitAny: true },
     include: ['src/unpoly.ts', 'src/unpoly/**/*.ts'],
   }))
   // What the probe file imports.
   write('src/unpoly.ts', 'export interface Up { a: { b(): void } }\n')
+  write('src/unpoly-migrate/m.ts', "declare module '../unpoly.js' { interface Up { m: number } }\n")
   for (let [file, content] of Object.entries(files)) write(file, content)
   return root
 }
@@ -62,7 +63,7 @@ function project(t, files) {
 test('the watcher gets the errors of all three checks, each once, one block per file', async (t) => {
   let root = project(t, {
     // Both checks find the first error, only the core check the second one.
-    'src/unpoly/a.ts': "export const n: number = 'x'\nexport function f(x) { return x }\n",
+    'src/unpoly/a.ts': "export const n: number = 'x'\nexport const m: import('../unpoly.js').Up['m'] = 1\n",
     'src/unpoly/a.md': '# up.a.c\n\nDoes nothing.\n\n@function up.a.c\n',
   })
 
@@ -73,7 +74,7 @@ test('the watcher gets the errors of all three checks, each once, one block per 
     [
       'src/unpoly/a.ts',
       "  1:14     error  Type 'string' is not assignable to type 'number'.  TS2322",
-      "  2:19     error  Parameter 'x' implicitly has an 'any' type.  TS7006",
+      "  2:43     error  Property 'm' does not exist on type 'Up'.  TS2339",
     ].join('\n'),
     [
       'src/unpoly/a.md',
@@ -105,14 +106,16 @@ test('bin/typecheck says so when tsc cannot start, and fails', async (t) => {
   for (let text of output) assert.match(text, /error {2}tsc failed \(exit code 1\): spawn .*no-tsc ENOENT/)
 })
 
-test('bin/typecheck prints the core and probe errors, and fails', async (t) => {
+test('bin/typecheck prints the probe errors and the errors that only the core check finds, and fails', async (t) => {
   let root = project(t, {
-    'src/unpoly/a.ts': 'export function f(x) { return x }\n',
+    // tsc prints the first error itself, in the full check.
+    'src/unpoly/a.ts': "export const n: number = 'x'\nexport const m: import('../unpoly.js').Up['m'] = 1\n",
     'src/unpoly/a.md': '# up.a.c\n\nDoes nothing.\n\n@function up.a.c\n',
   })
   let output = []
   let code = await runTypecheck({ root, log: (text) => output.push(text) })
   assert.equal(code, 1)
-  assert.match(output.join('\n'), /^src\/unpoly\/a\.ts\(1,19\): error TS7006/m)
+  assert.doesNotMatch(output.join('\n'), /^src\/unpoly\/a\.ts\(1,/m)
+  assert.match(output.join('\n'), /^src\/unpoly\/a\.ts\(2,43\): error TS2339/m)
   assert.match(output.join('\n'), /^src\/unpoly\/a\.md\(5,11\): error TS2339: Documented as up\.a\.c/m)
 })

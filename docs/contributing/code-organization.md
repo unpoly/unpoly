@@ -94,8 +94,8 @@ docs/                     # Documentation for contributors, never shipped
   contributing/           # ... The guides linked from CONTRIBUTING.md
   plans/                  # ... Implementation plans (gitignored)
 
-tsconfig.json             # Loose type check of all of src/ (bin/typecheck, see Code style)
-tsconfig.core.json        # Strict type check of core, src/unpoly/ (bin/typecheck)
+tsconfig.json             # Type check of all of src/ (bin/typecheck, see Code style)
+tsconfig.core.json        # Type check of core, src/unpoly/, without unpoly-migrate (bin/typecheck)
 .oxlintrc.json            # Rules for bin/lint (see Code style)
 
 dist/                     # Output directory for the build (gitignored, never edit directly)

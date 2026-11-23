@@ -61,7 +61,7 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      # Runs both tsconfig.json and the stricter tsconfig.core.json.
+      # Runs both tsconfig.json and tsconfig.core.json, which checks core without unpoly-migrate.
       - name: Type-check src
         run: bin/typecheck
 
