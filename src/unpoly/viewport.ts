@@ -353,7 +353,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   // it would gain a layout context which cannot be crossed by margins.
   const bounds = e.createFromSelector('up-bounds')
   // Insert the bounds object before our element, then move element into it.
-  e.insertBefore(element, bounds)
+  element.before(bounds)
   bounds.appendChild(element)
 
   const moveBounds = function(diffX: number, diffY: number) {

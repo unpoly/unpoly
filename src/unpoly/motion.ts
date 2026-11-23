@@ -167,7 +167,7 @@ export function swapElements(
       const scrollTopBeforeScroll = viewport.scrollTop
 
       const oldRemote = absolutize(oldElement, {
-        afterMeasure: () => e.insertBefore(oldElement, newElement)
+        afterMeasure: () => oldElement.before(newElement)
       })
 
       play = async () => {

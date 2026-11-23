@@ -306,13 +306,6 @@ element.getAttribute('title') // result: "Original"
 
 -----
 
-# up.element.insertBefore()
-
-@function up.element.insertBefore
-@internal
-
------
-
 # up.element.createFromSelector()
 
 Creates an element matching the given CSS selector.

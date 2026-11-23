@@ -179,11 +179,6 @@ export function metaContent(name: string): string | undefined {
   return document.head.querySelector<HTMLMetaElement>(selector)?.content
 }
 
-export function insertBefore(existingNode: Node, newNode: Node): void {
-  // We're not using insertAdjacentElement() because that does not work with Text nodes
-  existingNode.parentNode!.insertBefore(newNode, existingNode)
-}
-
 export function createFromSelector(selector: string, attrs: u.PlainObject = {}): HTMLElement {
   let { includePath } = parseSelector(selector)
 
@@ -450,12 +445,7 @@ export function setMissingAttr(element: Element, key: string, value: unknown): v
 }
 
 export function unwrap(wrapper: Element): void {
-  preservingFocus(function() {
-    // Make a copy as it is a live list and we to iterate over it while also mutating it.
-    let childNodes = [...wrapper.childNodes]
-    for (let child of childNodes) insertBefore(wrapper, child)
-    wrapper.remove()
-  })
+  preservingFocus(() => wrapper.replaceWith(...wrapper.childNodes))
 }
 
 function wrapNodes(nodeOrNodes: u.List<Node>): HTMLElement {
