@@ -58,6 +58,14 @@ export interface RevealOptions {
 }
 
 /**
+Options for `up.viewport.saveFocus()` and `up.viewport.restoreFocus()`.
+*/
+export interface FocusStateOptions {
+  location?: string
+  layer?: LayerReference
+}
+
+/**
 Options for `up.viewport.saveScroll()` and `up.viewport.restoreScroll()`.
 */
 export interface ScrollPositionOptions extends LookupOptions {

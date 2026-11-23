@@ -248,7 +248,7 @@ export function restoreScroll(...args: unknown[]): boolean {
   }
 }
 
-export function saveFocus(options: u.PlainObject = {}): void {
+export function saveFocus(options: t.FocusStateOptions = {}): void {
   const layer = layerStack.get(options)!
   const location = options.location || layer.location
   if (location) {
@@ -259,10 +259,11 @@ export function saveFocus(options: u.PlainObject = {}): void {
   }
 }
 
-export function restoreFocus(options: u.PlainObject = {}): boolean {
+export function restoreFocus(options: t.FocusStateOptions = {}): boolean {
   const layer = layerStack.get(options)!
   const location = options.location || layer.location
-  const locationCapsule = layer.lastFocusCapsules.get(location)
+  // A layer without a location has no saved focus.
+  const locationCapsule = location && layer.lastFocusCapsules.get(location)
   // The capsule returns `true` if we could rediscover and focus the previous element.
   if (locationCapsule && locationCapsule.restore(layer)) {
     printToStandard('up.viewport.restoreFocus()', 'Restored focus to "%s"', locationCapsule._target)
