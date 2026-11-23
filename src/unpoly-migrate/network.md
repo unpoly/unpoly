@@ -121,10 +121,11 @@ Whether this request is [preloading](/learn/preloading) content.
 The number of milliseconds after which this request can cause
 an `up:network:late` event and show the [progress bar](/learn/progress-bar).
 
-Defaults to `up.network.config.lateDelay`.
+A value of `false` means the request never causes an `up:network:late` event.
+Returns `undefined` if no `{ lateDelay }` option was given. The request then uses `up.network.config.lateDelay`.
 
 @property up.Request#badResponseTime
-@param {number} [badResponseTime]
+@param {number|false|undefined} badResponseTime
 @deprecated
   Use `up.Request#lateDelay` instead.
 

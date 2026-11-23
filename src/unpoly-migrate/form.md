@@ -87,13 +87,12 @@ up.observe('input.query', function(value) {
   The number of milliseconds to wait before executing the callback
   after the input value changes. Use this to limit how often the callback
   will be invoked for a fast typist.
-@param {Function(value, name): string} onChange
+@param {Function(value, name): Promise} onChange
   The callback to run when the field's value changes.
 
-  If given as a function, it receives two arguments (`value`, `name`).
+  It receives two arguments (`value`, `name`).
   `value` is a string with the new field value and `name` is the name
-  of the form field that changed. If given as a string, it will be evaled as
-  JavaScript code in a context where (`value`, `name`) are set.
+  of the form field that changed.
 
   A long-running callback function may return a promise that settles when
   the callback completes. In this case the callback will not be called again while

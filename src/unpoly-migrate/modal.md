@@ -11,7 +11,7 @@ Opens a modal overlay for the given URL.
 @function up.modal.visit
 @param {string} url
   The URL to load.
-@param {Object} options
+@param {Object} [options]
   See options for `up.render()`.
 @deprecated
   Use `up.layer.open({ url, mode: "modal" })` instead.
@@ -25,7 +25,7 @@ Opens the given link's destination in a modal overlay.
 @function up.modal.follow
 @param {Element|jQuery|string} linkOrSelector
   The link to follow.
-@param {string} [options]
+@param {Object} [options]
   See options for `up.render()`.
 @return {Promise}
   A promise that will be fulfilled when the modal has been opened.
@@ -44,7 +44,7 @@ opens the results in a modal overlay.
   The CSS selector to extract from the HTML.
 @param {string} document
   The HTML containing the modal content.
-@param {Object} options
+@param {Object} [options]
   See options for [`up.modal.follow()`](/api/up.modal.follow).
 @return {Promise}
   A promise that will be fulfilled when the modal has been opened.
@@ -58,7 +58,7 @@ opens the results in a modal overlay.
 Closes a currently open overlay.
 
 @function up.modal.close
-@param {Object} options
+@param {Object} [options]
 @return {Promise}
 @deprecated
   Use `up.layer.dismiss()` instead.

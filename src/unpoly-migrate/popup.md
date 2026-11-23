@@ -24,7 +24,7 @@ Attaches a popup overlay to the given element or selector.
 Closes a currently open overlay.
 
 @function up.popup.close
-@param {Object} options
+@param {Object} [options]
 @return {Promise}
 @deprecated
   Use `up.layer.dismiss()` instead.
