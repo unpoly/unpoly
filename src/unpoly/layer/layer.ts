@@ -412,7 +412,7 @@ export class Layer {
     throw new NotImplemented()
   }
 
-  affix(...args: [selector: string, attrs?: u.PlainObject]): HTMLElement {
+  affix(...args: [selector: string, attrs?: e.ElementAttrs]): HTMLElement {
     return e.affix(this.getFirstSwappableElement(), ...args)
   }
 

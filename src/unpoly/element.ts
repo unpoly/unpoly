@@ -179,7 +179,7 @@ export function metaContent(name: string): string | undefined {
   return document.head.querySelector<HTMLMetaElement>(selector)?.content
 }
 
-export function createFromSelector(selector: string, attrs: u.PlainObject = {}): HTMLElement {
+export function createFromSelector(selector: string, attrs: t.ElementAttrs = {}): HTMLElement {
   let { includePath } = parseSelector(selector)
 
   // A selector has at least one segment, so the loop below assigns this.
@@ -310,8 +310,8 @@ export function parseSelector(rawSelector: string): ParsedSelector {
   }
 }
 
-export function affix(parent: Element, selector: string, attrs?: u.PlainObject): HTMLElement
-export function affix(parent: Element, position: InsertPosition, selector: string, attrs?: u.PlainObject): HTMLElement
+export function affix(parent: Element, selector: string, attrs?: t.ElementAttrs): HTMLElement
+export function affix(parent: Element, position: InsertPosition, selector: string, attrs?: t.ElementAttrs): HTMLElement
 export function affix(...args: unknown[]): HTMLElement {
   let [parent, position = 'beforeend', selector, attributes] = u.parseArgs(args, 'val', u.isAdjacentPosition, 'val', 'options')
   const element = createFromSelector(selector, attributes)

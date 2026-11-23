@@ -15,6 +15,18 @@ Any object with such properties works, e.g. an `up.Rect`.
 export type StyleProps = Record<string, any>
 
 /**
+Attributes for `up.element.createFromSelector()` and `up.element.affix()`. Besides HTML attributes,
+it takes a few keys that set the element's content and style.
+*/
+export interface ElementAttrs {
+  text?: string
+  content?: string | Element | u.List<Node>
+  style?: string | StyleProps
+  // oxlint-disable-next-line typescript/no-explicit-any -- any attribute value, which setAttribute() stringifies
+  [attr: string]: any
+}
+
+/**
 The `up:element:defined` event.
 */
 export interface ElementDefinedEvent extends UpEvent { localName: string }
