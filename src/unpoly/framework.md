@@ -16,7 +16,7 @@ Compilers may query this property to check if the initial page is being compiled
 (as opposed to a subsequent fragment update).
 
 @property up.framework.booted
-@param {boolean} boolean
+@param {boolean} booted
 @experimental
 
 -----
@@ -169,5 +169,7 @@ Internet Explorer 11 or lower is [no longer supported](https://github.com/unpoly
 If you need to support Internet Explorer 11, use Unpoly 2.
 
 @function up.framework.isSupported
+@return {boolean}
+  Whether the current browser is supported.
 @stable
 @signature
