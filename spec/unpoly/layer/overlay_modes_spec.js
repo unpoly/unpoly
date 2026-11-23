@@ -679,6 +679,33 @@ describe('PopupLayer', function() {
     expect(rootInput).toBeFocused()
   })
 
+  it('opens and closes with animations when { backdrop: true } is set, although a popup has no backdrop element (bugfix)', async function() {
+    const [opener] = htmlFixtureList('<a href="#">opener</a>')
+
+    const job = up.render({
+      layer: 'new popup',
+      origin: opener,
+      fragment: '<div id="popup-content">popup content</div>',
+      backdrop: true,
+      openAnimation: 'fade-in',
+      openDuration: 10,
+      closeAnimation: 'fade-out',
+      closeDuration: 10,
+    })
+
+    await expectAsync(job.finished).toBeResolved()
+    const popup = up.layer.current
+    expect(popup.mode).toBe('popup')
+    expect(popup.element).toBeVisible()
+    expect(document).not.toHaveSelector('up-popup-backdrop')
+
+    popup.dismiss()
+    await wait(80)
+
+    expect(popup).not.toBeAlive()
+    expect(document).not.toHaveSelector('up-popup')
+  })
+
   describe('positioning', function() {
 
     const setPopupMargin = function(margins) {
