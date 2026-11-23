@@ -254,8 +254,6 @@ Does nothing if there are no animations to complete.
 @function up.motion.finish
 @param {Element|jQuery|string} [element]
   The element around which to finish all animations.
-@return {Promise}
-  A promise that fulfills when animations and transitions have finished.
 @stable
 
 -----

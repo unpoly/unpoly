@@ -2087,8 +2087,10 @@ up.fragment.matches(element, element) // result: true
   @param {string|up.Layer} [options.mode]
     Required if `{ layer: 'new' }` is passed.
 
-@return {boolean}
+@return {boolean|undefined}
   Whether `fragment` matches the given `selector`.
+
+  Returns `undefined` when an `Element` is passed as `selector` and no target can be derived from it.
 
 @stable
 

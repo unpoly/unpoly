@@ -281,7 +281,7 @@ console.log(layer.mode) // logs "modal"
   @param {string} [options.size]
     The size of the overlay.
 
-    Supported values are `'small'`, `'medium'`, `'large'`, and `'grow'`.\
+    Supported values are `'small'`, `'medium'`, `'large'`, `'full'`, and `'grow'`.\
     See [overlay sizes](/learn/customizing-overlays#overlay-sizes) for details.
 
   @param {string} [options.class]

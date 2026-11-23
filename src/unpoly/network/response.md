@@ -176,7 +176,10 @@ Returns `null` or `undefined` if the given header name was not included in the r
 The response's [content-type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
 
 @property up.Response#contentType
-@param {string} contentType
+@param {string|null|undefined} contentType
+  The value of the `Content-Type` header.
+
+  Returns `null` or `undefined` if the response has no `Content-Type` header.
 @stable
 
 -----

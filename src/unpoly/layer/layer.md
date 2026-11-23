@@ -584,8 +584,11 @@ the `'title'` aspect.
 @learn-ref history-in-overlays
 
 @property up.Layer#title
-@param {string} title
+@param {string|undefined} title
   This layer's title.
+
+  Returns `undefined` for an overlay without [visible history](/api/up.Layer.prototype.history)
+  that has not rendered a `<title>`.
 @experimental
 
 -----
@@ -604,8 +607,11 @@ this property returns the URL of the rendered content, while the address bar kee
 @learn-ref history-in-overlays
 
 @property up.Layer#location
-@param {string} location
+@param {string|undefined} location
   The layer's current location.
+
+  Returns `undefined` for an overlay without [visible history](/api/up.Layer.prototype.history)
+  that has not rendered a location, e.g. when it was opened from a string of HTML.
 @experimental
 
 -----

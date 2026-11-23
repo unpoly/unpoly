@@ -36,7 +36,7 @@
   How much [space to leave to the closest viewport edge](/learn/scroll-tuning#revealing-with-padding)
   when scrolling to an element.
 
-@param {number|Function} [options.revealMax]
+@param {number|false|Function(Element): number} [options.revealMax]
   How many pixel lines of a [tall element to reveal](/learn/scroll-tuning#revealing-large-elements) when scrolling to an element.
 
 @param {boolean} [options.saveScroll=true]

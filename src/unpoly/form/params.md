@@ -188,8 +188,11 @@ let foo = params.get('foo')
 @function up.Params#add
 @param {string} name
   The name of the new entry.
-@param {any} value
+@param {string|number|boolean|Blob|null|undefined} value
   The value of the new entry.
+
+  Pass a `Blob` (like a `File`) for a binary value.
+  In a [query string](/api/up.Params.prototype.toQuery), a `null` or `undefined` value encodes the name without a value.
 @stable
 
 -----
@@ -231,8 +234,10 @@ new entry is set. To add a new entry even if the `name` is taken, use `up.Params
 @function up.Params#set
 @param {string} name
   The name of the entry to set.
-@param {any} value
+@param {string|number|boolean|Blob|null|undefined} value
   The new value of the entry.
+
+  See `up.Params#add()` for the supported values.
 @stable
 
 -----
@@ -278,6 +283,8 @@ let bar = params.get('bar[]')
 
 @function up.Params#get
 @param {string} name
+@return {string|number|boolean|Blob|null|undefined|Array<string|number|boolean|Blob|null|undefined>}
+  The first value with the given name, or an array of all values for an array field.
 @stable
 
 -----
@@ -290,7 +297,7 @@ Returns `undefined` if no param value with that name is set.
 
 @function up.Params#getFirst
 @param {string} name
-@return {any}
+@return {string|number|boolean|Blob|null|undefined}
   The value of the param with the given name.
 @experimental
 
@@ -304,7 +311,7 @@ Returns an empty array if no param value with that name is set.
 
 @function up.Params#getAll
 @param {string} name
-@return {Array}
+@return {Array<string|number|boolean|Blob|null|undefined>}
   An array of all values with the given name.
 @experimental
 

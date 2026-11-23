@@ -26,10 +26,13 @@ The targeted `Element` that is being previewed.
 
 When [updating multiple fragments](/learn/targeting-fragments#multiple), the first targeted fragment will be previewed.
 
+Returns `undefined` when [opening a new overlay](/learn/opening-overlays).
+
 Also see [inspecting the preview context](/learn/previews#inspecting-the-preview-context).
 
 @property up.Preview#fragment
-@return {Element}
+@return {Element|undefined}
+  The targeted fragment.
 @stable
 
 -----

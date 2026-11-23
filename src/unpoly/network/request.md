@@ -386,7 +386,7 @@ When this request will [open a new overlay](/learn/opening-overlays), `undefined
 See also `up.RenderResult#fragment`.
 
 @property up.Request#fragment
-@param {Element} fragment
+@param {Element|undefined} fragment
   The first targeted fragment.
 @stable
 
