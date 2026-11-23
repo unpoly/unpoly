@@ -8,7 +8,7 @@ up.specUtil = (function() {
    Returns whether the given element has been detached from the DOM
    (or whether it was never attached).
 
-   @function up.util.isDetached
+   @function up.specUtil.isDetached
    @internal
    */
   function isDetached(element) {

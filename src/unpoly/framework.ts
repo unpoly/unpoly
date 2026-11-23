@@ -28,7 +28,7 @@ declare global {
   }
 }
 
-// Event                          up.framework.readyState   document.readyState
+// Event                          readyState                document.readyState
 // ------------------------------------------------------------------------------------------------------
 // Browser starts parsing HTML    -                         loading
 // Unpoly script is running       evaling                   loading (if sync) or interactive (if defered)

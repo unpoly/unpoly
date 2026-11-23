@@ -45,7 +45,7 @@ up.migrate = (function() {
   // Without a label we print the object itself.
   //
   // Pass a { value } to set an initial value without a warning.
-  // It is restored when up.framework.reset() runs the config patch again.
+  // It is restored when the config patch runs again on `up:framework:reset`.
   function removedProperty<T>(object: object, key: string, { label, warning, value }: RemovedPropertyOptions<T> = {}): [T] {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
@@ -59,7 +59,7 @@ up.migrate = (function() {
       }
     })
 
-    // We only keep an existing data value. When up.framework.reset() runs a config patch again,
+    // We only keep an existing data value. When a config patch runs again on `up:framework:reset`,
     // reading object[key] would call the getter from the previous definition, which warns and keeps the old value.
     // We return the reference so a polyfill can honor a value that the app sets.
     let valueRef: [T] = [value ?? Object.getOwnPropertyDescriptor(object, key)?.value]

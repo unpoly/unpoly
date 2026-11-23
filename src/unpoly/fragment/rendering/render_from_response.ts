@@ -196,7 +196,7 @@ function augmentOptionsFromResponse(renderOptions: t.RenderOptions, response: Up
   let openLayerOptions = response.openLayer
   if (openLayerOptions) {
     // For callback strings like { onAccepted } we need to
-    // (1) check up.script.config.allow and possibly block
+    // (1) check up.script.config.evalCallbackPolicy and possibly block
     // (2) adopt any prefixed nonces
     // (3) parse the string into a function
     adoptRenderOptionsFromHeader(openLayerOptions, response.cspInfo)
