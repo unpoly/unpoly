@@ -53,7 +53,9 @@ export function renderFromContent(options: t.RenderOptions): RenderResult | Prom
 
 // Returns information about the change that is most likely before the request was dispatched.
 // This might change postflight if the response does not contain the desired target.
-// With { optional: true }, returns an empty object instead of throwing when no target matches.
+// With { optional: true }, returns only the selector we would try first instead of throwing
+// when no target matches. It is undefined when there is no layer to render in, or when the
+// target or fallback give no selector to try.
 export function preflightPropsFromContent(options: t.RenderOptions): t.PreflightProps
 export function preflightPropsFromContent(options: t.RenderOptions, opts: PreflightOptions): Partial<t.PreflightProps>
 export function preflightPropsFromContent(
@@ -66,7 +68,14 @@ export function preflightPropsFromContent(
 
   let layers = getLayers(options)
   let plans = getPlans(options, layers)
-  return seekPlan(plans, (plan) => plan.getPreflightProps()) || (opts.optional ? {} : cannotMatchTarget('Could not find target in current page', plans, layers, options))
+  let props = seekPlan(plans, (plan) => plan.getPreflightProps())
+  if (props) return props
+
+  if (opts.optional) {
+    return { target: plans[0]?.target }
+  } else {
+    cannotMatchTarget('Could not find target in current page', plans, layers, options)
+  }
 }
 
 // The layer lookup normalizes the options in place, e.g. it sets a { baseLayer }.

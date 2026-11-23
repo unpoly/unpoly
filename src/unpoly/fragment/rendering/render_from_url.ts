@@ -71,7 +71,8 @@ function getRequestAttrs(options: URLRenderOptions): RequestAttrs {
   // likely before the request was dispatched.
   // This might change postflight if the response does not contain the desired target.
   const successAttrs = preflightPropsFromContent(options)
-  // This is empty when the fail options match no target.
+  // When the fail options match no target, this only has the { target } selector we would try first.
+  // It replaces the { failTarget } option, which may be an element or an array.
   const failAttrs = preflightPropsFromContent(deriveFailOptions(options), { optional: true })
 
   return {

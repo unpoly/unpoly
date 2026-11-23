@@ -1298,6 +1298,64 @@ extendDescribe('up.fragment', function() {
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find( common)? target/i))
           })
 
+          it('sends an unmatched { failTarget } string as an X-Up-Fail-Target header', async function() {
+            htmlFixtureList('<div class="success"></div>')
+
+            let request
+            up.render('.success', { url: '/path', failTarget: '.failure', onRequestKnown: (r) => { request = r } })
+            await wait()
+
+            expect(request.failTarget).toBe('.failure')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Fail-Target']).toBe('.failure')
+          })
+
+          it('sends the first alternative of an unmatched { failTarget } array as an X-Up-Fail-Target header', async function() {
+            htmlFixtureList('<div class="success"></div>')
+
+            let request
+            up.render('.success', { url: '/path', failTarget: ['.failure1', '.failure2'], onRequestKnown: (r) => { request = r } })
+            await wait()
+
+            expect(request.failTarget).toBe('.failure1')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Fail-Target']).toBe('.failure1')
+          })
+
+          it('sends an unmatched { failTarget } element as a selector string in the X-Up-Fail-Target header', async function() {
+            htmlFixtureList('<div class="success"></div>')
+            const failElement = up.element.createFromSelector('.failure')
+
+            let request
+            up.render('.success', { url: '/path', failTarget: failElement, failLayer: 'current', onRequestKnown: (r) => { request = r } })
+            await wait()
+
+            expect(request.failTarget).toBe('.failure')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Fail-Target']).toBe('.failure')
+          })
+
+          it('sends no X-Up-Fail-Target header when there is no layer to match the { failTarget } in', async function() {
+            htmlFixtureList('<div class="success"></div>')
+            // A detached element belongs to no layer.
+            const failElement = up.element.createFromSelector('.failure')
+
+            let request
+            up.render('.success', { url: '/path', failTarget: failElement, onRequestKnown: (r) => { request = r } })
+            await wait()
+
+            expect(request.failTarget).toBeUndefined()
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Fail-Target']).toBeUndefined()
+          })
+
+          it('sends no X-Up-Fail-Target header when the { failLayer } cannot be resolved', async function() {
+            htmlFixtureList('<div class="success"></div>')
+
+            let request
+            up.render('.success', { url: '/path', failTarget: '.failure', failLayer: 'parent', onRequestKnown: (r) => { request = r } })
+            await wait()
+
+            expect(request.failTarget).toBeUndefined()
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Fail-Target']).toBeUndefined()
+          })
+
           it('considers a union selector to be missing if one of its selector-atoms are missing', async function() {
             $fixture('.target').text('old target')
             $fixture('.fallback').text('old fallback')
