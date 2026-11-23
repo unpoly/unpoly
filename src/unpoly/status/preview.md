@@ -122,8 +122,10 @@ The [origin](/api/origin) element that triggered this render pass.
 For example, when the user clicked a link with a preview effect, `preview.origin` will be the
 clicked `a[href]` element.
 
+Returns `undefined` if the render pass has no origin, e.g. when it was started with `up.render()` without an `{ origin }`.
+
 @property up.Preview#origin
-@return {Element}
+@return {Element|undefined}
 @stable
 
 -----
@@ -782,4 +784,6 @@ up.preview('spinner-overlay', function(preview) {
 ```
 
 @function up.Preview#openLayer
+@return {up.Layer}
+  The temporary overlay.
 @experimental
