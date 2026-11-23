@@ -32,6 +32,12 @@ The tool runs no specs and no type check, and its build lints only `src/`. It bu
 working tree and tags `HEAD`, so release from a clean working tree, at a pushed commit that
 [CI](commit-conventions.md#continuous-integration) has passed.
 
+The specs never run against the bundles we publish, so CI's job "Boot published bundles" builds
+them like `bin/release` does and loads them in headless Chrome: each `unpoly*.js` alone, and with
+each `unpoly-migrate` and `unpoly-bootstrap` bundle of the same minification. Any uncaught error,
+console error, or a failed render of one fragment fails the job. It takes a few seconds, and you
+can run it yourself with `bin/build && bin/boot-bundles` (which stops a running dev environment).
+
 Afterwards it prints the manual follow-ups it cannot do for you: a matching
 [`unpoly-rails`](https://github.com/unpoly/unpoly-rails) release, deploying
 [`unpoly-site`](https://github.com/unpoly/unpoly-site) so unpoly.com serves the new

@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+// Loads the published bundles from dist/ in headless Chrome and checks that each combination
+// boots and renders (see tooling/build/boot_bundles.mjs). Build them first, like bin/release does:
+//
+//     bin/build && bin/boot-bundles
+import { bootBundles } from '../tooling/build/boot_bundles.mjs'
+
+process.exit(await bootBundles())

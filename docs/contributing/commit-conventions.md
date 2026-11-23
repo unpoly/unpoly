@@ -56,6 +56,7 @@ git log -1 --format='# %s%n%H' <sha> >> .git-blame-ignore-revs
 CI runs the whole suite in multiple Chrome configurations: without CSP, under a nonce-only
 CSP, under a strict-dynamic CSP, against the `unpoly-migrate` build, against the ES6
 build, against the minified build and against the minified ES6 build. Separate jobs run
-`bin/lint`, `bin/typecheck` and the tooling's own tests (`bin/tooling-tests`).
+`bin/lint`, `bin/typecheck`, the tooling's own tests (`bin/tooling-tests`), and boot the
+bundles we publish (see [Releasing](releasing.md)).
 
 It runs on every pull request against `master`, and on every push to `master`.

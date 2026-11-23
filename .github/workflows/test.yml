@@ -89,6 +89,33 @@ jobs:
       - name: Test the tooling
         run: bin/tooling-tests
 
+  # The specs run against the dev and CI builds. This loads the bundles that bin/release publishes,
+  # built the same way, in headless Chrome (see tooling/build/boot_bundles.mjs).
+  boot-bundles:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    name: Boot published bundles
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Install Node.js vom .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build the production bundles, like bin/release
+        run: bin/build
+
+      - name: Boot each bundle combination in Chrome
+        run: bin/boot-bundles
+
   test:
     runs-on: ubuntu-22.04
     timeout-minutes: 16
