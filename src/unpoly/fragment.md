@@ -33,7 +33,7 @@ Configures defaults for fragment updates.
 
     Also see [targeting the main fragment](/learn/targeting-fragments#targeting-the-main-element).
 
-  @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
+  @param {Array<string|(Function(Element): string|undefined)>} [config.targetDerivers]
     An array of [target derivation patterns](/learn/target-derivation#derivation-patterns)
     used to [guess a target selector](/learn/target-derivation) for an element.
 
@@ -533,7 +533,7 @@ Instead of calling `up.navigate()` you may also call `up.render({ navigate: true
 @function up.navigate
 
 @section Targeting
-  @param {string|Element|jQuery} [target]
+  @param {string|Element|jQuery|Array<string>} [target]
     The [target selector](/learn/targeting-fragments) to update.
 
     If omitted a [main target](/api/main) will be rendered.
@@ -1347,11 +1347,11 @@ Returns whether the given `root` matches or contains the given selector or eleme
 
 Will always return `false` if the two elements are on different [layers](/api/up.layer).
 
+@function up.fragment.contains
 @param {Element|Document} root
 @param {string|Element} query
   The selector or element to look for.
 @return {boolean}
-@function up.fragment.contains
   Whether the root contains the given element or selector.
 @experimental
 
@@ -1563,11 +1563,12 @@ up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'a
       Defaults to the [URL from which the fragment was originally loaded](/api/up.fragment.source).
 
 @section Caching
-  @param {boolean} [options.cache=false]
+  @param {boolean|string} [options.cache=false]
     Whether to restore the fragment from the [cache](/learn/caching).
 
     By default the cache is ignored and a new HTTP request is sent.
     Pass `{ cache: true }` to restore the fragment from the cache.
+    Pass `{ cache: 'auto' }` to use the cache only if `up.network.config.autoCache` returns `true` for the request.
 
   @param {boolean|string} [options.revalidate=false]
     @like up.render
@@ -2084,7 +2085,7 @@ up.fragment.matches(element, element) // result: true
     Pseudo-selectors like `:main` may expand to different selectors in different layers.
 
     Defaults to the layer of `fragment`.
-  @param {string|up.Layer} [options.mode]
+  @param {string} [options.mode]
     Required if `{ layer: 'new' }` is passed.
 
 @return {boolean|undefined}

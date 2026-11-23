@@ -1,6 +1,6 @@
 @partial up.render/caching
 
-@param {boolean} [options.cache]
+@param {boolean|string} [options.cache]
   Whether to read from and write to the [cache](/learn/caching).
 
   With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
@@ -25,13 +25,15 @@
 
   With `{ revalidate: false }` Unpoly will never revalidate cached content.
 
-@param {string|Function(up.Preview)} [options.revalidatePreview]
+@param {boolean|string|Function(up.Preview)|Array} [options.revalidatePreview]
   A [preview](/learn/previews) that runs
   while [revalidating cached content](/learn/caching#revalidation).
 
+  Pass `true` to reuse the [`{ preview }`](/api/up.render#options.preview) option.
+
   @experimental
 
-@param {boolean|string} [options.expireCache]
+@param {boolean|string|Function(up.Request): boolean} [options.expireCache]
   Whether existing [cache](/learn/caching) entries will be [expired](/learn/caching#expiration) when this request is sent.
 
   Expired content remains in the cache, but will be [revalidated](/learn/caching#revalidation) with the server
@@ -44,7 +46,7 @@
   To only expire some requests, pass a [URL pattern](/api/url-patterns) that matches requests to uncache.
   You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
-@param {boolean|string} [options.evictCache]
+@param {boolean|string|Function(up.Request): boolean} [options.evictCache]
   Whether existing [cache](/learn/caching) entries will be [evicted](/learn/caching#eviction) when this request is sent.
 
   By default, Unpoly will never evict entries while the cache has

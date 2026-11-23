@@ -48,7 +48,7 @@
   Background requests are deprioritized and won't show the [progress bar](/learn/progress-bar).
   See [[background-requests]].
 
-@param {number|boolean} [options.lateDelay]
+@param {number|false} [options.lateDelay]
   The number of milliseconds after which this request can cause
   an `up:network:late` event and show the [progress bar](/learn/progress-bar).
 

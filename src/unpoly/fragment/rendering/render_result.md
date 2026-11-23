@@ -132,10 +132,12 @@ Returns the inserted fragment.
 When [multiple fragments](/learn/targeting-fragments#multiple) were inserted, the first fragment is returned.
 To get a list of all inserted fragments, use the [`{ fragments }`](/api/up.RenderResult.prototype.fragments) property.
 
+When [no fragments were rendered](/api/up.RenderResult.prototype.none), `undefined` is returned.
+
 See also `up.Request#fragment`.
 
 @property up.RenderResult#fragment
-@param {Element} fragment
+@param {Element|undefined} fragment
 @stable
 
 -----
@@ -150,5 +152,5 @@ Other HTTP codes (like `500` or `404`) are considered [error responses](/learn/e
 Rendering a [string of HTML](/learn/providing-html#string) is always successful.
 
 @property up.RenderResult#ok
-@param {boolean} up.RenderResult#ok
+@param {boolean} ok
 @experimental
