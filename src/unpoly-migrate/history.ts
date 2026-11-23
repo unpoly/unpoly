@@ -6,6 +6,13 @@ declare module '../unpoly.js' {
   }
 }
 
+// Adds a setting to up.history.config that core doesn't declare, so it exists only with unpoly-migrate.
+declare module '../unpoly/history/types.js' {
+  interface HistoryConfig {
+    updateMetaTags?: boolean
+  }
+}
+
 up.history.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'popTargets', 'restoreTargets', { label: 'up.history.config' })
 })
