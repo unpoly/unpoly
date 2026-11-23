@@ -1,5 +1,24 @@
-import type { EmitProps, UnbindFunction } from '../unpoly/event.js'
+import type {
+  EmitProps, EventTypes, ListenerOptions, ListenerSelector, ListenerTargets, ObservedEvent, UnbindFunction,
+} from '../unpoly/event.js'
 import type { AnyFunction } from '../unpoly/util.js'
+
+// The listener for up.$on(). Like a listener for up.on(), but it gets a jQuery collection instead of
+// the element, also as `this`. We have no types for jQuery.
+//
+// The signature is taken from a method, since TypeScript checks method parameters bivariantly, even
+// under `strictFunctionTypes`. That lets a listener annotate a narrower type than we can infer,
+// like `(event: CustomEvent, $element)` for an event type that we don't know.
+type JQueryListenerCallback<E> =
+  // oxlint-disable-next-line typescript/no-explicit-any -- a jQuery collection, and the element's data of any type
+  { listener(this: any, event: E, $element: any, data?: any): unknown }['listener']
+
+// Like ListenerArgs, with a jQuery listener.
+type JQueryListenerArgs<E> =
+  | [listener: JQueryListenerCallback<E>]
+  | [selector: ListenerSelector, listener: JQueryListenerCallback<E>]
+  | [options: ListenerOptions<E>, listener: JQueryListenerCallback<E>]
+  | [selector: ListenerSelector, options: ListenerOptions<E>, listener: JQueryListenerCallback<E>]
 
 // A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
@@ -7,8 +26,12 @@ declare module '../unpoly.js' {
     event: CoreApi['event'] & {
       nobodyPrevents(eventType: string, eventProps?: EmitProps): boolean
     }
-    // The listener takes a jQuery collection instead of an element.
-    $on(...args: unknown[]): UnbindFunction
+    $on<const T extends EventTypes>(types: T, ...args: JQueryListenerArgs<ObservedEvent<T>>): UnbindFunction
+    $on<const T extends EventTypes>(
+      targets: ListenerTargets,
+      types: T,
+      ...args: JQueryListenerArgs<ObservedEvent<T>>
+    ): UnbindFunction
     $off(...args: unknown[]): void
     readonly bus: Up['event']
   }

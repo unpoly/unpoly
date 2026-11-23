@@ -1,14 +1,20 @@
-import type { Compiler } from '../unpoly/script.js'
+import type { Compiler, CompilerMeta, CompilerOptions, CompilerSelector } from '../unpoly/script.js'
 import type { AnyFunction } from '../unpoly/util.js'
 
 const u = up.util
 
+// The function for up.$compiler() and up.$macro(). Like a compiler function, but it gets a jQuery
+// collection instead of the element (or of all elements with { batch: true }). We have no types for jQuery.
+// oxlint-disable-next-line typescript/no-explicit-any -- a jQuery collection, and the element's data of any type
+type JQueryCompilerCallback = ($element: any, data: any, meta: CompilerMeta) => unknown
+
 // A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
-    // The compiler function takes a jQuery collection instead of an element.
-    $compiler(...args: unknown[]): void
-    $macro(...args: unknown[]): void
+    $compiler(selector: CompilerSelector, callback: JQueryCompilerCallback): void
+    $compiler(selector: CompilerSelector, options: CompilerOptions, callback: JQueryCompilerCallback): void
+    $macro(selector: CompilerSelector, callback: JQueryCompilerCallback): void
+    $macro(selector: CompilerSelector, options: CompilerOptions, callback: JQueryCompilerCallback): void
     readonly syntax: Up['script']
   }
 }
