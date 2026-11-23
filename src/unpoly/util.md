@@ -85,7 +85,7 @@ up.util.normalizeURL('/bar#hash', { hash: false }) // result: '/bar'
 @function up.util.normalizeURL
 @param {string|URL} url
   the URL to normalize
-@param {boolean} [options.host='cross-domain']
+@param {boolean|string} [options.host='cross-domain']
   Whether to include protocol, hostname and port in the normalized URL.
 
   When set to `'cross-domain'` (the default), the host is only included if it differs from the page's hostname.
@@ -189,6 +189,7 @@ up.util.mapObject(['alice', 'bob'], function(element) {
 // result: { ALICE: 5, BOB: 3 }
 ```
 
+@function up.util.mapObject
 @param {Array} array
   The array from which to create an object.
 
@@ -199,7 +200,8 @@ up.util.mapObject(['alice', 'bob'], function(element) {
 
   It must return a tuple of the object key and value.
 
-@function up.util.mapObject
+@return {Object}
+  The created object.
 @stable
 
 -----
@@ -557,8 +559,8 @@ Converts the given [array-like value](/api/List) into an array.
 If the given value is already an array, it is returned unchanged.
 
 @function up.util.toArray
-@param {any} value
-@return {Array}
+@param {List<T>} value
+@return {Array<T>}
 @stable
 
 -----
@@ -835,7 +837,7 @@ for which uniqueness is computed.
 
 @function up.util.uniqBy
 @param {Array} array
-@param {Function(value): any} array
+@param {Function(value): any} mapper
 @return {Array}
 @experimental
 
@@ -1051,6 +1053,7 @@ up.util.omit(object, ['foo', 'baz']) // result: { bar: 2 }
 @function up.util.omit
 @param {Object} object
 @param {Array} keys
+@return {Object}
 @stable
 
 -----
@@ -1110,6 +1113,8 @@ Escapes the given string of HTML by replacing control chars with their HTML enti
 @function up.util.escapeHTML
 @param {string} string
   The text that should be escaped.
+@return {string}
+  The escaped string.
 @stable
 
 -----
