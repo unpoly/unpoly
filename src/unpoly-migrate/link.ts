@@ -91,7 +91,7 @@ up.migrate.transformAttribute('up-restore-scroll', function(link, restoreScroll)
   }
 })
 
-up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, 'up.link.config.instantSelectors and up.link.config.preloadSelectors')
+up.migrate.targetMacro!('up-dash', { 'up-preload': '', 'up-instant': '' }, 'up.link.config.instantSelectors and up.link.config.preloadSelectors')
 
 up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: preloadSelectorFn })
 

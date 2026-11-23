@@ -21,8 +21,8 @@ declare module '../unpoly.js' {
 }
 
 up.popup = {
-  attach(origin, options = {}) {
-    origin = up.fragment.get(origin)
+  attach(originOrSelector, options = {}) {
+    let origin = up.fragment.get(originOrSelector)
     up.migrate.deprecated('up.popup.attach(origin)', "up.layer.open({ origin, mode: 'popup' })")
     return up.layer.open({ ...options, origin, layer: 'new', mode: 'popup' })
   },
@@ -30,7 +30,7 @@ up.popup = {
   close(options = {}) {
     up.migrate.deprecated('up.popup.close()', 'up.layer.dismiss()')
     up.layer.dismiss(null, options)
-    return up.migrate.formerlyAsync('up.layer.dismiss()')
+    return up.migrate.formerlyAsync!('up.layer.dismiss()')
   },
 
   url() {
@@ -75,4 +75,4 @@ up.migrate.renamedEvent('up:popup:opened', 'up:layer:opened')
 up.migrate.renamedEvent('up:popup:close', 'up:layer:dismiss')
 up.migrate.renamedEvent('up:popup:closed', 'up:layer:dismissed')
 
-up.migrate.targetMacro('up-popup', { 'up-layer': 'new popup' }, '[up-layer="new popup"]')
+up.migrate.targetMacro!('up-popup', { 'up-layer': 'new popup' }, '[up-layer="new popup"]')

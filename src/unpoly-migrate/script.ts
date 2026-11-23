@@ -60,7 +60,7 @@ up.migrate.targetMacro = function(queryAttr, fixedResultAttrs, replacement) {
   })
 }
 
-up.$compiler = function(...definitionArgs) {
+up.$compiler = function(...definitionArgs: unknown[]) {
   up.migrate.warn('up.$compiler() has been deprecated. Instead use up.compiler() with a callback that wraps the given native element in a jQuery collection.')
 
   let $fn = definitionArgs.pop() as AnyFunction
@@ -71,7 +71,7 @@ up.$compiler = function(...definitionArgs) {
   })
 }
 
-up.$macro = function(...definitionArgs) {
+up.$macro = function(...definitionArgs: unknown[]) {
   up.migrate.warn('up.$macro() has been deprecated. Instead use up.macro() with a callback that wraps the given native element in a jQuery collection.')
 
   let $fn = definitionArgs.pop() as AnyFunction

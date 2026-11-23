@@ -45,7 +45,7 @@ up.modal = {
   close(options = {}) {
     up.migrate.deprecated('up.modal.close()', 'up.layer.dismiss()')
     up.layer.dismiss(null, options)
-    return up.migrate.formerlyAsync('up.layer.dismiss()')
+    return up.migrate.formerlyAsync!('up.layer.dismiss()')
   },
 
   url() {
@@ -91,6 +91,6 @@ up.migrate.renamedEvent('up:modal:opened', 'up:layer:opened')
 up.migrate.renamedEvent('up:modal:close', 'up:layer:dismiss')
 up.migrate.renamedEvent('up:modal:closed', 'up:layer:dismissed')
 
-up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, '[up-layer="new modal"]')
+up.migrate.targetMacro!('up-modal', { 'up-layer': 'new modal' }, '[up-layer="new modal"]')
 
-up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, '[up-layer="new drawer"]')
+up.migrate.targetMacro!('up-drawer', { 'up-layer': 'new drawer' }, '[up-layer="new drawer"]')

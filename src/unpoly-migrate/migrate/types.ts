@@ -93,7 +93,8 @@ declare module '../../unpoly/migrate_stub.js' {
     removedEvent(type: string, replacementExpression?: string | null): void
     fixKey(object: PlainObject, oldKey: string, newKey: string, options?: FixKeyOptions): void
     warn(message: string, ...args: unknown[]): void
-    // Added by other files of unpoly-migrate.
+    // Added by other files of unpoly-migrate, so optional like the hooks that core declares.
+    // Files evaluated after the definition call them with `!`.
     targetMacro?(queryAttr: string, fixedResultAttrs: Record<string, string>, replacement: string): void
     fixLayerConfigs?(): void
   }

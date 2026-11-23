@@ -86,7 +86,8 @@ up.migrate = (function() {
   function transformAttribute(oldAttr: string, transformer: AttributeTransformer): void
   function transformAttribute(oldAttr: string, options: TransformAttributeOptions, transformer: AttributeTransformer): void
   function transformAttribute(oldAttr: string, ...args: unknown[]): void {
-    let transformer: AttributeTransformer = up.internal.extractCallback(args)
+    // The overloads require a transformer.
+    let transformer: AttributeTransformer = up.internal.extractCallback(args)!
     let { scope }: TransformAttributeOptions = up.internal.extractOptions(args)
 
     // Scope may be a selector string OR a function
@@ -94,7 +95,7 @@ up.migrate = (function() {
     up.macro(selector, { priority: -1000 }, function(element) {
       // If scope is given as a function it does not select for the attribute
       if (element.hasAttribute(oldAttr)) {
-        let value = element.getAttribute(oldAttr)
+        let value = element.getAttribute(oldAttr)!
         transformer(element, value)
       }
     })
@@ -264,7 +265,7 @@ up.migrate = (function() {
 
   // Takes an object of props or a string.
   function fixSetStyleProps(props: string | PlainObject, unit?: string): string | PlainObject {
-    let transformed
+    let transformed: string | PlainObject
 
     if (u.isObject(props)) {
       transformed = {}

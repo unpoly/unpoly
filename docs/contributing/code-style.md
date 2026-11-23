@@ -236,6 +236,10 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   unknown length into a rest parameter (TS2556). Type parameters where it's easy. Core declares
   the hooks it calls on `up.migrate` in `migrate_stub.ts`, and migrate marks each implementation
   with a "Core calls this hook" comment.
+- The hooks are optional, since they only exist while unpoly-migrate is loaded. So are the
+  helpers that a migrate file other than `migrate.ts` adds to `up.migrate`, like `targetMacro()`.
+  A migrate file that calls one asserts it with `!` (`up.migrate.formerlyAsync!(…)`): an earlier
+  file has defined it.
 
 
 ## Every byte counts

@@ -53,7 +53,7 @@ up.util.detect = function(...args) {
   return up.util.find(...args)
 }
 
-up.util.select = function(...args) {
+up.util.select = function(...args: unknown[]) {
   up.migrate.deprecated('up.util.select()', 'up.util.filter()')
   return (up.util.filter as AnyFunction)(...args)
 }

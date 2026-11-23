@@ -87,6 +87,8 @@ up.on('up:framework:boot', up.migrate.fixLayerConfigs)
 // Since the warning names the config object, it is only printed once per key and config object.
 // Core calls this hook (up.layer).
 up.migrate.handleLayerConfig = function(modeConfig) {
-  let [mode] = Object.entries(up.layer.config).find(([_mode, value]) => value === modeConfig)
+  // Core passes the mode configs from up.layer.config.
+  // An unknown mode throws here, as core's buildLayer() would after this hook.
+  let [mode] = Object.entries(up.layer.config).find(([_mode, value]) => value === modeConfig)!
   fixRenamedLayerKeys(modeConfig, { label: `up.layer.config.${mode}` })
 }

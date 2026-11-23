@@ -48,11 +48,12 @@ up.migrate.renamedAttribute('up-delay', 'up-watch-delay', { scope: '[up-autosubm
 
 up.migrate.renamedAttribute('up-delay', 'up-watch-delay', { scope: '[up-watch]' })
 
-up.observe = function(...args) {
+up.observe = function(...args: unknown[]) {
   up.migrate.deprecated('up.observe()', 'up.watch()')
 
-  if (up.util.isList(args[0]) && args[0].length > 1) {
-    let list = args.shift()
+  let list = args[0]
+  if (up.util.isList(list) && list.length > 1) {
+    args.shift()
     up.migrate.warn('Calling up.observe() with a list of multiple elements is no longer supported by up.watch()')
     let unwatchFns = up.util.map(list, (firstArg) => (up.watch as AnyFunction)(firstArg, ...args))
     return up.internal.sequence(unwatchFns)

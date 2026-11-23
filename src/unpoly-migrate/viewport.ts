@@ -35,9 +35,9 @@ up.viewport.closest = function(...args) {
 up.viewport.scroll = function(viewport, top, options = {}) {
   up.migrate.deprecated('up.scroll()', 'Element#scrollTo()')
 
-  viewport = up.fragment.get(viewport, options)
+  viewport = up.fragment.get(viewport, options)!
   viewport.scrollTo({ ...options, top })
-  return up.migrate.formerlyAsync('up.scroll()')
+  return up.migrate.formerlyAsync!('up.scroll()')
 }
 
 up.scroll = up.viewport.scroll

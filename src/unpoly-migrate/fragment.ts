@@ -156,7 +156,9 @@ up.migrate.preprocessRenderOptions = function(options: PlainObject) {
 
 // Core calls this hook (up.reload()).
 up.migrate.postprocessReloadOptions = function(options) {
-  let lastModified = options.headers?.['If-Modified-Since']
+  // Core sets { headers } before it calls this hook.
+  let headers = options.headers!
+  let lastModified = headers['If-Modified-Since']
   let legacyHeader
   if (lastModified) {
     legacyHeader = Math.floor(+new Date(lastModified) * 0.001).toString()
@@ -164,7 +166,7 @@ up.migrate.postprocessReloadOptions = function(options) {
     legacyHeader = '0'
   }
 
-  options.headers[up.internal.headerize('reloadFromTime')] = legacyHeader
+  headers[up.internal.headerize('reloadFromTime')] = legacyHeader
 }
 
 // Modern versions only support ":origin". This legacy implementation
@@ -185,7 +187,7 @@ up.migrate.resolveOrigin = function(target, { origin }: { origin?: Element & Pic
       if (origin) {
         return up.fragment.toTarget(origin)
       } else {
-        up.internal.fail('Missing { origin } element to resolve "%s" reference (found in %s)', variant, target)
+        return up.internal.fail('Missing { origin } element to resolve "%s" reference (found in %s)', variant, target)
       }
     } else {
       // Skip over quoted attribute selector values, which may contain an ampersand
