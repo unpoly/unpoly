@@ -164,6 +164,8 @@ function observeInputDevice(newModality: t.InputDevice): void {
 }
 
 export function install(): void {
+  e.setEventEmitFunction(emit)
+
   on('up:click', '[up-emit]', executeEmitAttr)
 
   on('keydown keyup', { capture: true }, () => observeInputDevice('key'))

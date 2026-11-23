@@ -1,7 +1,8 @@
 import * as u from './util.js'
-import { newConfig } from './util/config.js'
+import { newConfig, setConfigErrorPrinter } from './util/config.js'
 import { on } from './event.js'
 import { mockable } from './mockable.js'
+import { version } from './namespace.js.erb'
 
 /**
 The settings in `up.log.config`, described in its doc comment.
@@ -110,7 +111,7 @@ function printBanner(): void {
   // The ASCII art looks broken in code since we need to escape backslashes
   const logo =
     " __ _____  ___  ___  / /_ __\n" +
-    `/ // / _ \\/ _ \\/ _ \\/ / // /  ${up.version}\n` +
+    `/ // / _ \\/ _ \\/ _ \\/ / // /  ${version}\n` +
     "\\___/_//_/ .__/\\___/_/\\_. / \n" +
     "        / /            / /\n\n"
 
@@ -145,6 +146,7 @@ export function disable(): void {
 }
 
 export function install(): void {
+  setConfigErrorPrinter(printToError)
   on('up:framework:boot', printBanner)
 }
 

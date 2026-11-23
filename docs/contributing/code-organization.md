@@ -315,8 +315,9 @@ Where they need one, move the function down into a module they may import, as we
 `copyCursorProps()` in `element.ts`. Instead of checking `instanceof` against a class
 from a feature namespace, define a protocol key that the class implements, like
 `up.util.copy.key`: `error.ts` defines `isCritical.key`, and `up.Response` implements it. Only
-when neither is possible, call the function through the global at call time, as `Config` logs
-with `up.internal.printToError()`.
+when neither is possible, have the function injected: the low-level module exports a setter, and
+the namespace that owns the function calls it from `install()`. That's how `Config` gets
+`printToError()` from `log.ts` (`setConfigErrorPrinter()`).
 
 ### Imports, exports and types
 

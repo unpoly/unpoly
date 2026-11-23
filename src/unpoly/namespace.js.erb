@@ -1,6 +1,8 @@
+export const version = '<%=
+  require 'json'
+  JSON.parse(File.read('package.json')).fetch('version')
+%>'
+
 export const api = {
-  version: '<%=
-    require 'json'
-    JSON.parse(File.read('package.json')).fetch('version')
-  %>'
+  version,
 }

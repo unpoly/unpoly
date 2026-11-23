@@ -766,11 +766,18 @@ export function removeAttrsFromHTML(html: string, attrs: string[]): string {
 // references nothing else.
 const awaitedTagNames = new Set<string>()
 
+// element.ts is evaluated before up.event, so it can't import emit(). up.event injects it when it installs.
+let emit: (type: string, props: u.PlainObject) => unknown
+
+export function setEventEmitFunction(emitFunction: typeof emit): void {
+  emit = emitFunction
+}
+
 export function trackDefinitions(root: ParentNode): void {
   for (let { localName } of subtree(root, ':not(:defined)')) {
     if (!awaitedTagNames.has(localName)) {
       awaitedTagNames.add(localName)
-      customElements.whenDefined(localName).then(() => up.emit('up:element:defined', { localName, log: false }))
+      customElements.whenDefined(localName).then(() => emit('up:element:defined', { localName, log: false }))
     }
   }
 }

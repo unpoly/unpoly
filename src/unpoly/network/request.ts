@@ -7,6 +7,7 @@ import {
 import { Params } from '../form.js'
 import { getFragment, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
+import { version } from '../namespace.js.erb'
 import { abortRequests, isSafeMethod, networkConfig, requestCache } from '../network.js'
 import {
   acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
@@ -556,7 +557,7 @@ export class UpRequest {
       this._setAutoHeader(header, token)
     }
 
-    this._setAutoHeader(headerize('version'), up.version)
+    this._setAutoHeader(headerize('version'), version)
   }
 
   _setPropertyHeader(key: AutoHeaderProp): void {

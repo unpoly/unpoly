@@ -27,5 +27,6 @@ declare module '*.sass'
 // ERB templates are rendered by the build's erb plugin. The only one inserts the version number.
 // We spell out its type: an untyped module would make the whole `Up` type `any`.
 declare module '*/namespace.js.erb' {
+  export const version: string
   export const api: { version: string }
 }

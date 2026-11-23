@@ -19,6 +19,14 @@ which returns this type.
 */
 export type ConfigWith<S extends object> = Config<S> & S
 
+// Config is evaluated before up.log, which builds its own config with newConfig(). So Config can't
+// import printToError(), and up.log injects it when it installs.
+let printToError: (prefix: string, message: string, ...vars: unknown[]) => void
+
+export function setConfigErrorPrinter(printer: typeof printToError): void {
+  printToError = printer
+}
+
 export class Config<S extends object> {
   declare _label: string
   declare _blueprintFn: () => S
@@ -48,9 +56,7 @@ export class Config<S extends object> {
   logUnknownKeys(): void {
     for (let key of Object.keys(this)) {
       if (!this._knownKeys.includes(key)) {
-        // Config is evaluated before up.log, which uses it. So we can't import
-        // printToError() and reach it through window.up when called.
-        up.internal.printToError(this._label, 'Ignoring unknown setting %s. Fix its name or remove it.', key)
+        printToError(this._label, 'Ignoring unknown setting %s. Fix its name or remove it.', key)
       }
     }
   }
