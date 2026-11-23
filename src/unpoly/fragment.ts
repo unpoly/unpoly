@@ -349,7 +349,7 @@ export function getFragment(...args: unknown[]): unknown {
   if (u.isElementLike(selector)) {
     // (1) up.fragment.get(root: Element, element: Element, [options]) should just return element.
     //     The given root and options are ignored. We also don't check if it's destroying.
-    // (2) We do use e.get() to unwrap a jQuery collection.
+    // (2) We do use e.getOne() to unwrap a jQuery collection.
     return e.getOne(selector)
   }
 

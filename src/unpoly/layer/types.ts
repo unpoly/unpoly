@@ -244,7 +244,8 @@ export interface LayerCloseEvent extends UpEvent {
 export interface LayerAcceptEvent extends LayerCloseEvent {}
 
 /**
-The `up:layer:accepting` event, emitted when an overlay starts closing, after no listener prevented `up:layer:accept`.
+The `up:layer:accepting` event, emitted when an overlay starts closing, after `up:layer:accept`.
+It is skipped when a listener prevents `up:layer:accept`, unless the overlay closes with `{ preventable: false }`.
 @internal
 */
 export interface LayerAcceptingEvent extends LayerCloseEvent {}
@@ -256,7 +257,8 @@ export interface LayerAcceptedEvent extends LayerCloseEvent {}
 export interface LayerDismissEvent extends LayerCloseEvent {}
 
 /**
-The `up:layer:dismissing` event, emitted when an overlay starts closing, after no listener prevented `up:layer:dismiss`.
+The `up:layer:dismissing` event, emitted when an overlay starts closing, after `up:layer:dismiss`.
+It is skipped when a listener prevents `up:layer:dismiss`, unless the overlay closes with `{ preventable: false }`.
 @internal
 */
 export interface LayerDismissingEvent extends LayerCloseEvent {}

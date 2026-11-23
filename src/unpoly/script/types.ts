@@ -100,7 +100,7 @@ export interface AssetsChangedEvent extends UpEvent {
 }
 
 /**
-The `up:compilers:before` event, emitted on a fragment before compilers run on it.
+The `up:compilers:before` event, emitted on a fragment between running macros and compilers on it.
 @internal
 */
 export interface CompilersBeforeEvent extends UpEvent {}
