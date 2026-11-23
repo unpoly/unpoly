@@ -156,6 +156,9 @@ function improveOptionsFromResponseDoc(options: t.RenderOptions, responseDoc: Re
     options.target ||= responseDoc.rootSelector()
   }
 
+  // { location: true } stands for the response URL, which augmentOptionsFromResponse() has already set.
+  // Local content has no URL, so we keep the current location.
+  options.location = refineOption(options.location, undefined)
   options.title = refineOption(options.title, responseDoc.title)
   options.metaTags = refineOption(options.metaTags, responseDoc.metaTags)
   options.lang = refineOption(options.lang, responseDoc.lang)

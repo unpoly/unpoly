@@ -259,6 +259,17 @@ extendDescribe('up.fragment', function() {
             })
           })
 
+          it('keeps the current location when rendering local content with { location: true }', async function() {
+            up.history.replace('/start-location')
+            htmlFixtureList('<div id="target">old content</div>')
+
+            await up.render({ target: '#target', content: 'new content', history: true, location: true })
+
+            expect('#target').toHaveText('new content')
+            expect(location.href).toMatchURL('/start-location')
+            expect(up.layer.location).toMatchURL('/start-location')
+          })
+
           describe('when a string is passed as { location } option', function() {
 
             it('uses that URL as the new location after a GET request', async function() {

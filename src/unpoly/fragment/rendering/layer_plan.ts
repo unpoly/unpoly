@@ -90,7 +90,7 @@ export abstract class LayerPlan {
   }
 
   // TODO: Consider moving this to up.Layer
-  // { location: true } only makes sense with a response, and refineOption() replaces it with the response URL.
+  // refineOption() has replaced { location: true } with the response URL, or with undefined for local content.
   closeIfRequested(newElements: Element[], newLocation: string | false | undefined): void {
     if (this.layer.isOverlay()) {
       // The server may send an HTTP header `X-Up-Accept-Layer: value`

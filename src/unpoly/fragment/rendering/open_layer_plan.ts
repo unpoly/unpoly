@@ -260,7 +260,7 @@ export class OpenLayerPlan extends LayerPlan {
   }
 
   _getNewLocation(): string | false | undefined {
-    // { location: true } only makes sense with a response, and refineOption() replaces it with the response URL.
+    // refineOption() has replaced { location: true } with the response URL, or with undefined for local content.
     return this._getEffectiveRenderOptions().location as string | false | undefined
   }
 

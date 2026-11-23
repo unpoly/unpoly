@@ -1783,6 +1783,36 @@ extendDescribe('up.layer', function() {
             expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
           })
 
+          it('does not accept the layer when local content is rendered with { location: true }', async function() {
+            const callback = jasmine.createSpy('onAccepted callback')
+            const overlay = await up.layer.open({
+              target: '.overlay-content',
+              content: 'start content',
+              onAccepted: callback,
+              acceptLocation: '*'
+            })
+
+            await up.render('.overlay-content', { content: 'new content', history: true, location: true })
+
+            expect(overlay).toBeAlive()
+            expect(callback).not.toHaveBeenCalled()
+            expect('.overlay-content').toHaveText('new content')
+          })
+
+          it('does not accept a new overlay that opens from local content with { location: true }', async function() {
+            const callback = jasmine.createSpy('onAccepted callback')
+            const overlay = await up.layer.open({
+              target: '.overlay-content',
+              content: 'start content',
+              onAccepted: callback,
+              acceptLocation: '*',
+              location: true
+            })
+
+            expect(overlay).toBeAlive()
+            expect(callback).not.toHaveBeenCalled()
+          })
+
           it('does not accept the layer when another layer has reached the given location', function() {
             const callback = jasmine.createSpy('onAccepted callback')
 
