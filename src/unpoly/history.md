@@ -99,7 +99,7 @@ Returns a normalized URL for the previous history entry.
 If no previous history entry is known, returns `undefined`.
 
 @property up.history.previousLocation
-@param {string} previousLocation
+@param {string|undefined} previousLocation
 @stable
 
 -----
@@ -199,8 +199,10 @@ Also see [History in overlays](/learn/history-in-overlays).
     The new URL after the change.
 
     When this event is emitted, the [browser location](/api/up.history.location) has already been updated.
-  @param {string} event.previousLocation
+  @param {string|undefined} event.previousLocation
     The URL before the change.
+
+    May be `undefined` if no previous location is known.
 
     @experimental
   @param {string} event.reason
