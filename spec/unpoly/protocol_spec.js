@@ -3,7 +3,7 @@ const $ = jQuery
 
 describe('up.protocol', function() {
 
-  describe('up.internal.csrfToken', function() {
+  describe('up.protocol.csrfToken()', function() {
 
     afterEach(function() {
       this.$meta?.remove()
@@ -11,17 +11,22 @@ describe('up.protocol', function() {
 
     it('returns the [content] of a <meta name="csrf-token"> by default', function() {
       this.$meta = $('<meta name="csrf-token" content="token-from-meta">').appendTo('head')
-      expect(up.internal.csrfToken()).toEqual('token-from-meta')
+      expect(up.protocol.csrfToken()).toEqual('token-from-meta')
     })
 
     it('returns a configured token', function() {
       up.protocol.config.csrfToken = 'configured-token'
-      expect(up.internal.csrfToken()).toEqual('configured-token')
+      expect(up.protocol.csrfToken()).toEqual('configured-token')
     })
 
     it('allows to configure a function that returns the token', function() {
       up.protocol.config.csrfToken = () => 'configured-token'
-      expect(up.internal.csrfToken()).toEqual('configured-token')
+      expect(up.protocol.csrfToken()).toEqual('configured-token')
+    })
+
+    it('returns undefined if no token is configured', function() {
+      expect(document.querySelector('meta[name="csrf-token"]')).toBeMissing()
+      expect(up.protocol.csrfToken()).toBeUndefined()
     })
   })
 

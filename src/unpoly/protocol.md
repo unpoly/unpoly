@@ -1057,6 +1057,8 @@ Configures strings used in the optional [server protocol](/api/up.protocol).
     The token can either be configured as a string or as function that returns the token.
     If no token is set, no token will be sent.
 
+    To read the current token, call `up.protocol.csrfToken()`.
+
     Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
 
     ```
@@ -1090,3 +1092,30 @@ Configures strings used in the optional [server protocol](/api/up.protocol).
     @experimental
 
 @stable
+
+-----
+
+# up.protocol.csrfToken()
+
+Returns the [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) that Unpoly sends with unsafe requests to your own origin.
+
+The token is read from `up.protocol.config.csrfToken` on every call. By default this is the `content` attribute of a `<meta name="csrf-token">` tag.
+
+## Example
+
+When you make a request yourself, e.g. with `fetch()`, you can send the token in the header that Unpoly uses:
+
+```js
+let headers = {}
+let token = up.protocol.csrfToken() // mark: up.protocol.csrfToken()
+if (token) headers[up.protocol.config.csrfHeader] = token
+
+fetch('/scores', { method: 'POST', headers })
+```
+
+Only send the token to your own origin, never to a third-party URL.
+
+@function up.protocol.csrfToken
+@return {string|undefined}
+  The CSRF token, or `undefined` if no token is configured.
+@experimental

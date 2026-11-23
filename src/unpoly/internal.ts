@@ -49,7 +49,7 @@ import { printToError, printToStandard, printToWarn } from './log.js'
 import { mockable } from './mockable.js'
 import { isNone, MotionController, swapElementsDirectly } from './motion.js'
 import { queue } from './network.js'
-import { csrfParam, csrfToken, headerize, initialRequestMethod } from './protocol.js'
+import { csrfParam, headerize, initialRequestMethod } from './protocol.js'
 import {
   adoptDetachedHeadAsset, adoptNewFragment, adoptRenderOptionsFromHeader, clean, CSPInfo, cspNonce,
   findAssets, NonceableCallback, parseCallback, warnOfUnsafeCSP,
@@ -144,7 +144,6 @@ export const api = {
     parseEmitArgs,
 
     csrfParam,
-    csrfToken,
     headerize,
     initialRequestMethod,
 
