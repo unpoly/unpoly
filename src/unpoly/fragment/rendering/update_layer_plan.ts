@@ -27,7 +27,7 @@ export class UpdateLayerPlan extends LayerPlan {
     this.layer = options.layer!
     this.target = options.target!
     this._context = options.context
-    // up.fragment.expandTargets() was already called by renderFromContent()
+    // expandTargets() was already called by renderFromContent()
     this._steps = parseTargetSteps(this.target, this.options)
   }
 
@@ -79,7 +79,7 @@ export class UpdateLayerPlan extends LayerPlan {
     }
 
     if (this.options.saveFocus) {
-      // TODO: This creates the same up.FocusCapsule that we already built in _coordinateSteps()
+      // TODO: This creates the same FocusCapsule that we already built in _coordinateSteps()
       saveFocus({ layer: this.layer })
     }
 
@@ -148,7 +148,7 @@ export class UpdateLayerPlan extends LayerPlan {
   _matchOldElements(): void {
     this._steps = this._steps.filter((step) => {
       // Try to find fragments matching step.selector within step.layer.
-      // Note that step.oldElement might already have been set by up.radio.hungrySteps().
+      // Note that step.oldElement might already have been set by hungrySteps().
       step.oldElement ||= findFragment(u.pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements'] as const))
       if (step.oldElement === e.getRoot()) throw new CannotTarget('Cannot swap <html>')
 
@@ -171,7 +171,7 @@ export class UpdateLayerPlan extends LayerPlan {
 
   _coordinateSteps(): void {
     // Store the focused element's selector, scroll position and selection range
-    // in an up.FocusCapsule for later restoration.
+    // in a FocusCapsule for later restoration.
     let focusCapsule = FocusCapsule.preserve(this.layer)
     let oldScrollTops = getScrollTops({ layer: this.layer })
 

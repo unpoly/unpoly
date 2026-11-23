@@ -8,7 +8,7 @@ import type * as t from '../types.js'
 // `up.fragment.closest()` and `up.fragment.get()`.
 interface FindFragmentOptions extends t.LookupOptions {
   selector: string
-  // For matching fragments in detached content, as needed by up.ResponseDoc.
+  // For matching fragments in detached content, as needed by ResponseDoc.
   document?: Document | Element
   preferOldElements?: Element[]
 }

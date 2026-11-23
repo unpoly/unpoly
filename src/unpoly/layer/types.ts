@@ -105,7 +105,7 @@ A layer mode that opens an overlay. All modes except `'root'`.
 export type OverlayMode = 'modal' | 'drawer' | 'popup' | 'cover'
 
 /**
-The options a layer is constructed with. `up.layer.build()` merges them from the
+The options a layer is constructed with. `buildLayer()` merges them from the
 layer config and the options for `up.layer.open()`.
 @internal
 */

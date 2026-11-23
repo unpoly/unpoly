@@ -41,7 +41,7 @@ export function renderFromContent(options: t.RenderOptions): RenderResult | Prom
     || cannotMatchTarget('Could not find common target in current page and response', plans, layers, options)
 
   // Group compilation and emission of up:fragment:inserted into a mutation block.
-  // This allows up.SelectorTracker to only sync once after the mutation, and
+  // This allows SelectorTracker to only sync once after the mutation, and
   // ignore any events in between.
   return mutate(() => {
     onPlanApplicable(plan, plans[0], responseDoc, options)
@@ -171,10 +171,10 @@ function defaultPlacement(options: t.RenderOptions): 'content' | undefined {
 }
 
 // When the user provided a { content } we need an actual CSS selector for
-// which up.ResponseDoc can create a matching element.
+// which ResponseDoc can create a matching element.
 function firstExpandedTarget(target: t.RenderTarget | undefined, layers: (Layer | 'new')[], options: t.RenderOptions): string {
   // When the user passes a closed layer as { layer } option, we expand the target with the root
-  // layer instead of having up.fragment.expandTargets() throw. In many cases we get the same result.
+  // layer instead of having expandTargets() throw. In many cases we get the same result.
   let layer = layers[0] || layerStack.root
   return expandTargetsInLayer(target || ':main', layer, options)[0]
 }

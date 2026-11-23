@@ -121,7 +121,7 @@ async function revalidate(
       abort: false,
       cache: false, // This implies { revalidate: false }. We will still update the expired cache entry.
       background: true,
-      // The guardEvent was already plucked from render options in up.RenderJob#_emitGuardEvent().
+      // The guardEvent was already plucked from render options in RenderJob#_emitGuardEvent().
     })
 
     // A well-behaved server will respond with "304 Not Modified" if the reload
@@ -169,7 +169,7 @@ function helloMeta(revalidating: boolean, response: UpResponse): u.PlainObject {
 }
 
 function augmentOptionsFromResponse(renderOptions: t.RenderOptions, response: UpResponse): void {
-  // Also see preprocessing of server response in up.Request#extractResponseFromXHR().
+  // Also see preprocessing of server response in UpRequest#_extractResponseFromXHR().
 
   const responseURL = response.url
 

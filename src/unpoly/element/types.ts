@@ -9,9 +9,9 @@ export type ElementOrSelector = string | Element | u.List<Element>
 /**
 Inline styles as an object, with property names in kebab-case (`'font-size'`).
 Values are strings, or numbers that get the unit passed to `up.element.setStyle()`.
-Any object with such properties works, e.g. an `up.Rect`.
+Any object with such properties works, e.g. a `Rect`.
 */
-// oxlint-disable-next-line typescript/no-explicit-any -- any object with style properties, like an up.Rect
+// oxlint-disable-next-line typescript/no-explicit-any -- any object with style properties, like a Rect
 export type StyleProps = Record<string, any>
 
 /**
@@ -38,7 +38,7 @@ Reads an attribute value from an element, like `up.element.booleanAttr()`.
 export type AttrReader<R = unknown> = (element: Element, attribute: string) => R
 
 /**
-Options for an `up.OptionsParser`.
+Options for an `OptionsParser`.
 @internal
 */
 export interface OptionsParserOptions {

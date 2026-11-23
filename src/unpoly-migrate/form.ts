@@ -27,7 +27,7 @@ up.migrate.migratedFormGroupSelectors = function(): string[] {
 
 
 // An old implementation allowed [up-switch] to be set on individual radio buttons
-// instead of on a container for the radio group. Each button got its own up.Switcher.
+// instead of on a container for the radio group. Each button got its own Switcher.
 // The old implementation also listened to `change`, which has a weird caveat for radio
 // buttons that happens to make individual Switchers work: It only fires when the radio
 // button gets checked, not when it gets unchecked.

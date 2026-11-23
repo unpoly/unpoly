@@ -1,4 +1,4 @@
-// An object with a rectangle's position and size, like a `DOMRect` or an `up.Rect`.
+// An object with a rectangle's position and size, like a `DOMRect` or a `Rect`.
 interface RectLike {
   left: number
   top: number

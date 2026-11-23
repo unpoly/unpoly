@@ -121,12 +121,12 @@ export type RequestArgs = [url: string, options?: Partial<RequestOptions>] | [op
 
 /**
 Which requests `up.network.abort()` aborts: a request, a URL pattern, a function or a boolean.
-A function may return any truthy or falsy value. `up.Request.tester()` accepts the same.
+A function may return any truthy or falsy value. `UpRequest.tester()` accepts the same.
 */
 export type RequestCondition = UpRequest | string | ((request: UpRequest) => unknown) | boolean
 
 /**
-Options for `up.Request.tester()`, and for the cache and queue methods that use it.
+Options for `UpRequest.tester()`, and for the cache and queue methods that use it.
 */
 export interface RequestTesterOptions {
   // Never match this request, or the cached request whose response it waits for.

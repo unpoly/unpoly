@@ -80,7 +80,7 @@ and the callback gets one element.
 export type BatchCompilerCallback<E extends Element = HTMLElement> = (elements: E[], data: any[], meta: CompilerMeta) => unknown
 
 /**
-Options for `up.script.parseCallback()`.
+Options for `parseCallback()`.
 @internal
 */
 export interface ParseCallbackOptions {

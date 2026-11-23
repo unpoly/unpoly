@@ -41,7 +41,7 @@ export interface AnimateOptions {
 }
 
 /**
-Options for `up.morph()` and `up.motion.swap()`.
+Options for `up.morph()` and `swapElements()`.
 */
 export interface SwapOptions {
   duration?: number

@@ -728,7 +728,7 @@ export function getComplexTokens(value: unknown): t.List<unknown> {
 }
 
 // A string with some substrings replaced by placeholders, and a function to put them back.
-// See `up.util.maskPattern()`.
+// See `maskPattern()`.
 interface MaskedString {
   masked: string
   restore(string: string, transform?: (masked: string) => string): string

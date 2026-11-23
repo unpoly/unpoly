@@ -234,7 +234,7 @@ export function assertContentGiven(options: t.RenderOptions): void {
 function failOverrides(options: t.RenderOptions): t.RenderOptions {
   const overrides: u.PlainObject = {}
   for (let key in options) {
-    // Note that up.fragment.toSuccessKey(key) only returns a value
+    // Note that toSuccessKey(key) only returns a value
     // if the given key is prefixed with "fail".
     const value = (options as u.PlainObject)[key]
     let unprefixed = toSuccessKey(key)

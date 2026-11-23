@@ -281,7 +281,7 @@ export interface PartialRenderResult {
 }
 
 /**
-Options for an `up.ResponseDoc`. One of `{ document }`, `{ fragment }` or `{ content }` holds the new HTML.
+Options for a `ResponseDoc`. One of `{ document }`, `{ fragment }` or `{ content }` holds the new HTML.
 @internal
 */
 export interface ResponseDocOptions {
@@ -296,7 +296,7 @@ export interface ResponseDocOptions {
 }
 
 /**
-Options for an `up.FragmentProcessor`. Subclasses take more.
+Options for a `FragmentProcessor`. Subclasses take more.
 @internal
 */
 export interface FragmentProcessorOptions {

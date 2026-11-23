@@ -61,7 +61,7 @@ export class HelloFragment {
 
     // Some selectors only match a custom element after its definition, which may arrive
     // after the element was inserted. Emit up:element:defined when that happens, so
-    // e.g. an up.SelectorTracker can sync again.
+    // e.g. a SelectorTracker can sync again.
     //
     // We scan after running compilers, which may insert undefined custom elements themselves.
     e.trackDefinitions(this._root)

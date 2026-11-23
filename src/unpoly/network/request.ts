@@ -311,7 +311,7 @@ export class UpRequest {
         onabort: () => this._onXHRAbort()
       })
 
-      // Signal to callers (in particular to up.Queue) that load() was not aborted.
+      // Signal to callers (in particular to RequestQueue) that load() was not aborted.
       return true
     } else {
       this.abort({ reason: 'Prevented by event listener' })
@@ -410,7 +410,7 @@ export class UpRequest {
   }
 
   // Settle our promise before running settle callbacks. A callback may settle a u.variant() of this
-  // request (like up.Response#redirectRequest), which shares our deferred and would settle it first.
+  // request (like UpResponse#redirectRequest), which shares our deferred and would settle it first.
   _resolve(response: UpResponse): void {
     this._deferred.resolve(response)
     this._runSettleCallbacks(response)

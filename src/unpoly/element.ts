@@ -6,7 +6,7 @@ import type * as t from './element/types.js'
 export type * from './element/types.js'
 
 // Parses the value of an attribute. Returns `undefined` if it cannot parse the value,
-// so `up.element.parseAttr()` tries the next parser.
+// so `parseAttr()` tries the next parser.
 type AttrParser<R> = (value: string, attribute: string, element: Element) => R | undefined
 
 // One element in a parsed selector's descendant path (`div.foo#bar[baz]` in `main > div.foo#bar[baz]`).
@@ -17,7 +17,7 @@ interface SelectorSegment {
   attributes: Record<string, string>
 }
 
-// What `up.element.parseSelector()` returns.
+// What `parseSelector()` returns.
 interface ParsedSelector {
   includePath: SelectorSegment[]
   includeRaw: string
@@ -385,11 +385,11 @@ export function createNodesFromHTML(html: string): NodeListOf<ChildNode> {
   // Prevent all-whitespace text nodes at the beginning or end
   html = html.trim()
 
-  // (1) We cannot use createBrokenDocumentFromHTML() here, since up.ResponseDoc
+  // (1) We cannot use createBrokenDocumentFromHTML() here, since ResponseDoc
   //     needs to create <noscript> elements, and DOMParser cannot create those.
   //     Also it always parses a full document, and we would need to rediscover our element
   //     root within that.
-  // (2) We cannot use innerHTML on an anonymous element here, since up.ResponseDoc
+  // (2) We cannot use innerHTML on an anonymous element here, since ResponseDoc
   //     needs to create executable <script> elements and setting innerHTML will
   //     create inert <script> elements.
   // (3) Using Range#createContextualFragment() is significantly faster than setting

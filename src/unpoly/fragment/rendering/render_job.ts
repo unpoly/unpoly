@@ -88,9 +88,9 @@ export class RenderJob {
 
       // Ignoring other rejections prevents Chrome from logging an `unhandledrejection` event
       // to the error console, hiding details about a failed revalidation. We could fix this by
-      // handling errors with `up.error.throwCritical` instead.
+      // handling errors with `throwCritical()` instead.
       //
-      // However, handling errors with `up.error.throwCritical` will cause Safari (not Chrome)
+      // However, handling errors with `throwCritical()` will cause Safari (not Chrome)
       // to emit an `unhandledrejection` event whenever there is a critical error, even if there are
       // other error handlers registered via `job.finished.catch()`.
       //

@@ -153,7 +153,7 @@ function insertSwapStep(step: MatchedStep, willChangeBody: boolean): StepInserti
 
   markFragmentAsDestroying(step.oldElement)
 
-  // This needs to happen before up.script.clean() below.
+  // This needs to happen before clean() below.
   // Otherwise we would run destructors for elements we want to keep.
   preserveDescendantKeepables(step, willChangeBody)
 
@@ -271,7 +271,7 @@ function preserveDescendantKeepables(step: MatchedStep, willChangeBody: boolean)
         const keepableClone = keepable.cloneNode(true) as Element
         keepable.insertAdjacentElement('beforebegin', keepableClone)
 
-        // Mark the original keepable to up.ResponseDoc#finalizeElement() knows to skip it.
+        // Mark the original keepable to ResponseDoc#finalizeElement() knows to skip it.
         keepable.classList.add('up-keeping')
 
         // When the newElement from the response has a response, it will be inserted

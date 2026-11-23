@@ -4,7 +4,7 @@ import { restoreScroll, reveal, revealHash, scrollToPosition, type RevealMax } f
 import type * as t from '../types.js'
 import { FragmentProcessor } from './fragment_processor.js'
 
-// Options for an up.FragmentScrolling.
+// Options for a FragmentScrolling.
 interface FragmentScrollingOptions extends t.FragmentProcessorOptions {
   hash?: string
   mode?: LayerMode

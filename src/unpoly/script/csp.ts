@@ -257,7 +257,7 @@ class Policy {
     this.cspInfo = cspInfo
 
     this._validNonces = new Set(cspInfo.nonces)
-    // (A) Allow the page nonce for up.script.evalCallback(), which checks an already adopted callback.
+    // (A) Allow the page nonce for evalCallback(), which checks an already adopted callback.
     // (B) Allow the page nonce for developers who do keep their nonces stable across sessions.
     if (pageNonce) this._validNonces.add(pageNonce)
   }

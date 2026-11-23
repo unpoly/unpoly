@@ -26,7 +26,7 @@ export class SelectorTracker<E extends Element = Element> {
     // (2) A later user compiler (after) us changes a field value and emits 'change'.
     //     The change event would normally cause us to re-read field values.
     //     But we aren't yet listening to field events!
-    // (3) The change event is only registered via trackFields() and up.SelectorTracker, which
+    // (3) The change event is only registered via trackFields() and SelectorTracker, which
     //     only syncs the current mutation (after up:fragment:insert) for performance reasons.
     this.sync()
 

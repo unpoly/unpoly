@@ -135,7 +135,7 @@ export class LayerLookup {
 
     if (u.isString(baseLayer)) {
       // The { baseLayer } option may itself be a string like "parent".
-      // In this case we look it up using a new up.LayerLookup instance, using
+      // In this case we look it up using a new LayerLookup instance, using
       // up.layer.current as the { baseLayer } for that second lookup.
       const recursiveOptions = {
         ...this._options,

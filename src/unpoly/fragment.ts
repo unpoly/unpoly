@@ -560,8 +560,8 @@ function deriveTarget(element: Element, deriver: t.TargetDeriver): string | unde
     } catch (error) {
       if (error instanceof CannotParse) {
         // This error can be thrown for two reasons:
-        // (1) up.element.parseSelector() cannot parse the given string
-        // (2) up.element.parseSelector() parses a selector with a depth > 1.
+        // (1) e.parseSelector() cannot parse the given string
+        // (2) e.parseSelector() parses a selector with a depth > 1.
         return deriver
       } else {
         throw error
@@ -721,7 +721,7 @@ function modernResolveOrigin(target: string, { origin }: t.LookupOptions = {}): 
 }
 
 export function resolveOrigin<T>(target: T, options?: t.LookupOptions): T | string {
-  // up.FormValidator sometimes calls resolveOrigin(undefined)
+  // FormValidator sometimes calls resolveOrigin(undefined)
   if (!u.isString(target)) return target
   return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
 }
@@ -881,7 +881,7 @@ export const abortFragment = mockable(function abortFragment(...args: t.AbortFra
     //     fragment update, whether or not we're actually aborting requests. Logging
     //     with every update would make the log noisy and confusing.
     // (2) When we *do* abort a request, up:request:aborted is emitted and logged.
-    //     This is done in up.Request#setAbortedState().
+    //     This is done in UpRequest#_setAbortedState().
     // (3) When up.fragment.abort() is called via up.render({ abort }) we also log
     //     a message "Change with { abort } option will abort other requests' before
     //     we abort the first request. This is done via an { logOnce } option that

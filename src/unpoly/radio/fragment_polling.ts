@@ -222,7 +222,7 @@ export class FragmentPolling {
 
   _onFragmentSwapped(newFragment: Element): void {
     if (this._forceIntent === 'start' && matches(this._fragment, newFragment)) {
-      // Force start the new up.Polling instance for the new fragment.
+      // Force start the new FragmentPolling instance for the new fragment.
       FragmentPolling.forFragment(newFragment).forceStart(this._options)
     }
   }

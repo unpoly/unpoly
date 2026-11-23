@@ -306,7 +306,7 @@ export class FormValidator {
     options.defaultMaybe = true
 
     // We can receive params from
-    // (1) A <form up-params="..."> JSON attribute, obtained by up.form.destinationOptions() above
+    // (1) A <form up-params="..."> JSON attribute, obtained by destinationOptions() above
     // (2) one or more up.validate({ params }) calls
     options.params = Params.merge(
       formDestinationOptions.params,
@@ -314,7 +314,7 @@ export class FormValidator {
     )
 
     // We can receive headers from
-    // (1) A <form up-headers="..."> JSON attribute, obtained by up.form.destinationOptions() above
+    // (1) A <form up-headers="..."> JSON attribute, obtained by destinationOptions() above
     // (2) one or more up.validate({ headers }) calls
     options.headers = u.merge(
       formDestinationOptions.headers,

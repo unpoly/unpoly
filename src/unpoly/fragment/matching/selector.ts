@@ -15,7 +15,7 @@ export class Selector {
 
   constructor(selector: string, elementOrDocument?: Element | Document, options: t.LookupOptions = {}) {
     // If we're given an element that is detached *or* from another document
-    // (think up.ResponseDoc), it has no layer and no destroying ancestors.
+    // (think ResponseDoc), it has no layer and no destroying ancestors.
     let externalDocument = elementOrDocument && !document.contains(elementOrDocument)
     this._filters = (externalDocument || options.destroying) ? [] : [isNotDestroying]
 
@@ -91,7 +91,7 @@ export class Selector {
       return this._firstSelectorMatch((selector) => root.querySelectorAll<HTMLElement>(selector))
     } else if (!this._layers) {
       // With layers out of the picture the container is a whole document: the one we were
-      // given (up.ResponseDoc passes its own), or ours.
+      // given (ResponseDoc passes its own), or ours.
       return this._firstSelectorMatch((selector) => (root || document).querySelectorAll<HTMLElement>(selector))
     } else {
       // Earlier layers win, so u.findResult() tries one layer at a time. E.g.

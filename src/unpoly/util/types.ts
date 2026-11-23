@@ -65,7 +65,7 @@ export interface NormalizeURLOptions {
 }
 
 /**
-A function that undoes a temporary change, like the one returned by `up.element.setAttrsTemp()`.
+A function that undoes a temporary change, like the one returned by `e.setAttrsTemp()`.
 */
 export type UndoFunction = () => void
 
@@ -74,7 +74,7 @@ export type UndoFunction = () => void
 export type AnyFunction = (...args: any[]) => any
 
 /**
-A promise that can be resolved or rejected from the outside. See `up.util.newDeferred()`.
+A promise that can be resolved or rejected from the outside. See `newDeferred()`.
 @internal
 */
 export interface Deferred<T> extends Promise<T> {
@@ -83,7 +83,7 @@ export interface Deferred<T> extends Promise<T> {
 }
 
 /**
-Collects clean-up functions and runs them later. See `up.util.cleaner()`.
+Collects clean-up functions and runs them later. See `cleaner()`.
 @internal
 */
 export interface Cleaner {
@@ -96,7 +96,7 @@ export interface Cleaner {
 }
 
 /**
-What `up.util.args()` should extract from the end of an argument list:
+What `parseArgs()` should extract from the end of an argument list:
 `'options'` (a plain object), `'callback'` (a function), `'val'` (any value),
 or a function that tests whether the last argument matches.
 @internal
@@ -104,7 +104,7 @@ or a function that tests whether the last argument matches.
 export type ArgSpec = 'options' | 'callback' | 'val' | ((value: unknown) => boolean)
 
 /**
-Returns a selector for a config property. See `up.util.Config#selectorFn()`.
+Returns a selector for a config property. See `Config#selectorFn()`.
 @internal
 */
 export type SelectorFunction = (condition?: string) => string

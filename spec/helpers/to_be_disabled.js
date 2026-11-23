@@ -3,7 +3,7 @@
 const PLATFORM_CONTROLS = 'input, select, textarea, button, fieldset, optgroup, option'
 
 function isDisabled(element) {
-  // Deliberately not up.form.readFieldDisabled(): a matcher must be an independent oracle, or a
+  // Deliberately not up.internal.readFieldDisabled(): a matcher must be an independent oracle, or a
   // broken reader would make these specs agree with the bug.
   if (element.matches(PLATFORM_CONTROLS) || element.constructor.formAssociated) {
     // The platform's answer wins here. A component claiming to be disabled through an

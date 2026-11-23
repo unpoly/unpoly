@@ -5,7 +5,7 @@ import type * as t from './types.js'
 // The keys of settings `S` that hold a list of CSS selectors, like `'followSelectors'`.
 type SelectorKey<S> = { [K in keyof S]-?: S[K] extends string[] ? K : never }[keyof S] & string
 
-// Returns whether an element matches the selector of a config property. See `up.util.Config#matchesFn()`.
+// Returns whether an element matches the selector of a config property. See `Config#matchesFn()`.
 // Testers for u.presence() also get null, like `document.activeElement`.
 type MatchesFunction = (element: Element | null | undefined, condition?: string) => boolean
 

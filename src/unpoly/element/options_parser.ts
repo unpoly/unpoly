@@ -3,7 +3,7 @@ import * as e from '../element.js'
 import { renderCallbackAttr, toFailKey } from '../fragment.js'
 import type * as t from './types.js'
 
-// Options for parsing a single option with an `up.OptionsParser`.
+// Options for parsing a single option with an `OptionsParser`.
 interface ParseKeyOptions {
   // The attribute(s) to read. Defaults to the kebab-cased key with the parser's prefix.
   attr?: string | string[]

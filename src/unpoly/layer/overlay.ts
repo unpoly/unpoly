@@ -307,7 +307,7 @@ export abstract class Overlay extends Layer {
   _registerClickCloser(attribute: string, closeFn: CloseFunction): void {
     // Allow the fallbacks to be both vanilla links and Unpoly [up-follow] links
     this.on('up:click', `[${attribute}]:not(form)`, (event, link) => {
-      // Since we're defining this handler on up.Overlay, we will not prevent
+      // Since we're defining this handler on Overlay, we will not prevent
       // a link from being followed on the root layer.
       haltEvent(event, { log: true })
 
@@ -319,7 +319,7 @@ export abstract class Overlay extends Layer {
   _registerSubmitCloser(attribute: string, closeFn: CloseFunction): void {
     // Allow the fallbacks to be both vanilla forms and Unpoly [up-submit] forms
     this.on('submit', `[${attribute}]`, (event, element) => {
-      // Since we're defining this handler on up.Overlay, we will not prevent
+      // Since we're defining this handler on Overlay, we will not prevent
       // a form from being submitted on the root layer.
       haltEvent(event, { log: true })
 

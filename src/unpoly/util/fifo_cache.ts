@@ -1,6 +1,6 @@
 import * as u from '../util.js'
 
-// Options for `up.FIFOCache`.
+// Options for `FIFOCache`.
 interface FIFOCacheOptions<K> {
   capacity?: number
   normalizeKey?: (key: K) => unknown

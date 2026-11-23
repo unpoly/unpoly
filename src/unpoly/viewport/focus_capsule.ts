@@ -29,7 +29,7 @@ export class FocusCapsule {
   restore(layer: Layer, focusOptions?: t.DoFocusOptions): boolean | undefined {
     if (!this.wasLost()) {
       // Signal callers that we could not restore.
-      // This matters to up.FragmentFocus to know that a { focus: ['restore', '.other'] }
+      // This matters to FragmentFocus to know that a { focus: ['restore', '.other'] }
       // option could not restore focus, and should focus the next option (".other".).
       return false
     }
@@ -42,7 +42,7 @@ export class FocusCapsule {
       doFocus(rediscoveredElement, focusOptions)
 
       // Signals callers that we could restore.
-      // This matters to up.FragmentFocus to know that a { focus: ['restore', '.other'] }
+      // This matters to FragmentFocus to know that a { focus: ['restore', '.other'] }
       // option could restore focus, and should not focus the next option (".other".).
       return true
     }
