@@ -249,11 +249,11 @@ The given element does not need an `[up-poll]` attribute.
 
     @experimental
 
-  @param {string} [options.headers={}]
+  @param {Object} [options.headers={}]
     A JSON object with additional request headers.
 
-  @param {string} [options.params={}]
-    A JSON object with additional [parameters](/api/up.Params) that should be sent as the request's
+  @param {Object|up.Params|FormData|string|Array} [options.params={}]
+    Additional [parameters](/api/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
     When making a `GET` request to a URL with a query string, the given `{ params }` will be added
