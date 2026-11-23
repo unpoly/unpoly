@@ -181,6 +181,26 @@ describe('up.Layer', function() {
 
   })
 
+  describe('comparing with up.util.isEqual()', function() {
+
+    it('returns false for another layer', async function() {
+      const overlay = await up.layer.open()
+
+      expect(up.util.isEqual(overlay, up.layer.root)).toBe(false)
+      expect(up.util.isEqual(up.layer.root, overlay)).toBe(false)
+    })
+
+    it('returns false for a missing value', function() {
+      expect(up.util.isEqual(up.layer.root, null)).toBe(false)
+      expect(up.util.isEqual(up.layer.root, undefined)).toBe(false)
+    })
+
+    it('returns false for an object that is no layer', function() {
+      expect(up.util.isEqual(up.layer.root, { element: up.layer.root.element })).toBe(false)
+    })
+
+  })
+
   describe('#peel()', function() {
 
     // Additional specs can be found for up.render({ peel })

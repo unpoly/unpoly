@@ -416,8 +416,8 @@ export class Layer {
     return e.affix(this.getFirstSwappableElement(), ...args)
   }
 
-  [u.isEqual.key](other: Layer): boolean {
-    return (this.constructor === other.constructor) && (this.element === other.element)
+  [u.isEqual.key](other: unknown): boolean {
+    return (other instanceof Layer) && (this.element === other.element)
   }
 
   hasFocus(): boolean {
