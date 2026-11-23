@@ -101,7 +101,7 @@ export interface RenderOptions {
   background?: boolean
   lateDelay?: number | false
   timeout?: number
-  fail?: u.ValueOrFunction<boolean>
+  fail?: boolean | ((response: UpResponse) => boolean)
 
   // Caching
   cache?: boolean | 'auto'

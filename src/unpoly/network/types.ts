@@ -97,7 +97,7 @@ export interface RequestProps {
   payload?: XMLHttpRequestBodyInit
   onLoading?: () => void
   onSettle?: (responseOrError: UpResponse | Error) => void
-  fail?: u.ValueOrFunction<boolean>
+  fail?: boolean | ((response: UpResponse) => boolean)
   abortable?: boolean | null
   lateDelay?: number | false
   bindLayer?: Layer

@@ -26,7 +26,7 @@ interface ResponseOptions {
   // Custom headers for synthetic responses without { xhr }.
   headers?: Record<string, string>
   loadedAt?: Date
-  fail?: u.ValueOrFunction<boolean>
+  fail?: boolean | ((response: UpResponse) => boolean)
 }
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
