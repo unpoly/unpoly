@@ -40,11 +40,12 @@ Sets default options for network requests.
     If you disable method wrapping, make sure that your server always redirects with
     a 303 status code (rather than 302).
 
-  @param {number|Function(up.Request): number|boolean} [config.lateDelay=400]
+  @param {number|false|(Function(up.Request): number|false)} [config.lateDelay=400]
     The number of milliseconds to wait before emitting the [`up:network:late` event](/api/up:network:late) and showing
     the [progress bar](/learn/progress-bar).
 
-    To never consider a request to be late, configure a function that returns `false` for that request.
+    Set `false` to never consider a request to be late.
+    To only exclude some requests, configure a function that returns `false` for those requests.
 
   @param {number|undefined} [config.timeout=90_000]
     A default [timeout](/api/up.request#options.timeout) for [requests](/api/up.request) in milliseconds.
@@ -372,13 +373,15 @@ See [Caching](/learn/caching) for more details and examples.
     Background requests are deprioritized and won't show the [progress bar](/learn/progress-bar).
     See [[background-requests]].
 
-  @param {number} [options.lateDelay]
+  @param {number|false} [options.lateDelay]
     The number of milliseconds after which this request can cause
     an `up:network:late` event.
 
+    Pass `false` to never cause an `up:network:late` event for this request.
+
     Defaults to `up.network.config.lateDelay`.
 
-  @param {string|boolean|Function(up.Response): boolean} [options.fail]
+  @param {boolean|Function(up.Response): boolean} [options.fail]
     Whether the response to this request should be considered an [error response](/learn/error-responses).
 
     By [default](/api/up.network.config#config.fail), any HTTP status code other than 2xx or 304 is considered an error code.
@@ -387,7 +390,7 @@ See [Caching](/learn/caching) for more details and examples.
     An error response will cause the [returned promise](#return-value) to reject.
 
 @section Caching
-  @param {boolean} [options.cache=false]
+  @param {boolean|string} [options.cache=false]
     Whether to read from and write to the [cache](/learn/caching).
 
     With `{ cache: true }`, Unpoly will try to reuse a cached response before connecting
@@ -399,20 +402,22 @@ See [Caching](/learn/caching) for more details and examples.
 
     With `{ cache: false }` (the default), Unpoly will always make a network request.
 
-  @param {boolean|string} [options.expireCache]
+  @param {boolean|string|Function(up.Request): boolean} [options.expireCache]
     Whether to [expire](/learn/caching#expiration) the [cache](/learn/caching) when this request is sent.
 
     Defaults to the result of `up.network.config.expireCache`, which defaults to expiring the entire cache for a non-GET request.
     Pass `false` to not expire any cache entries.
 
-    You may also pass a [URL pattern](/api/url-patterns) to only expire matching responses.
+    You may also pass a [URL pattern](/api/url-patterns) to only expire matching responses,
+    or a function that accepts an existing `up.Request` and returns a boolean value.
 
-  @param {boolean|string} [options.evictCache]
+  @param {boolean|string|Function(up.Request): boolean} [options.evictCache]
     Whether to [evict](/learn/caching#eviction) the [cache](/learn/caching) when this request is sent.
 
     Defaults to the result of `up.network.config.evictCache`, which defaults to `false`.
 
-    You may also pass a [URL pattern](/api/url-patterns) to only evict matching responses.
+    You may also pass a [URL pattern](/api/url-patterns) to only evict matching responses,
+    or a function that accepts an existing `up.Request` and returns a boolean value.
 
 
 @section Render context

@@ -50,8 +50,10 @@ request.url // result: '/path'
 request.hash // result: '#section'
 ```
 
+Returns `undefined` if the URL has no hash.
+
 @property up.Request#hash
-@param {string} hash
+@param {string|undefined} hash
 @stable
 
 -----
@@ -61,7 +63,7 @@ request.hash // result: '#section'
 [Parameters](/api/up.Params) that should be sent as the request's payload.
 
 @property up.Request#params
-@param {Object|FormData|string|Array} params
+@param {up.Params} params
 @stable
 
 -----
@@ -72,10 +74,12 @@ The CSS selector [targeted](/learn/targeting-fragments) by this request.
 
 The selector will be sent as an `X-Up-Target` header.
 
+Returns `undefined` if the request has no target.
+
 @learn-ref targeting-fragments
 
 @property up.Request#target
-@param {string} target
+@param {string|undefined} target
 @stable
 
 -----
@@ -87,10 +91,12 @@ the server responds with an [error code](/learn/error-responses).
 
 The selector will be sent as an `X-Up-Fail-Target` header.
 
+Returns `undefined` if the request has no fail target.
+
 @learn-ref error-responses#fail-options
 
 @property up.Request#failTarget
-@param {string} failTarget
+@param {string|undefined} failTarget
 @stable
 
 -----
@@ -135,8 +141,10 @@ A timeout in milliseconds.
 If the request is queued due to [many concurrent requests](/api/up.network.config#config.concurrency),
 the timeout will not include the time spent waiting in the queue.
 
+Returns `null` or `undefined` if the request has no timeout.
+
 @property up.Request#timeout
-@param {Object|undefined} timeout
+@param {number|null|undefined} timeout
 @stable
 
 -----
@@ -162,10 +170,12 @@ The [context](/learn/layer-context) of the layer targeted by this request.
 
 The context object will be sent as an `X-Up-Context` header.
 
+Returns `undefined` for a request that targets no layer, e.g. from `up.request()` without a `{ target }`.
+
 @learn-ref layer-context
 
 @property up.Request#context
-@param {Object} context
+@param {Object|undefined} context
 @experimental
 
 -----
@@ -176,8 +186,10 @@ The [context](/learn/layer-context) of the layer targeted by this request in cas
 
 The context object will be sent as an `X-Up-Fail-Context` header.
 
+Returns `undefined` for a request that targets no layer, e.g. from `up.request()` without a `{ target }`.
+
 @property up.Request#failContext
-@param {Object} failContext
+@param {Object|undefined} failContext
 @experimental
 
 -----
@@ -190,10 +202,12 @@ Setting the `{ layer }` property will automatically derive `{ context }` and `{ 
 
 When this request will [open a new overlay](/learn/opening-overlays), the string `"new"` is returned.
 
+Returns `undefined` for a request that targets no layer, e.g. from `up.request()` without a `{ target }`.
+
 To prevent memory leaks, this property is removed shortly after the response is received.
 
 @property up.Request#layer
-@param {up.Layer|string} layer
+@param {up.Layer|string|undefined} layer
 @stable
 
 -----
@@ -206,10 +220,12 @@ Setting the `{ failLayer }` property will automatically derive `{ failContext }`
 
 When an error response will [open a new overlay](/learn/opening-overlays), the string `"new"` is returned.
 
+Returns `undefined` for a request that targets no layer, e.g. from `up.request()` without a `{ target }`.
+
 To prevent memory leaks, this property is removed shortly after the response is received.
 
 @property up.Request#failLayer
-@param {up.Layer|string} layer
+@param {up.Layer|string|undefined} failLayer
 @stable
 
 -----
@@ -221,10 +237,12 @@ The element that triggered the request.
 For example, when this request was triggered by a click on a link, the link
 element is set as the `{ origin }`.
 
+Returns `undefined` if the request wasn't triggered by an element.
+
 To prevent memory leaks, this property is removed shortly after the response is received.
 
 @property up.Request#origin
-@param {Element} origin
+@param {Element|undefined} origin
 @stable
 
 -----
@@ -235,10 +253,12 @@ The [mode](/api/up.Layer.prototype.mode) of the layer targeted by this request.
 
 The value will be sent as an `X-Up-Mode` header.
 
+Returns `undefined` for a request that targets no layer, e.g. from `up.request()` without a `{ target }`.
+
 @learn-ref customizing-overlays
 
 @property up.Request#mode
-@param {string} mode
+@param {string|undefined} mode
 @stable
 
 -----
@@ -249,8 +269,10 @@ The [mode](/api/up.Layer.prototype.mode) of the layer targeted by this request i
 
 The value will be sent as an `X-Up-Fail-Mode` header.
 
+Returns `undefined` for a request that targets no layer, e.g. from `up.request()` without a `{ target }`.
+
 @property up.Request#failMode
-@param {string} failMode
+@param {string|undefined} failMode
 @stable
 
 -----
@@ -261,8 +283,10 @@ The [mode](/api/up.Layer.prototype.mode) of the layer from which the interaction
 
 The value will be sent as an `X-Up-Origin-Mode` header.
 
+Returns `undefined` for a request that targets no layer, e.g. from `up.request()` without a `{ target }`.
+
 @property up.Request#originMode
-@param {string} originMode
+@param {string|undefined} originMode
 @experimental
 
 -----
@@ -271,8 +295,10 @@ The value will be sent as an `X-Up-Origin-Mode` header.
 
 The format in which the [request params](/api/up.Request.prototype.params) will be encoded.
 
+Returns `undefined` if no `{ contentType }` option was given. Unpoly then chooses a format when the request is sent.
+
 @property up.Request#contentType
-@param {string} contentType
+@param {string|undefined} contentType
 @stable
 
 -----
@@ -282,9 +308,10 @@ The format in which the [request params](/api/up.Request.prototype.params) will 
 The payload that the request will encode into its body.
 
 By default Unpoly will build a payload from the given `{ params }` option.
+Returns `undefined` if no `{ payload }` option was given.
 
 @property up.Request#payload
-@param {string} payload
+@param {string|undefined} payload
 @stable
 
 -----
@@ -323,10 +350,11 @@ the [progress bar](/learn/progress-bar).
 The number of milliseconds after which this request can cause
 an `up:network:late` event and show the [progress bar](/learn/progress-bar).
 
-Defaults to `up.network.config.lateDelay`.
+A value of `false` means the request never causes an `up:network:late` event.
+Returns `undefined` if no `{ lateDelay }` option was given. The request then uses `up.network.config.lateDelay`.
 
 @property up.Request#lateDelay
-@param {number|boolean} [lateDelay]
+@param {number|false|undefined} lateDelay
 @stable
 
 -----
