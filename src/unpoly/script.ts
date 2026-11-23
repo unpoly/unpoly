@@ -213,7 +213,8 @@ function insertProcessor(queue: t.Compiler[], newCompiler: t.Compiler): t.Compil
   return newCompiler
 }
 
-export function registerDestructor(element: t.ScriptedElement, value: unknown): void {
+export function registerDestructor(element: Element, value: unknown): void {
+  let scriptedElement: t.ScriptedElement = element
   let fns = u.scanFunctions(value)
   if (!fns.length) return
 
@@ -223,7 +224,7 @@ export function registerDestructor(element: t.ScriptedElement, value: unknown): 
   // (B) Because destructors are called *after* an destroy animation, we don't need
   //     to check .up-destroying here. We can use the cheaper Element#isConnected instead.
   if (element.isConnected) {
-    let registry = (element.upDestructors ||= buildDestructorRegistry(element))
+    let registry = (scriptedElement.upDestructors ||= buildDestructorRegistry(element))
     registry.guard(fns)
   } else {
     // The element was destroyed before an async compiler function resolved.
